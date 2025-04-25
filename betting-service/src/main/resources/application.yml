@@ -1,0 +1,74 @@
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+  shutdown: graceful
+  forward-headers-strategy: framework
+  servlet:
+    context-path: /api/betting
+  tomcat:
+    connection-timeout: 10s
+    keep-alive-timeout: 20s
+    threads:
+      max: 50
+      min-spare: 5
+
+spring:
+  threads:
+    virtual:
+      enabled: true
+  application:
+    name: betting-service
+  lifecycle:
+    timeout-per-shutdown-phase: 15s
+
+  keycloak:
+    server-url: http://localhost/keycloak
+    server-external-url: http://localhost/keycloak
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${spring.keycloak.server-external-url}/realms/betting-realm
+          jwk-set-uri: ${spring.keycloak.server-url}/realms/betting-realm/protocol/openid-connect/certs
+
+app:
+  kafka:
+    brokers: "my-cluster-kafka-bootstrap:9092"
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+    console: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+  level:
+    net.skycomposer.betting: DEBUG
+    org.springframework.cloud.kubernetes: TRACE
+    org.springframework.security: DEBUG
+
+openapi:
+  oauthflow:
+    authServerUrl: ${spring.keycloak.server-external-url}
+    realm: betting-realm
+
+jwt:
+  auth:
+    converter:
+      resource-id: betting-app
+      principal-attribute: preferred_username
+
+grpc:
+  betting:
+    server-url: localhost:9000
+  betting-projection:
+    server-url: localhost:9003
+  client:
+    betting-grpc-server:
+      address: ${grpc.betting.server-url}
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+    betting-grpc-projection-server:
+      address: ${grpc.betting-projection.server-url}
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext

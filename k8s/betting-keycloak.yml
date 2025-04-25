@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: betting-keycloak
+  labels:
+    app: betting-keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: betting-keycloak
+  template:
+    metadata:
+      labels:
+        app: betting-keycloak
+    spec:
+      containers:
+      - name: betting-keycloak
+        image: quay.io/keycloak/keycloak:22.0.5
+        args: ["start-dev"]
+        ports:
+        - containerPort: 8080
+        env:
+        - name: KEYCLOAK_ADMIN
+          value: "admin"
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          value: "admin"
+        - name: KC_DB
+          value: "postgres"
+        - name: KC_DB_URL_HOST
+          value: "keycloak-postgres"
+        - name: KC_DB_DATABASE
+          value: "keycloak"
+        - name: KC_DB_USERNAME
+          value: "postgres"
+        - name: KC_DB_SCHEMA
+          value: "public"
+        - name: KC_DB_PASSWORD
+          value: "postgres"
+        - name: KC_PROXY
+          value: "edge"
+        - name: KC_PORT
+          value: "8080"
+        - name: KC_HTTP_RELATIVE_PATH
+          value: "/keycloak"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: betting-keycloak
+spec:
+  selector:
+    app: betting-keycloak
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  type: LoadBalancer

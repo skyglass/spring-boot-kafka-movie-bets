@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: e2e
+
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            readTimeout: 30000
+            connectTimeout: 30000
+          customer:
+            url: http://localhost/api/customer
+          market:
+            url: http://localhost/api/market
+          betting:
+            url: http://localhost/api/betting
+          oauth2:
+            url: http://localhost/keycloak
+          kafka:
+            url: http://localhost:8081/api/clusters/local
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+  datasource:
+    betting-house:
+      url: jdbc:postgresql://${app.betting-house.postgres.host}:${app.betting-house.postgres.port}/${app.betting-house.postgres.database}
+      username: ${app.betting-house.postgres.user}
+      password: ${app.betting-house.postgres.password}
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        connection-timeout: 2000 #ms
+        maximum-pool-size: 5
+
+security:
+  oauth2:
+    client-id: betting-app
+    grant-type: password
+    username: admin
+    password: admin
+
+app:
+  betting-house:
+    postgres:
+      host: localhost
+      port: 5432
+      database: betting
+      user: postgres
+      password: dbpass

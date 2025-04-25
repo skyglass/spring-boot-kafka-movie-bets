@@ -1,0 +1,68 @@
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+  shutdown: graceful
+  forward-headers-strategy: framework
+  servlet:
+    context-path: /api/market
+  tomcat:
+    connection-timeout: 10s
+    keep-alive-timeout: 20s
+    threads:
+      max: 50
+      min-spare: 5
+
+spring:
+  threads:
+    virtual:
+      enabled: true
+  application:
+    name: market-service
+  lifecycle:
+    timeout-per-shutdown-phase: 15s
+
+  keycloak:
+    server-url: http://localhost/keycloak
+    server-external-url: http://localhost/keycloak
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${spring.keycloak.server-external-url}/realms/betting-realm
+          jwk-set-uri: ${spring.keycloak.server-url}/realms/betting-realm/protocol/openid-connect/certs
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+    console: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+  level:
+    net.skycomposer.betting: DEBUG
+    org.springframework.cloud.kubernetes: TRACE
+    org.springframework.security: DEBUG
+
+app:
+  kafka:
+    brokers: "my-cluster-kafka-bootstrap:9092"
+
+
+openapi:
+  oauthflow:
+    authServerUrl: ${spring.keycloak.server-external-url}
+    realm: betting-realm
+
+jwt:
+  auth:
+    converter:
+      resource-id: betting-app
+      principal-attribute: preferred_username
+
+grpc:
+  market:
+    server-url: localhost:9002
+  client:
+    market-grpc-server:
+      address: ${grpc.market.server-url}
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext

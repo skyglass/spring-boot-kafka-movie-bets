@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: betting-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: betting-ui
+  template:
+    metadata:
+      labels:
+        app: betting-ui
+    spec:
+      containers:
+        - name: betting-ui
+          image: $CONTAINER_REGISTRY/betting-ui:$VERSION
+          imagePullPolicy: IfNotPresent    
+          env:
+            - name: NEXT_PUBLIC_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: base-url-config
+                  key: BASE_URL
+            - name: NEXT_PUBLIC_API_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: base-url-config
+                  key: API_BASE_URL
+            - name: NEXT_PUBLIC_KEYCLOAK_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: base-url-config
+                  key: KEYCLOAK_BASE_URL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: betting-ui
+spec:
+  selector:
+    app: betting-ui
+  ports:
+    - name: betting-ui
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
