@@ -1,4 +1,4 @@
-package net.skycomposer.betting.bettinghouse;
+package net.skycomposer.betting.bet;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -11,25 +11,25 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
 
 @Configuration
-public class BettingHouseJdbcConfig {
+public class BettingJdbcConfig {
 
     @Bean
-    @ConfigurationProperties("spring.datasource.betting-house")
-    public DataSourceProperties bettingHouseDataSourceProperties() {
+    @ConfigurationProperties("spring.datasource.betting")
+    public DataSourceProperties bettingDataSourceProperties() {
         return new DataSourceProperties();
     }
 
     @Bean
     @Primary
-    @ConfigurationProperties("spring.datasource.betting-house.hikari")
-    public DataSource bettingHouseDataSource() {
-        return bettingHouseDataSourceProperties()
+    @ConfigurationProperties("spring.datasource.betting.hikari")
+    public DataSource bettingDataSource() {
+        return bettingDataSourceProperties()
                 .initializeDataSourceBuilder()
                 .build();
     }
 
     @Bean
-    public JdbcTemplate bettingHouseJdbcTemplate(@Qualifier("bettingHouseDataSource") DataSource dataSource) {
+    public JdbcTemplate bettingJdbcTemplate(@Qualifier("bettingDataSource") DataSource dataSource) {
         return new JdbcTemplate(dataSource);
     }
 

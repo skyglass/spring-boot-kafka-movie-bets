@@ -1,4 +1,4 @@
-package net.skycomposer.betting.bettinghouse;
+package net.skycomposer.betting.bet;
 
 import lombok.extern.slf4j.Slf4j;
 import net.skycomposer.betting.testdata.JdbcTestDataService;
@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class BettingHouseTestDataService extends JdbcTestDataService {
+public class BettingTestDataService extends JdbcTestDataService {
 
     @Autowired
-    @Qualifier("bettingHouseJdbcTemplate")
+    @Qualifier("bettingJdbcTemplate")
     private JdbcTemplate jdbcTemplate;
 
     @Override

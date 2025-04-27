@@ -46,11 +46,17 @@
       <version>${springdoc.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>net.skycomposer.betting</groupId>
-      <artifactId>betting-grpc-lib</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+  <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+      <scope>runtime</scope>
+  </dependency>
+
+  <dependency>
+     <groupId>net.skycomposer.betting</groupId>
+     <artifactId>betting-grpc-lib</artifactId>
+     <version>${project.version}</version>
+  </dependency>
 
     <dependency>
       <groupId>net.devh</groupId>

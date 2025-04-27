@@ -24,10 +24,10 @@ spring:
     hibernate:
       ddl-auto: none
   datasource:
-    betting-house:
-      url: jdbc:postgresql://${app.betting-house.postgres.host}:${app.betting-house.postgres.port}/${app.betting-house.postgres.database}
-      username: ${app.betting-house.postgres.user}
-      password: ${app.betting-house.postgres.password}
+    betting:
+      url: jdbc:postgresql://${app.betting.postgres.host}:${app.betting.postgres.port}/${app.betting.postgres.database}
+      username: ${app.betting.postgres.user}
+      password: ${app.betting.postgres.password}
       driver-class-name: org.postgresql.Driver
       hikari:
         connection-timeout: 2000 #ms
@@ -41,7 +41,7 @@ security:
     password: admin
 
 app:
-  betting-house:
+  betting:
     postgres:
       host: localhost
       port: 5432

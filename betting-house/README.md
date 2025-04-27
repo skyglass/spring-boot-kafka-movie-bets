@@ -144,8 +144,8 @@ In another command like go to
 
 ### create database
 
-    kubectl apply -f betting-house-postgres-deployment.yaml 
-    kubectl apply -f betting-house-postgres-service.yaml 
+    kubectl apply -f betting-postgres-deployment.yaml 
+    kubectl apply -f betting-postgres-service.yaml 
     kubectl port-forward pods/[pod-name] 5432:5432 -n akka-cluster 
 
 change the `pod-name` accordingly 
@@ -176,7 +176,7 @@ change the `pod-name` accordingly
 
 You can use the port forwarding to the DB to connect to it and check the expected events are stored in the DB.
   
-    k port-forward svc/betting-house-postgres 5432:5432 -n akka-cluster
+    k port-forward svc/betting-postgres 5432:5432 -n akka-cluster
 
 
 #### To connect to the betting services

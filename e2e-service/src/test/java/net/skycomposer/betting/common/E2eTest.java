@@ -1,7 +1,7 @@
 package net.skycomposer.betting.common;
 
 import lombok.SneakyThrows;
-import net.skycomposer.betting.bettinghouse.BettingHouseTestDataService;
+import net.skycomposer.betting.bet.BettingTestDataService;
 import net.skycomposer.betting.client.KafkaClient;
 import net.skycomposer.betting.config.MockHelper;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +22,7 @@ public abstract class E2eTest {
     private MockHelper mockHelper;
 
     @Autowired
-    private BettingHouseTestDataService bettingHouseTestDataService;
+    private BettingTestDataService bettingHouseTestDataService;
 
     @Autowired
     private KafkaClient kafkaClient;

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: betting-house-postgres-pv
+  name: betting-postgres-pv
 spec:
   capacity:
     storage: 10Gi  # Adjust storage size as needed
@@ -15,7 +15,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: betting-house-postgres-pvc
+  name: betting-postgres-pvc
 spec:
   accessModes:
     - ReadWriteOnce
@@ -28,16 +28,16 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: betting-house-postgres-depl
+  name: betting-postgres-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: betting-house-postgres
+      app: betting-postgres
   template:
     metadata:
       labels:
-        app: betting-house-postgres
+        app: betting-postgres
     spec:
       containers:
         - env:
@@ -45,8 +45,28 @@ spec:
               value: postgres
             - name: POSTGRES_PASSWORD
               value: dbpass
-          image: $CONTAINER_REGISTRY/betting-house-postgres:$VERSION
-          name: betting-house-postgres
+            - name: PGTZ
+              value: "Europe/Amsterdam"
+            - name: BETTING_DB_USER
+              value: "bettingdbuser"
+            - name: BETTING_DB_PASSWORD
+              value: "dbpass"
+            - name: BETTING_DB_NAME
+              value: "bettingdb"
+            - name: CUSTOMER_DB_USER
+              value: "customerdbuser"
+            - name: CUSTOMER_DB_PASSWORD
+              value: "dbpass"
+            - name: CUSTOMER_DB_NAME
+              value: "customerdb"
+            - name: MARKET_DB_USER
+              value: "marketdbuser"
+            - name: MARKET_DB_PASSWORD
+              value: "dbpass"
+            - name: MARKET_DB_NAME
+              value: "marketdb"
+          image: $CONTAINER_REGISTRY/betting-postgres:$VERSION
+          name: betting-postgres
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5432
@@ -58,15 +78,15 @@ spec:
       volumes:
         - name: postgres-storage
           persistentVolumeClaim:
-            claimName: betting-house-postgres-pvc
+            claimName: betting-postgres-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: betting-house-postgres
+  name: betting-postgres
 spec:
   selector:
-    app: betting-house-postgres
+    app: betting-postgres
   ports:
     - name: "5432"
       port: 5432
