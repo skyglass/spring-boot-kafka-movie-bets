@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import feign.FeignException;
+import net.skycomposer.betting.common.domain.dto.market.MarketResult;
+import net.skycomposer.betting.common.domain.dto.market.MarketStatus;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,11 +55,11 @@ public class BetConcurrencyE2eTest extends E2eTest {
         int walletBalance = 500;
         int walletBeforeMarketCloseBalance = 0;
         int walletAfterMarketCloseBalance = 1000;
-        String marketId = UUID.randomUUID().toString();
+        UUID marketId = UUID.randomUUID();
         int betStake = 10;
         double betOdds = 2.8;
         double betOdds2 = 2.9;
-        MarketData.Result betResult = MarketData.Result.TIE;
+        MarketResult betResult = MarketResult.ITEM2_WINS;
         AtomicInteger counter = new  AtomicInteger(0);
 
         WalletResponse walletResponse = customerTestHelper.createWallet(walletId, walletRequestId, walletBalance);
@@ -78,9 +80,8 @@ public class BetConcurrencyE2eTest extends E2eTest {
         List<CompletableFuture<BetResponse>> createdBets = new ArrayList<>();
         for (int i = 0; i < numberOfBets; i++) {
             CompletableFuture<BetResponse> betResponse = betTestHelper.asyncPlaceBet(
-                    UUID.randomUUID().toString(),
+                    UUID.randomUUID(),
                     marketId, walletId, betStake,
-                    counter.getAndIncrement() % 2 == 0 ? betOdds : betOdds2,
                     betResult);
             createdBets.add(betResponse);
         }
@@ -100,7 +101,7 @@ public class BetConcurrencyE2eTest extends E2eTest {
         MarketResponse response = null;
         while (response == null) {
             try {
-                response = marketTestHelper.updateMarket(marketId, 2.9);
+                response = marketTestHelper.updateMarket(marketId);
             } catch (FeignException.TooManyRequests e) {
                 TimeUnit.MILLISECONDS.sleep(Duration.ofSeconds(1).toMillis());
             }
@@ -110,12 +111,12 @@ public class BetConcurrencyE2eTest extends E2eTest {
                 Duration.ofSeconds(5)
                 , () -> {
                     var result = marketTestHelper.getMarketData(marketId);
-                    while (result.getOdds().getTie() != 2.9) {
+                    while (result.getStatus() != MarketStatus.CLOSING) {
                         Thread.sleep(1000);
                         result =  marketTestHelper.getMarketData(marketId);
                     }
-                    assertThat(result.getOdds().getTie(), equalTo(2.9));
-                }, () -> String.format("Market update odds are incorrect for marketId = %s: tieOdds = %.2f", marketId, marketTestHelper.getMarketData(marketId).getOdds().getTie())
+                    assertThat(result.getStatus(), equalTo(MarketStatus.CLOSING));
+                }, () -> String.format("Market update status is incorrect for marketId = %s: status = %s", marketId, marketTestHelper.getMarketData(marketId).getStatus())
         );
 
         //Before market is closed, make sure that all bets are confirmed by market and wallet

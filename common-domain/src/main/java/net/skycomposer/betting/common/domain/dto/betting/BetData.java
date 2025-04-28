@@ -4,22 +4,25 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.skycomposer.betting.common.domain.dto.market.FixtureData;
-import net.skycomposer.betting.common.domain.dto.market.OddsData;
+import net.skycomposer.betting.common.domain.dto.market.MarketResult;
+
+import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class BetData {
-    private String betId;
-    private String marketId;
+    private UUID betId;
+    private UUID marketId;
+    private String customerId;
     private String marketName;
-    private String walletId;
-    private double odds;
     private int stake;
-    private int result;
+    private MarketResult result;
+    private BetStatus status;
     private boolean marketConfirmed;
     private boolean fundsConfirmed;
+    private boolean betSettled;
+    private boolean betWon;
 
 }

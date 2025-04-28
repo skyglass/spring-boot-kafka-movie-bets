@@ -46,22 +46,25 @@
       <version>${springdoc.version}</version>
     </dependency>
 
-     <dependency>
-       <groupId>org.flywaydb</groupId>
-       <artifactId>flyway-core</artifactId>
-       <scope>runtime</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>net.skycomposer.betting</groupId>
-      <artifactId>betting-grpc-lib</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+      <dependency>
+          <groupId>org.flywaydb</groupId>
+          <artifactId>flyway-core</artifactId>
+      </dependency>
 
       <dependency>
-          <groupId>net.devh</groupId>
-          <artifactId>grpc-client-spring-boot-starter</artifactId>
-          <version>${grpc-springboot.version}</version>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-jdbc</artifactId>
+      </dependency>
+
+      <dependency>
+          <groupId>org.flywaydb</groupId>
+          <artifactId>flyway-database-postgresql</artifactId>
+      </dependency>
+
+      <dependency>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+          <scope>runtime</scope>
       </dependency>
 
   </dependencies>

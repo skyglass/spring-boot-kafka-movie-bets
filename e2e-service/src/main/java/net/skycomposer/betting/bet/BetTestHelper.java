@@ -1,12 +1,15 @@
 package net.skycomposer.betting.bet;
 
 import java.time.Duration;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import feign.FeignException;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import net.skycomposer.betting.common.domain.dto.betting.BetStatus;
+import net.skycomposer.betting.common.domain.dto.market.MarketResult;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -25,20 +28,19 @@ public class BetTestHelper {
     private final BetClient betClient;
 
     @Async
-    public CompletableFuture<BetResponse> asyncPlaceBet(String betId, String marketId, String walletId, int stake,
-                                                 double odds, MarketData.Result result) throws InterruptedException {
-        return CompletableFuture.completedFuture(createBet(betId, marketId, walletId, stake, odds, result));
+    public CompletableFuture<BetResponse> asyncPlaceBet(UUID betId, UUID marketId, String customerId, int stake, MarketResult result) throws InterruptedException {
+        return CompletableFuture.completedFuture(createBet(betId, marketId, customerId, stake, result));
     }
 
     @SneakyThrows
-    public BetResponse createBet(String betId, String marketId, String walletId, int stake, double odds, MarketData.Result result) {
+    public BetResponse createBet(UUID betId, UUID marketId, String customerId, int stake, MarketResult result) {
         BetData betData = BetData.builder()
                 .betId(betId)
                 .marketId(marketId)
-                .walletId(walletId)
-                .result(result.getValue())
+                .customerId(customerId)
+                .result(result)
                 .stake(stake)
-                .odds(odds)
+                .status(BetStatus.PlACED)
                 .build();
         BetResponse response = null;
         while (response == null) {
@@ -52,12 +54,12 @@ public class BetTestHelper {
 
     }
 
-    public BetData getState(String betId) {
-        return betClient.getState(betId);
+    public BetData getState(UUID betId) {
+        return betClient.getState(betId.toString());
     }
 
-    public SumStakesData getBetsByMarket(String marketId) {
-        return betClient.getBetsByMarket(marketId);
+    public SumStakesData getBetsByMarket(UUID marketId) {
+        return betClient.getBetsByMarket(marketId.toString());
     }
 
 }

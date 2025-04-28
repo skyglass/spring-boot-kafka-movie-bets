@@ -65,7 +65,7 @@ spec:
               value: "dbpass"
             - name: MARKET_DB_NAME
               value: "marketdb"
-          image: $CONTAINER_REGISTRY/betting-postgres:$VERSION
+          image: $CONTAINER_REGISTRY/betting-postgres:15.8
           name: betting-postgres
           imagePullPolicy: IfNotPresent
           ports:

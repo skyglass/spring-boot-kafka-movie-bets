@@ -53,6 +53,7 @@ logging:
     net.skycomposer.betting: DEBUG
     org.springframework.cloud.kubernetes: TRACE
     org.springframework.security: DEBUG
+    org.flywaydb: DEBUG
 
 app:
   postgres:

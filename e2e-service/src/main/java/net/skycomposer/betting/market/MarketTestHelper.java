@@ -1,6 +1,7 @@
 package net.skycomposer.betting.market;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import net.skycomposer.betting.common.domain.dto.market.*;
 import org.springframework.stereotype.Component;
@@ -13,42 +14,31 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MarketTestHelper {
 
+    private static final long DEFAULT_MARKET_CLOSE_TIME_MS = 24 * 60 * 60 * 1000; //24 hours
+
     private final MarketClient marketClient;
 
-    public MarketResponse createMarket(String marketId) {
-        FixtureData fixtureData = FixtureData.builder()
-                .id("id1")
-                .homeTeam("RM")
-                .awayTeam("MU")
-                .build();
-        OddsData oddsData = OddsData.builder()
-                .winHome(1.5)
-                .winAway(3.5)
-                .tie(2.8)
-                .build();
+    public MarketResponse createMarket(UUID marketId) {
         MarketData marketData = MarketData.builder()
                 .marketId(marketId)
-                .fixture(fixtureData)
-                .odds(oddsData)
-                .opensAt(Instant.now().toEpochMilli())
+                .item1("RM")
+                .item2("MU")
+                .status(MarketStatus.OPENED)
+                .closesAt(Instant.now().toEpochMilli() + DEFAULT_MARKET_CLOSE_TIME_MS)
+                .open(true)
                 .build();
         return marketClient.open(marketData);
     }
 
-    public MarketResponse updateMarket(String marketId, double marketTieOdds) {
-        OddsData oddsData = OddsData.builder()
-                .winHome(1.5)
-                .winAway(3.5)
-                .tie(marketTieOdds)
-                .build();
+    public MarketResponse updateMarket(UUID marketId) {
         MarketData marketData = MarketData.builder()
                 .marketId(marketId)
-                .odds(oddsData)
+                .status(MarketStatus.CLOSING)
                 .build();
         return marketClient.update(marketData);
     }
 
-    public MarketResponse closeMarket(String marketId, MarketData.Result result) {
+    public MarketResponse closeMarket(UUID marketId, MarketResult result) {
         CloseMarketRequest closeMarketRequest = CloseMarketRequest
                 .builder()
                 .marketId(marketId)
@@ -57,8 +47,8 @@ public class MarketTestHelper {
         return marketClient.close(closeMarketRequest);
     }
 
-    public MarketData getMarketData(String marketId) {
-        return marketClient.getState(marketId);
+    public MarketData getMarketData(UUID marketId) {
+        return marketClient.getState(marketId.toString());
     }
 }
 
