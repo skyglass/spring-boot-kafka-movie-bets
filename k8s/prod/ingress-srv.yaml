@@ -26,13 +26,13 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: betting-keycloak
+                name: moviebets-keycloak
                 port:
                   number: 8080
           - path: /?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
-                name: betting-ui
+                name: moviebets-ui
                 port:
                   number: 3000

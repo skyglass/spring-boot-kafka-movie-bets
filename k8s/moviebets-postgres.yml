@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: moviebets-postgres-pv
+spec:
+  capacity:
+    storage: 10Gi  # Adjust storage size as needed
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual  # Use manual storage class for explicit PV binding
+  hostPath:
+    path: "/mnt/data/postgresql"  # This path is on the host node
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: moviebets-postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: manual  # Match the manual storage class with the PV
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: moviebets-postgres-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: moviebets-postgres
+  template:
+    metadata:
+      labels:
+        app: moviebets-postgres
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: dbpass
+            - name: PGTZ
+              value: "Europe/Amsterdam"
+            - name: BET_DB_USER
+              value: "betdbuser"
+            - name: BET_DB_PASSWORD
+              value: "dbpass"
+            - name: BET_DB_NAME
+              value: "betdb"
+            - name: CUSTOMER_DB_USER
+              value: "customerdbuser"
+            - name: CUSTOMER_DB_PASSWORD
+              value: "dbpass"
+            - name: CUSTOMER_DB_NAME
+              value: "customerdb"
+            - name: MARKET_DB_USER
+              value: "marketdbuser"
+            - name: MARKET_DB_PASSWORD
+              value: "dbpass"
+            - name: MARKET_DB_NAME
+              value: "marketdb"
+          image: $CONTAINER_REGISTRY/moviebets-postgres:15.8
+          name: moviebets-postgres
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data  # Default data path for PostgreSQL
+          resources: {}
+      restartPolicy: Always
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: moviebets-postgres-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: moviebets-postgres
+spec:
+  selector:
+    app: moviebets-postgres
+  ports:
+    - name: "5432"
+      port: 5432
+      targetPort: 5432
+  type: LoadBalancer

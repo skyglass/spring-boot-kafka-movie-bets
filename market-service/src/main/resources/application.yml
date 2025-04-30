@@ -45,8 +45,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${spring.keycloak.server-external-url}/realms/betting-realm
-          jwk-set-uri: ${spring.keycloak.server-url}/realms/betting-realm/protocol/openid-connect/certs
+          issuer-uri: ${spring.keycloak.server-external-url}/realms/moviebets-realm
+          jwk-set-uri: ${spring.keycloak.server-url}/realms/moviebets-realm/protocol/openid-connect/certs
 
   kafka:
     brokers: "my-cluster-kafka-bootstrap:9092"
@@ -68,7 +68,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: net.skycomposer.betting.*
+        spring.json.trusted.packages: net.skycomposer.moviebets.*
         allow.auto.create.topics: false
 
 logging:
@@ -76,14 +76,14 @@ logging:
     level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
     console: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
   level:
-    net.skycomposer.betting: DEBUG
+    net.skycomposer.moviebets: DEBUG
     org.springframework.cloud.kubernetes: TRACE
     org.springframework.security: DEBUG
     org.flywaydb: DEBUG
 
 app:
   postgres:
-    host: betting-postgres
+    host: moviebets-postgres
     port: 5432
     database: marketdb
     user: marketdbuser
@@ -92,12 +92,12 @@ app:
 openapi:
   oauthflow:
     authServerUrl: ${spring.keycloak.server-external-url}
-    realm: betting-realm
+    realm: moviebets-realm
 
 jwt:
   auth:
     converter:
-      resource-id: betting-app
+      resource-id: moviebets-app
       principal-attribute: preferred_username
 
 market:

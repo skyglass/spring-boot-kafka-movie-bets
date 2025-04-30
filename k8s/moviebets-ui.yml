@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: moviebets-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: moviebets-ui
+  template:
+    metadata:
+      labels:
+        app: moviebets-ui
+    spec:
+      containers:
+        - name: moviebets-ui
+          image: $CONTAINER_REGISTRY/moviebets-ui:$VERSION
+          imagePullPolicy: IfNotPresent    
+          env:
+            - name: NEXT_PUBLIC_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: base-url-config
+                  key: BASE_URL
+            - name: NEXT_PUBLIC_API_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: base-url-config
+                  key: API_BASE_URL
+            - name: NEXT_PUBLIC_KEYCLOAK_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: base-url-config
+                  key: KEYCLOAK_BASE_URL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: moviebets-ui
+spec:
+  selector:
+    app: moviebets-ui
+  ports:
+    - name: moviebets-ui
+      protocol: TCP
+      port: 3000
+      targetPort: 3000

@@ -13,7 +13,7 @@ spring:
             url: http://localhost/api/customer
           market:
             url: http://localhost/api/market
-          betting:
+          bet:
             url: http://localhost/api/bet
           oauth2:
             url: http://localhost/keycloak
@@ -24,10 +24,10 @@ spring:
     hibernate:
       ddl-auto: none
   datasource:
-    betting:
-      url: jdbc:postgresql://${app.betting.postgres.host}:${app.betting.postgres.port}/${app.betting.postgres.database}
-      username: ${app.betting.postgres.user}
-      password: ${app.betting.postgres.password}
+    bet:
+      url: jdbc:postgresql://${app.bet.postgres.host}:${app.bet.postgres.port}/${app.bet.postgres.database}
+      username: ${app.bet.postgres.user}
+      password: ${app.bet.postgres.password}
       driver-class-name: org.postgresql.Driver
       hikari:
         connection-timeout: 2000 #ms
@@ -35,16 +35,16 @@ spring:
 
 security:
   oauth2:
-    client-id: betting-app
+    client-id: moviebets-app
     grant-type: password
     username: admin
     password: admin
 
 app:
-  betting:
+  bet:
     postgres:
       host: localhost
       port: 5432
-      database: betting
+      database: bet
       user: postgres
       password: dbpass

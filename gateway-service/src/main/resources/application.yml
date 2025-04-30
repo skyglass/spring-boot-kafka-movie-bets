@@ -67,7 +67,7 @@ spring:
             - name: CircuitBreaker
               args:
                 name: customerCircuitBreaker
-                fallbackUri: forward:/betting-fallback
+                fallbackUri: forward:/moviebets-fallback
         - id: market
           uri: ${MARKET_SERVICE_URL:http://localhost:9004}
           predicates:
@@ -76,7 +76,7 @@ spring:
             - name: CircuitBreaker
               args:
                 name: marketCircuitBreaker
-                fallbackUri: forward:/betting-fallback
+                fallbackUri: forward:/moviebets-fallback
         - id: bet
           uri: ${BET_SERVICE_URL:http://localhost:9005}
           predicates:
@@ -84,8 +84,8 @@ spring:
           filters:
             - name: CircuitBreaker
               args:
-                name: bettingCircuitBreaker
-                fallbackUri: forward:/betting-fallback
+                name: moviebetsCircuitBreaker
+                fallbackUri: forward:/moviebets-fallback
 
   data:
     redis:
@@ -107,18 +107,18 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${spring.keycloak.server-external-url}/realms/betting-realm
-          jwk-set-uri: ${spring.keycloak.server-url}/realms/betting-realm/protocol/openid-connect/certs
+          issuer-uri: ${spring.keycloak.server-external-url}/realms/moviebets-realm
+          jwk-set-uri: ${spring.keycloak.server-url}/realms/moviebets-realm/protocol/openid-connect/certs
 
 jwt:
   auth:
     converter:
-      resource-id: betting-app
+      resource-id: moviebets-app
       principal-attribute: preferred_username
 
-betting-app:
+moviebets-app:
   base-url: http://localhost
-  redirect-url: ${betting-app.base-url}/*
+  redirect-url: ${moviebets-app.base-url}/*
 
 resilience4j:
   circuitbreaker:
