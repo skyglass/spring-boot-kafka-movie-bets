@@ -15,7 +15,7 @@ const BetListPage = () => {
         if (user) {
             const fetchData = async () => {
                 const client = buildClient({ req: {}, currentUser: user });
-                const { data } = await client.get(`/api/betting/get-bets-for-market/${eventId}`);
+                const { data } = await client.get(`/api/bet/get-bets-for-market/${eventId}`);
                 setBets(data.betDataList);
             };
             fetchData();

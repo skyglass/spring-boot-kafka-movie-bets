@@ -1,0 +1,36 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+DROP TABLE IF EXISTS bet;
+
+CREATE TABLE bet(
+    id uuid NOT NULL,
+    customer_id character varying COLLATE pg_catalog."default" NOT NULL,
+    market_id uuid NOT NULL,
+    market_name character varying COLLATE pg_catalog."default" NOT NULL,
+    stake int NOT NULL,
+    result int NOT NULL,
+    status character varying COLLATE pg_catalog."default" NOT NULL,
+    ingested_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    market_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
+    funds_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
+    bet_settled BOOLEAN NOT NULL DEFAULT FALSE,
+    bet_won BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT bet_pkey PRIMARY KEY (id)
+);
+
+CREATE INDEX idx_bet_market_id ON bet (market_id);
+CREATE INDEX idx_bet_customer_id ON bet (customer_id);
+CREATE INDEX idx_bet_result ON bet (result);
+CREATE INDEX idx_bet_status ON bet (status);
+
+CREATE INDEX idx_bet_market_result ON bet (market_id, result);
+CREATE INDEX idx_bet_market_status ON bet (market_id, status);
+CREATE UNIQUE INDEX idx_bet_customer_market ON bet (customer_id, market_id);
+
+DROP TABLE IF EXISTS bet_request;
+
+CREATE TABLE bet_request(
+    id uuid NOT NULL,
+    CONSTRAINT bet_request_pkey PRIMARY KEY (id)
+);

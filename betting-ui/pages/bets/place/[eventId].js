@@ -61,7 +61,7 @@ const NewBet = () => {
 
     try {
       const client = buildClient({ req: {}, currentUser: user });
-      const response = await client.post('/api/betting/open', betData);
+      const response = await client.post('/api/bet/open', betData);
 
       if (response.status !== 201) {
         const errorMessage = await response.data.message; // Get error message from server

@@ -30,7 +30,7 @@ const EventShow = () => {
         setErrors(null);
         try {
             const client = buildClient({ req: {}, currentUser: user });
-            const { data: bet } = await client.post('/api/betting', { marketId: event.id });
+            const { data: bet } = await client.post('/api/bet', { marketId: event.id });
             Router.push('/bets/[betId]', `/bets/${bet.id}`);
         } catch (err) {
             setErrors(err.response?.data?.errors || [{ message: "Failed to place bet" }]);

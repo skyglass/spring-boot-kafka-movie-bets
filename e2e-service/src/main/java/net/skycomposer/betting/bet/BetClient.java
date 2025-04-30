@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "betting")
+@FeignClient(name = "bet")
 public interface BetClient {
 
     @GetMapping("/get-state/{betId}")

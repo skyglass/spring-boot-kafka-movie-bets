@@ -3,7 +3,7 @@ import useRequest from '../../hooks/use-request';
 
 const CustomerShow = ({ customer }) => {
   const { doRequest, errors } = useRequest({
-    url: '/api/betting',
+    url: '/api/bet',
     method: 'post',
     body: {
       customerId: customer.id,

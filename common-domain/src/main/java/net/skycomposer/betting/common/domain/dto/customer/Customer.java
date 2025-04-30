@@ -15,8 +15,6 @@ public class Customer {
 
   private UUID id;
 
-  private int version;
-
   private String username;
 
   private String fullName;

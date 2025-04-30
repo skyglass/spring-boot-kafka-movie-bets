@@ -77,10 +77,10 @@ spring:
               args:
                 name: marketCircuitBreaker
                 fallbackUri: forward:/betting-fallback
-        - id: betting
-          uri: ${BETTING_SERVICE_URL:http://localhost:9005}
+        - id: bet
+          uri: ${BET_SERVICE_URL:http://localhost:9005}
           predicates:
-            - Path=/api/betting/**
+            - Path=/api/bet/**
           filters:
             - name: CircuitBreaker
               args:
@@ -186,5 +186,5 @@ springdoc:
         name: Customer Service
       - url: /api/market/v3/api-docs
         name: Market Service
-      - url: /api/betting/v3/api-docs
-        name: Betting Service
+      - url: /api/bet/v3/api-docs
+        name: Bet Service

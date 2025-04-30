@@ -2,6 +2,7 @@ package net.skycomposer.betting.common.domain.dto.market;
 
 import lombok.*;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Data
@@ -14,7 +15,7 @@ public class MarketData {
     private String item2;
     private MarketStatus status;
     private MarketResult result;
-    private long closesAt;
+    private Instant closesAt;
     private boolean open;
 
 }

@@ -14,6 +14,9 @@ server:
       min-spare: 5
 
 spring:
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
   threads:
     virtual:
       enabled: true
@@ -38,6 +41,7 @@ spring:
   keycloak:
     server-url: http://localhost/keycloak
     server-external-url: http://localhost/keycloak
+
   security:
     oauth2:
       resourceserver:
@@ -45,15 +49,29 @@ spring:
           issuer-uri: ${spring.keycloak.server-external-url}/realms/betting-realm
           jwk-set-uri: ${spring.keycloak.server-url}/realms/betting-realm/protocol/openid-connect/certs
 
-  cloud:
-    openfeign:
-      client:
-        config:
-          default:
-            readTimeout: 20000
-            connectTimeout: 30000
-          wallet:
-            url: ${http.wallet.server-url}
+  kafka:
+    brokers: "my-cluster-kafka-bootstrap:9092"
+    admin:
+      auto-create: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        delivery.timeout.ms: 120000
+        linger.ms: 0
+        request.timeout.ms: 30000
+        max.in.flight.requests.per.connection: 5
+        enable.idempotence: true
+        allow.auto.create.topics: false
+    consumer:
+      group-id: customer-ms
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: net.skycomposer.betting.*
+        allow.auto.create.topics: false
+
 
 app:
   postgres:
@@ -62,9 +80,6 @@ app:
     database: customerdb
     user: customerdbuser
     password: dbpass
-
-  kafka:
-    brokers: "my-cluster-kafka-bootstrap:9092"
 
 logging:
   pattern:
@@ -86,3 +101,11 @@ jwt:
     converter:
       resource-id: betting-app
       principal-attribute: preferred_username
+
+customer:
+  commands:
+    topic:
+      name: customer-commands
+  events:
+    topic:
+      name: customer-events

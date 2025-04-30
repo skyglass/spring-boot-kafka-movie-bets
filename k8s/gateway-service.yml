@@ -34,8 +34,8 @@ spec:
           value: "http://customer:9001"
         - name: MARKET_SERVICE_URL
           value: "http://market:9004"
-        - name: BETTING_SERVICE_URL
-          value: "http://betting:9005"
+        - name: BET_SERVICE_URL
+          value: "http://bet:9005"
         - name: SPRING_REDIS_HOST
           value: "gateway-redis"
         - name: SPRING_REDIS_USERNAME

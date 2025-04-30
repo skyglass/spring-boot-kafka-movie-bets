@@ -7,6 +7,8 @@ CREATE TABLE market (
       item1 character varying COLLATE pg_catalog."default" NOT NULL,
       item2 character varying COLLATE pg_catalog."default" NOT NULL,
       status character varying COLLATE pg_catalog."default" NOT NULL,
+      created_at TIMESTAMP NOT NULL,
+      updated_at TIMESTAMP NOT NULL,
       closes_at TIMESTAMP NOT NULL,
       open BOOLEAN NOT NULL DEFAULT TRUE,
       result int,
@@ -14,3 +16,10 @@ CREATE TABLE market (
 );
 
 CREATE INDEX idx_market_status ON market (status);
+
+DROP TABLE IF EXISTS market_request;
+
+CREATE TABLE market_request(
+    id uuid NOT NULL,
+    CONSTRAINT market_request_pkey PRIMARY KEY (id)
+);

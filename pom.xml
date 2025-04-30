@@ -30,7 +30,7 @@
         <module>common-domain</module>
         <module>customer-service</module>
         <module>market-service</module>
-        <module>betting-service</module>
+        <module>bet-service</module>
         <module>gateway-service</module>
         <module>e2e-service</module>
     </modules>

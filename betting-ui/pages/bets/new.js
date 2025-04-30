@@ -13,7 +13,7 @@ const BetIndex = ({ bets }) => {
 };
 
 BetIndex.getInitialProps = async (context, client) => {
-  const { data } = await client.get('/api/betting');
+  const { data } = await client.get('/api/bet');
 
   return { bets: data };
 };

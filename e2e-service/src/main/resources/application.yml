@@ -14,7 +14,7 @@ spring:
           market:
             url: http://localhost/api/market
           betting:
-            url: http://localhost/api/betting
+            url: http://localhost/api/bet
           oauth2:
             url: http://localhost/keycloak
           kafka:
