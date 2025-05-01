@@ -12,8 +12,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FundReservationSucceededEvent {
+public class FundReservedEvent {
+    private UUID betId;
     private String customerId;
+    private UUID marketId;
     private BigDecimal funds;
     private BigDecimal currentBalance;
 }

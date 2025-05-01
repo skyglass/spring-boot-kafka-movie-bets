@@ -1,4 +1,6 @@
-package net.skycomposer.moviebets.common.dto.bet;
+package net.skycomposer.moviebets.common.dto.bet.events;
+
+import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +12,11 @@ import net.skycomposer.moviebets.common.dto.market.MarketResult;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SumStakeData {
-    private Long total;
+public class BetCreatedEvent {
+    private UUID betId;
+    private UUID marketId;
+    private String customerId;
+    private String marketName;
+    private Integer stake;
     private MarketResult result;
 }

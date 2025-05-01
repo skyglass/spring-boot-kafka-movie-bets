@@ -1,4 +1,4 @@
-package net.skycomposer.moviebets.common.dto.bet;
+package net.skycomposer.moviebets.common.dto.bet.commands;
 
 import java.util.UUID;
 
@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CancelBetRequest {
+public class ApproveBetCommand {
     private UUID betId;
-    private String reason;
 }

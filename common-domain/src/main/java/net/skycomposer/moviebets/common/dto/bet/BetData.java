@@ -17,12 +17,12 @@ public class BetData {
     private UUID marketId;
     private String customerId;
     private String marketName;
-    private int stake;
+    private Integer stake;
     private MarketResult result;
     private BetStatus status;
-    private boolean marketConfirmed;
-    private boolean fundsConfirmed;
-    private boolean betSettled;
-    private boolean betWon;
+    private Boolean marketConfirmed;
+    private Boolean fundsConfirmed;
+    private Boolean betSettled;
+    private Boolean betWon;
 
 }

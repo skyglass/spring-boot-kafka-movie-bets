@@ -11,21 +11,55 @@ import org.springframework.kafka.core.ProducerFactory;
 @Configuration
 public class KafkaConfig {
 
-    @Value("${bet.events.topic.name}")
-    private String betEventsTopicName;
-    private final static Integer TOPIC_REPLICATION_FACTOR = 3;
-    private final static Integer TOPIC_PARTITIONS = 3;
+        private final static Integer TOPIC_REPLICATION_FACTOR = 3;
+        private final static Integer TOPIC_PARTITIONS = 3;
 
-    @Bean
-    KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
-        return new KafkaTemplate<>(producerFactory);
-    }
+        @Value("${bet.events.topic.name}")
+        private String betEventsTopicName;
 
-    @Bean
-    NewTopic createBetEventsTopic() {
-        return TopicBuilder.name(betEventsTopicName)
-                .partitions(TOPIC_PARTITIONS)
-                .replicas(TOPIC_REPLICATION_FACTOR)
-                .build();
-    }
+        @Value("${market.commands.topic.name}")
+        private String marketCommandsTopicName;
+
+        @Value("${customer.commands.topic.name}")
+        private String customerCommandsTopicName;
+
+        @Value("${bet.commands.topic.name}")
+        private String betCommandsTopicName;
+
+        @Bean
+        KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
+            return new KafkaTemplate<>(producerFactory);
+        }
+
+        @Bean
+        NewTopic createBetEventsTopic() {
+            return TopicBuilder.name(betEventsTopicName)
+                    .partitions(TOPIC_PARTITIONS)
+                    .replicas(TOPIC_REPLICATION_FACTOR)
+                    .build();
+        }
+
+        @Bean
+        NewTopic createMarketCommandsTopic(){
+            return TopicBuilder.name(marketCommandsTopicName)
+                    .partitions(TOPIC_PARTITIONS)
+                    .replicas(TOPIC_REPLICATION_FACTOR)
+                    .build();
+        }
+
+        @Bean
+        NewTopic createCustomerCommandsTopic() {
+            return TopicBuilder.name(customerCommandsTopicName)
+                    .partitions(TOPIC_PARTITIONS)
+                    .replicas(TOPIC_REPLICATION_FACTOR)
+                    .build();
+        }
+
+        @Bean
+        NewTopic createBetCommandsTopic() {
+            return TopicBuilder.name(betCommandsTopicName)
+                    .partitions(TOPIC_PARTITIONS)
+                    .replicas(TOPIC_REPLICATION_FACTOR)
+                    .build();
+        }
 }

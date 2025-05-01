@@ -110,3 +110,19 @@ bet:
   events:
     topic:
       name: bet-events
+
+market:
+  commands:
+    topic:
+      name: market-commands
+  events:
+    topic:
+      name: market-events
+
+customer:
+  commands:
+    topic:
+      name: customer-commands
+  events:
+    topic:
+      name: customer-events

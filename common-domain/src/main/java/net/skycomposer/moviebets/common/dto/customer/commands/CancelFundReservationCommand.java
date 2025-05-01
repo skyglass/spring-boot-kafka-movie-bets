@@ -13,6 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class CancelFundReservationCommand {
+    private UUID betId;
     private String customerId;
     private String requestId;
     private BigDecimal funds;

@@ -3,9 +3,9 @@ package net.skycomposer.moviebets.customer.service.handler;
 import net.skycomposer.moviebets.common.dto.customer.WalletResponse;
 import net.skycomposer.moviebets.common.dto.customer.commands.CancelFundReservationCommand;
 import net.skycomposer.moviebets.common.dto.customer.commands.ReserveFundsCommand;
-import net.skycomposer.moviebets.common.dto.customer.events.FundReservationCancelledEvent;
 import net.skycomposer.moviebets.common.dto.customer.events.FundReservationFailedEvent;
-import net.skycomposer.moviebets.common.dto.customer.events.FundReservationSucceededEvent;
+import net.skycomposer.moviebets.common.dto.customer.events.FundReservationCancelledEvent;
+import net.skycomposer.moviebets.common.dto.customer.events.FundReservedEvent;
 import net.skycomposer.moviebets.customer.exception.CustomerInsufficientFundsException;
 import net.skycomposer.moviebets.customer.service.CustomerService;
 import org.slf4j.Logger;
@@ -38,29 +38,25 @@ public class CustomerCommandHandler {
     public void handleCommand(@Payload ReserveFundsCommand command) {
         try {
             WalletResponse walletResponse = customerService.removeFunds(command.getCustomerId(), command.getRequestId(), command.getFunds());
-            FundReservationSucceededEvent fundReservationSucceededEvent = new FundReservationSucceededEvent(command.getCustomerId(),
-                    command.getFunds(), walletResponse.getCurrentBalance());
+            FundReservedEvent fundReservationSucceededEvent = new FundReservedEvent(
+                    command.getBetId(), command.getCustomerId(),
+                    command.getMarketId(), command.getFunds(), walletResponse.getCurrentBalance());
             kafkaTemplate.send(customerEventsTopicName, fundReservationSucceededEvent);
         } catch (CustomerInsufficientFundsException e) {
             logger.error(e.getLocalizedMessage(), e);
-            FundReservationFailedEvent fundReservationFailedEvent = new FundReservationFailedEvent(command.getCustomerId(),
-                            e.getRequiredAmount(), e.getAvailableAmount());
+            FundReservationFailedEvent fundReservationFailedEvent = new FundReservationFailedEvent(
+                    command.getBetId(), command.getCustomerId(),
+                    e.getRequiredAmount(), e.getAvailableAmount());
             kafkaTemplate.send(customerEventsTopicName, fundReservationFailedEvent);
         }
     }
 
     @KafkaHandler
     public void handleCommand(@Payload CancelFundReservationCommand command) {
-        try {
-            WalletResponse walletResponse = customerService.addFunds(command.getCustomerId(), command.getRequestId(), command.getFunds());
-            FundReservationCancelledEvent fundReservationCancelledEvent = new FundReservationCancelledEvent(command.getCustomerId(),
-                    command.getFunds(), walletResponse.getCurrentBalance());
-            kafkaTemplate.send(customerEventsTopicName, fundReservationCancelledEvent);
-        } catch (CustomerInsufficientFundsException e) {
-            logger.error(e.getLocalizedMessage(), e);
-            FundReservationFailedEvent fundReservationFailedEvent = new FundReservationFailedEvent(command.getCustomerId(),
-                    e.getRequiredAmount(), e.getAvailableAmount());
-            kafkaTemplate.send(customerEventsTopicName, fundReservationFailedEvent);
-        }
+        WalletResponse walletResponse = customerService.addFunds(command.getCustomerId(), command.getRequestId(), command.getFunds());
+        FundReservationCancelledEvent fundReservationCancelledEvent = new FundReservationCancelledEvent(
+                command.getBetId(), command.getCustomerId(),
+                command.getFunds(), walletResponse.getCurrentBalance());
+        kafkaTemplate.send(customerEventsTopicName, fundReservationCancelledEvent);
     }
 }
