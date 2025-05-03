@@ -123,13 +123,13 @@ public class BetConcurrencyE2eTest extends E2eTest {
                     Duration.ofSeconds(60)
                     , () -> {
                         var result = betTestHelper.getState(betResponse.getBetId());
-                        while (!result.isMarketConfirmed() || !result.isFundsConfirmed()) {
+                        while (!result.getMarketConfirmed() || !result.getFundsConfirmed()) {
                             Thread.sleep(1000);
                             result = betTestHelper.getState(betResponse.getBetId());
                         }
                         Thread.sleep(100);
-                        assertThat(result.isMarketConfirmed(), equalTo(true));
-                        assertThat(result.isFundsConfirmed(), equalTo(true));
+                        assertThat(result.getMarketConfirmed(), equalTo(true));
+                        assertThat(result.getFundsConfirmed(), equalTo(true));
                     }, () -> String.format("Bet with betId = %s is not market or funds confirmed", betResponse.getBetId())
             );
         }

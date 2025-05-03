@@ -12,5 +12,6 @@ import net.skycomposer.moviebets.common.dto.market.MarketResult;
 @AllArgsConstructor
 public class SumStakeData {
     private Long total;
+    private Long votes;
     private MarketResult result;
 }

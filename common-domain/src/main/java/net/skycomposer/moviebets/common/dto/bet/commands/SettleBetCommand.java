@@ -1,4 +1,4 @@
-package net.skycomposer.moviebets.common.dto.customer.commands;
+package net.skycomposer.moviebets.common.dto.bet.commands;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,13 +9,14 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class CancelFundReservationCommand {
+public class SettleBetCommand {
     private UUID betId;
     private String customerId;
     private UUID marketId;
     private String requestId;
-    private BigDecimal funds;
+    private Integer stake;
+    private BigDecimal winnerEarned;
 }

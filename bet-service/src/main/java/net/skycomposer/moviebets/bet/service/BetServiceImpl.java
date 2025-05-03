@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -69,19 +69,6 @@ public class BetServiceImpl implements BetService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public BetResponse updateStatus(UUID betId, BetStatus betStatus) {
-        BetEntity betEntity = betRepository.findById(betId).get();
-        if (betEntity == null) {
-            throw new BetNotFoundException(betId);
-        }
-        betEntity.setStatus(betStatus);
-        betEntity = betRepository.save(betEntity);
-        return new BetResponse(betEntity.getId(),
-                "Bet %s was updated with status %s successfully".formatted(betEntity.getId(), betStatus));
-    }
-
-    @Override
     @Transactional(readOnly = true)
     public BetData getState(UUID betId) {
         return findBetById(betId);
@@ -112,6 +99,30 @@ public class BetServiceImpl implements BetService {
         return BetDataList.builder()
                 .betDataList(createBetDataList(betEntityList))
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BetData> findByMarketAndStatus(UUID marketId, BetStatus betStatus, Integer limit) {
+        return betRepository.findByMarketIdAndStatus(marketId, betStatus, PageRequest.of(0, limit))
+                .stream()
+                .map(this::createBetData)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void updateStatus(List<UUID> betUuids, BetStatus betStatus) {
+        if (betUuids == null || betUuids.isEmpty()) {
+            return;
+        }
+        betRepository.updateStatus(betUuids, betStatus);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countByStatus(BetStatus betStatus) {
+        return betRepository.countByStatus(betStatus);
     }
 
     private BetData createBetData(BetEntity betEntity) {

@@ -3,11 +3,11 @@ package net.skycomposer.moviebets.market;
 import java.time.Instant;
 import java.util.UUID;
 
-import net.skycomposer.moviebets.common.dto.market.*;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.skycomposer.moviebets.common.dto.market.*;
 
 @Component
 @RequiredArgsConstructor
@@ -42,6 +42,7 @@ public class MarketTestHelper {
         CloseMarketRequest closeMarketRequest = CloseMarketRequest
                 .builder()
                 .marketId(marketId)
+                .requestId(UUID.randomUUID().toString())
                 .result(result.getValue())
                 .build();
         return marketClient.close(closeMarketRequest);

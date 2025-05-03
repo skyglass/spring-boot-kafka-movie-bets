@@ -3,7 +3,8 @@ package net.skycomposer.moviebets.common.dto.bet;
 public enum BetStatus {
     PlACED,
     VALIDATED,
-    SETTLING,
+    SETTLE_STARTED,
+    SETTLE_READY,
     SETTLED,
     CANCELLED;
 }

@@ -11,6 +11,10 @@ public interface BetService {
 
     BetData findBetById(UUID betId);
 
+    List<BetData> findByMarketAndStatus(UUID marketId, BetStatus betStatus, Integer limit);
+
+    void updateStatus(List<UUID> betUuids, BetStatus betStatus);
+
     BetData getState(UUID betId);
 
     SumStakesData getBetsByMarket(UUID marketId);
@@ -23,6 +27,6 @@ public interface BetService {
 
     BetResponse close(CancelBetRequest request);
 
-    BetResponse updateStatus(UUID betId, BetStatus betStatus);
+    public long countByStatus(BetStatus status);
 
 }

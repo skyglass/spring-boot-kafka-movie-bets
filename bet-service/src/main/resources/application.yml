@@ -49,13 +49,14 @@ spring:
           jwk-set-uri: ${spring.keycloak.server-url}/realms/moviebets-realm/protocol/openid-connect/certs
 
   kafka:
-    brokers: "my-cluster-kafka-bootstrap:9092"
+    bootstrap-servers: "my-cluster-kafka-bootstrap:9092"
     admin:
       auto-create: false
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       acks: all
+      transaction-id-prefix: ${INSTANCE_NAME}-
       properties:
         delivery.timeout.ms: 120000
         linger.ms: 0
@@ -64,7 +65,11 @@ spring:
         enable.idempotence: true
         allow.auto.create.topics: false
     consumer:
-      group-id: moviebets-ms
+      commands:
+        group-id: bet-commands
+      settle:
+        group-id: bet-settle
+      group-id: bet-saga
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
@@ -91,6 +96,10 @@ logging:
     org.springframework.cloud.kubernetes: TRACE
     org.springframework.security: DEBUG
     org.flywaydb: DEBUG
+    org.springframework.kafka.transaction.KafkaTransactionManager: DEBUG
+    org.springframework.transaction: DEBUG
+    org.springframework.orm.jpa.JpaTransactionManager: DEBUG
+    org.apache.kafka.clients.producer.internals.TransactionManager: DEBUG
 
 openapi:
   oauthflow:
@@ -110,6 +119,11 @@ bet:
   events:
     topic:
       name: bet-events
+  settle:
+    topic:
+      name: bet-settle
+    batch:
+      size: 20
 
 market:
   commands:

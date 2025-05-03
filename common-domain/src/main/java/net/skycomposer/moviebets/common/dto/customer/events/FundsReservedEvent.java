@@ -1,4 +1,4 @@
-package net.skycomposer.moviebets.common.dto.customer.commands;
+package net.skycomposer.moviebets.common.dto.customer.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,10 +12,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CancelFundReservationCommand {
+public class FundsReservedEvent {
     private UUID betId;
     private String customerId;
     private UUID marketId;
-    private String requestId;
     private BigDecimal funds;
+    private BigDecimal currentBalance;
 }

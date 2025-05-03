@@ -22,4 +22,6 @@ public interface MarketService {
 
     MarketResponse cancel(CancelMarketRequest request);
 
+    boolean isValid(UUID marketId);
+
 }

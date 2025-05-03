@@ -50,13 +50,14 @@ spring:
           jwk-set-uri: ${spring.keycloak.server-url}/realms/moviebets-realm/protocol/openid-connect/certs
 
   kafka:
-    brokers: "my-cluster-kafka-bootstrap:9092"
+    bootstrap-servers: "my-cluster-kafka-bootstrap:9092"
     admin:
       auto-create: false
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       acks: all
+      transaction-id-prefix: ${INSTANCE_NAME}-
       properties:
         delivery.timeout.ms: 120000
         linger.ms: 0
@@ -90,6 +91,10 @@ logging:
     org.springframework.cloud.kubernetes: TRACE
     org.springframework.security: DEBUG
     org.flywaydb: DEBUG
+    org.springframework.kafka.transaction.KafkaTransactionManager: DEBUG
+    org.springframework.transaction: DEBUG
+    org.springframework.orm.jpa.JpaTransactionManager: DEBUG
+    org.apache.kafka.clients.producer.internals.TransactionManager: DEBUG
 
 openapi:
   oauthflow:
@@ -101,6 +106,11 @@ jwt:
     converter:
       resource-id: moviebets-app
       principal-attribute: preferred_username
+
+bet:
+  events:
+    topic:
+      name: bet-events
 
 customer:
   commands:

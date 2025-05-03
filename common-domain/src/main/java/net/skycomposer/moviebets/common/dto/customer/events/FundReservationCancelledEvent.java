@@ -15,6 +15,7 @@ import java.util.UUID;
 public class FundReservationCancelledEvent {
     private UUID betId;
     private String customerId;
+    private UUID marketId;
     private BigDecimal funds;
     private BigDecimal currentBalance;
 }
