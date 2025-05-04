@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import net.skycomposer.moviebets.common.dto.customer.WalletData;
 import net.skycomposer.moviebets.common.dto.customer.WalletResponse;
 
+import java.util.UUID;
+
 @FeignClient(name = "customer")
 public interface CustomerClient {
 
@@ -15,8 +17,8 @@ public interface CustomerClient {
     WalletData findWalletById(@PathVariable("walletId") String walletId);
 
     @PostMapping("/add-funds/{walletId}/{requestId}/{funds}")
-    public WalletResponse addFunds(@PathVariable String walletId, @PathVariable String requestId, @PathVariable int funds);
+    public WalletResponse addFunds(@PathVariable String walletId, @PathVariable UUID requestId, @PathVariable int funds);
 
     @PostMapping("/remove-funds/{walletId}/{requestId}/{funds}")
-    public WalletResponse removeFunds(@PathVariable String walletId, @PathVariable String requestId, @PathVariable int funds);
+    public WalletResponse removeFunds(@PathVariable String walletId, @PathVariable UUID requestId, @PathVariable int funds);
 }

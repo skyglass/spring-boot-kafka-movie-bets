@@ -34,14 +34,19 @@ public class CustomerCommandHandler {
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     private final String betEventsTopicName;
 
+    @Value("${bet.settle.topic.name}")
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    private final String betSettleTopicName;
+
     @KafkaHandler
     public void handleCommand(@Payload ReserveFundsCommand command) {
         try {
             WalletResponse walletResponse = customerService.removeFunds(command.getCustomerId(), command.getRequestId(), command.getFunds());
             FundsReservedEvent fundsReservedEvent = new FundsReservedEvent(
                     command.getBetId(), command.getCustomerId(),
+                    command.getCancelRequestId(),
                     command.getMarketId(), command.getFunds(), walletResponse.getCurrentBalance());
-            kafkaTemplate.send(betEventsTopicName, command.getBetId().toString(), fundsReservedEvent);
+            kafkaTemplate.send(betSettleTopicName, command.getMarketId().toString(), fundsReservedEvent);
         } catch (CustomerInsufficientFundsException e) {
             logger.error(e.getLocalizedMessage(), e);
             FundReservationFailedEvent fundReservationFailedEvent = new FundReservationFailedEvent(
@@ -68,6 +73,6 @@ public class CustomerCommandHandler {
                 command.getBetId(), command.getCustomerId(),
                 command.getMarketId(),
                 command.getFunds(), walletResponse.getCurrentBalance());
-        kafkaTemplate.send(betEventsTopicName, command.getBetId().toString(), fundsAddedEvent);
+        kafkaTemplate.send(betSettleTopicName, command.getMarketId().toString(), fundsAddedEvent);
     }
 }

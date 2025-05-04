@@ -66,9 +66,9 @@ spring:
         allow.auto.create.topics: false
     consumer:
       commands:
-        group-id: bet-commands
+        group-id: bet-consumer
       settle:
-        group-id: bet-settle
+        group-id: settle-consumer
       group-id: bet-saga
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer

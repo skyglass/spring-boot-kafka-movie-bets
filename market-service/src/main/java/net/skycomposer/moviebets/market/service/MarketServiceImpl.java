@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import net.skycomposer.moviebets.common.dto.market.*;
-import net.skycomposer.moviebets.common.dto.market.commands.SettleBetsCommand;
+import net.skycomposer.moviebets.common.dto.market.events.MarketClosedEvent;
 import net.skycomposer.moviebets.market.dao.entity.MarketEntity;
 import net.skycomposer.moviebets.market.dao.repository.MarketRepository;
 import net.skycomposer.moviebets.market.dao.repository.MarketRequestRepository;
@@ -35,9 +35,9 @@ public class MarketServiceImpl implements MarketService {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    @Value("${market.commands.topic.name}")
+    @Value("${bet.settle.topic.name}")
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    private final String marketCommandsTopicName;
+    private final String betSettleTopicName;
 
 
     @Override
@@ -55,16 +55,6 @@ public class MarketServiceImpl implements MarketService {
                 .open(marketEntity.getOpen())
                 .closesAt(marketEntity.getClosesAt())
                 .build();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public boolean isValid(UUID marketId) {
-        MarketEntity marketEntity = marketRepository.findById(marketId).get();
-        if (marketEntity == null) {
-            throw new MarketNotFoundException(marketId);
-        }
-        return !marketEntity.getOpen();
     }
 
     @Override
@@ -106,12 +96,25 @@ public class MarketServiceImpl implements MarketService {
             throw new MarketNotFoundException(request.getMarketId());
         }
         marketEntity.setOpen(false);
-        marketEntity.setStatus(MarketStatus.CLOSING);
+        marketEntity.setStatus(MarketStatus.CLOSED);
         marketEntity = marketRepository.save(marketEntity);
-        SettleBetsCommand settleBetsCommand = new SettleBetsCommand(marketEntity.getId(), request.getRequestId());
-        kafkaTemplate.send(marketCommandsTopicName, marketEntity.getId().toString(), settleBetsCommand);
+        MarketClosedEvent marketClosedEvent = new MarketClosedEvent(marketEntity.getId());
+        kafkaTemplate.send(betSettleTopicName, marketEntity.getId().toString(), marketClosedEvent);
         return new MarketResponse(marketEntity.getId(),
                 "Market %s closed successfully".formatted(marketEntity.getId()));
+    }
+
+    @Override
+    @Transactional
+    public MarketResponse settle(UUID marketId) {
+        MarketEntity marketEntity = marketRepository.findById(marketId).get();
+        if (marketEntity == null) {
+            throw new MarketNotFoundException(marketId);
+        }
+        marketEntity.setStatus(MarketStatus.SETTLED);
+        marketEntity = marketRepository.save(marketEntity);
+        return new MarketResponse(marketEntity.getId(),
+                "Market %s settled successfully".formatted(marketEntity.getId()));
     }
 
     @Override

@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CloseMarketRequest {
     private UUID marketId;
-    private String requestId;
+    private UUID requestId;
     private int result;
 }
 

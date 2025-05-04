@@ -65,7 +65,7 @@ spring:
         enable.idempotence: true
         allow.auto.create.topics: false
     consumer:
-      group-id: market-ms
+      group-id: market-consumer
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
@@ -112,6 +112,9 @@ bet:
   events:
     topic:
       name: bet-events
+  settle:
+    topic:
+      name: bet-settle
 
 market:
   commands:

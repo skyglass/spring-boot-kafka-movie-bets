@@ -44,7 +44,7 @@ public class BetE2eTest extends E2eTest {
         UUID betId2 = UUID.randomUUID();
         UUID betId3 = UUID.randomUUID();
         String customerId = UUID.randomUUID().toString();
-        String walletRequestId = UUID.randomUUID().toString();
+        UUID walletRequestId = UUID.randomUUID();
         int walletBalance = 100;
         UUID marketId = UUID.randomUUID();
         int betStake = 100;

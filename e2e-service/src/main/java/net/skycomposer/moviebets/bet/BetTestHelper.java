@@ -36,6 +36,8 @@ public class BetTestHelper {
                 .betId(betId)
                 .marketId(marketId)
                 .customerId(customerId)
+                .requestId(UUID.randomUUID())
+                .cancelRequestId(UUID.randomUUID())
                 .result(result)
                 .stake(stake)
                 .status(BetStatus.PlACED)

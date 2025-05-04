@@ -20,8 +20,8 @@ public interface MarketService {
 
     MarketResponse close(CloseMarketRequest request);
 
-    MarketResponse cancel(CancelMarketRequest request);
+    MarketResponse settle(UUID marketId);
 
-    boolean isValid(UUID marketId);
+    MarketResponse cancel(CancelMarketRequest request);
 
 }

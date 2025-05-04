@@ -11,8 +11,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MarketValidatedEvent {
-    private UUID betId;
+public class MarketSettledEvent {
     private UUID marketId;
-
 }

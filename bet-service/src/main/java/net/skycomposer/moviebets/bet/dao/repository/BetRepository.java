@@ -31,6 +31,10 @@ public interface BetRepository extends JpaRepository<BetEntity, UUID> {
     @Query("UPDATE BetEntity b SET b.status = :status WHERE b.id IN :ids")
     void updateStatus(List<UUID> ids, BetStatus status);
 
-    long countByStatus(BetStatus status);
+    @Modifying
+    @Query("UPDATE BetEntity b SET b.status = :newStatus WHERE b.marketId = :marketId AND b.status = :oldStatus")
+    void updateStatus(UUID marketId, BetStatus oldStatus, BetStatus newStatus);
+
+    int countByStatus(BetStatus status);
 
 }

@@ -1,7 +1,6 @@
 package net.skycomposer.moviebets.bet.service.handler;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +13,9 @@ import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 import net.skycomposer.moviebets.bet.service.BetService;
-import net.skycomposer.moviebets.common.dto.bet.BetStatus;
+import net.skycomposer.moviebets.common.dto.bet.CancelBetRequest;
+import net.skycomposer.moviebets.common.dto.bet.commands.RejectBetCommand;
 import net.skycomposer.moviebets.common.dto.bet.commands.SettleBetCommand;
-import net.skycomposer.moviebets.common.dto.bet.commands.SettleBetStatusCommand;
 import net.skycomposer.moviebets.common.dto.customer.commands.AddFundsCommand;
 
 @Component
@@ -34,6 +33,12 @@ public class BetCommandHandler {
     private final String customerCommandsTopicName;
 
     @KafkaHandler
+    public void handleCommand(@Payload RejectBetCommand rejectBetCommand) {
+        CancelBetRequest cancelBetRequest = new CancelBetRequest(rejectBetCommand.getBetId(), rejectBetCommand.getReason());
+        betService.close(cancelBetRequest);
+    }
+
+    @KafkaHandler
     public void handleCommand(@Payload SettleBetCommand settleBetCommand) {
         AddFundsCommand addFundsCommand = new AddFundsCommand(
                 settleBetCommand.getBetId(),
@@ -42,11 +47,6 @@ public class BetCommandHandler {
                 settleBetCommand.getRequestId(),
                 settleBetCommand.getWinnerEarned().add(new BigDecimal(settleBetCommand.getStake())));
         kafkaTemplate.send(customerCommandsTopicName, settleBetCommand.getCustomerId(), addFundsCommand);
-    }
-
-    @KafkaHandler
-    public void handleCommand(@Payload SettleBetStatusCommand settleBetStatusCommand) {
-        betService.updateStatus(List.of(settleBetStatusCommand.getBetId()), BetStatus.SETTLED);
     }
 
 }

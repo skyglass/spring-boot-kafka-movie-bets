@@ -33,7 +33,7 @@ public class MarketTestHelper {
     public MarketResponse updateMarket(UUID marketId) {
         MarketData marketData = MarketData.builder()
                 .marketId(marketId)
-                .status(MarketStatus.CLOSING)
+                .status(MarketStatus.CLOSED)
                 .build();
         return marketClient.update(marketData);
     }
@@ -42,7 +42,7 @@ public class MarketTestHelper {
         CloseMarketRequest closeMarketRequest = CloseMarketRequest
                 .builder()
                 .marketId(marketId)
-                .requestId(UUID.randomUUID().toString())
+                .requestId(UUID.randomUUID())
                 .result(result.getValue())
                 .build();
         return marketClient.close(closeMarketRequest);

@@ -15,6 +15,8 @@ import net.skycomposer.moviebets.common.dto.market.MarketResult;
 public class BetCreatedEvent {
     private UUID betId;
     private UUID marketId;
+    private UUID requestId;
+    private UUID cancelRequestId;
     private String customerId;
     private String marketName;
     private Integer stake;

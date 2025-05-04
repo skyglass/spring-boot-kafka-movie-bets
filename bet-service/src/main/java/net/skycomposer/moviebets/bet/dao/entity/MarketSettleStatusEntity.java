@@ -1,23 +1,30 @@
 package net.skycomposer.moviebets.bet.dao.entity;
 
-import java.util.UUID;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Table(name = "bet_request")
+import java.util.UUID;
+
+@Table(name = "bet_settle_status")
 @Entity
 @Data // Generates getters, setters, toString, equals, and hashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BetRequestEntity {
+public class MarketSettleStatusEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(name = "expected_count", nullable = false)
+    private Integer expectedCount;
+
+    @Column(name = "finished_count", nullable = false)
+    private Integer finishedCount;
+
 
 }

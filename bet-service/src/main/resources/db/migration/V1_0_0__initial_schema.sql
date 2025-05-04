@@ -35,3 +35,21 @@ CREATE TABLE bet_request(
     id uuid NOT NULL,
     CONSTRAINT bet_request_pkey PRIMARY KEY (id)
 );
+
+DROP TABLE IF EXISTS market_settle_status;
+
+CREATE TABLE market_settle_status(id uuid NOT NULL,
+                               expected_count int NOT NULL,
+                               finished_count int NOT NULL,
+                               CONSTRAINT bet_settle_status_pkey PRIMARY KEY (id)
+);
+
+DROP TABLE IF EXISTS bet_settle_request;
+
+CREATE TABLE bet_settle_request(
+                               id uuid NOT NULL,
+                               market_id uuid NOT NULL,
+                               CONSTRAINT bet_settle_request_pkey PRIMARY KEY (id)
+);
+
+CREATE INDEX idx_bet_settle_request ON bet_settle_request (market_id);

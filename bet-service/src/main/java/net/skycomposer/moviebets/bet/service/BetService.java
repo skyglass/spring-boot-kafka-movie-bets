@@ -15,6 +15,8 @@ public interface BetService {
 
     void updateStatus(List<UUID> betUuids, BetStatus betStatus);
 
+    void updateStatus(UUID marketId, BetStatus oldStatus, BetStatus newStatus);
+
     BetData getState(UUID betId);
 
     SumStakesData getBetsByMarket(UUID marketId);
@@ -27,6 +29,20 @@ public interface BetService {
 
     BetResponse close(CancelBetRequest request);
 
-    public long countByStatus(BetStatus status);
+    int countByStatus(BetStatus status);
+
+    void setBetValidated(UUID betId);
+
+    boolean isMarketClosed(UUID marketId);
+
+    int countSettledBets(UUID marketId);
+
+    void marketSettleStart(UUID marketId, int expectedCount);
+
+    void updateMarketSettleCount(UUID betId, UUID marketId);
+
+    void marketSettleDone(UUID marketId);
+
+
 
 }

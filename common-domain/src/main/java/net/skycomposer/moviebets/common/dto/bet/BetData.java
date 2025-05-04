@@ -16,6 +16,8 @@ public class BetData {
     private UUID betId;
     private UUID marketId;
     private String customerId;
+    private UUID requestId;
+    private UUID cancelRequestId;
     private String marketName;
     private Integer stake;
     private MarketResult result;

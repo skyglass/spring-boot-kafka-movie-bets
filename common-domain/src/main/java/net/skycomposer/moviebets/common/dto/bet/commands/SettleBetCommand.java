@@ -16,7 +16,7 @@ public class SettleBetCommand {
     private UUID betId;
     private String customerId;
     private UUID marketId;
-    private String requestId;
+    private UUID requestId;
     private Integer stake;
     private BigDecimal winnerEarned;
 }

@@ -6,16 +6,22 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import net.skycomposer.moviebets.bet.dao.entity.BetEntity;
+import net.skycomposer.moviebets.bet.dao.entity.BetSettleRequestEntity;
+import net.skycomposer.moviebets.bet.dao.entity.MarketSettleStatusEntity;
 import net.skycomposer.moviebets.bet.dao.repository.BetRepository;
-import net.skycomposer.moviebets.bet.dao.repository.BetRequestRepository;
+import net.skycomposer.moviebets.bet.dao.repository.BetSettleRequestRepository;
+import net.skycomposer.moviebets.bet.dao.repository.MarketSettleStatusRepository;
 import net.skycomposer.moviebets.bet.exception.BetNotFoundException;
 import net.skycomposer.moviebets.common.dto.bet.*;
+import net.skycomposer.moviebets.common.dto.bet.events.BetCreatedEvent;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +31,15 @@ public class BetServiceImpl implements BetService {
 
     private final BetRepository betRepository;
 
-    private final BetRequestRepository betRequestRepository;
+    private final MarketSettleStatusRepository marketSettleStatusRepository;
+
+    private final BetSettleRequestRepository betSettleRequestRepository;
+
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Value("${bet.settle.topic.name}")
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    private final String betSettleTopicName;
 
 
     @Override
@@ -51,6 +65,8 @@ public class BetServiceImpl implements BetService {
     public BetResponse open(BetData betData) {
         BetEntity betEntity = createBetEntity(betData);
         betEntity = betRepository.save(betEntity);
+        BetCreatedEvent betCreatedEvent = createBetCreatedEvent(betEntity, betData.getRequestId(), betData.getCancelRequestId());
+        kafkaTemplate.send(betSettleTopicName, betEntity.getMarketId().toString(), betCreatedEvent);
         return new BetResponse(betEntity.getId(),
                 "Bet %s created successfully".formatted(betEntity.getId()));
     }
@@ -120,9 +136,71 @@ public class BetServiceImpl implements BetService {
     }
 
     @Override
+    @Transactional
+    public void updateStatus(UUID marketId, BetStatus oldStatus, BetStatus newStatus) {
+        betRepository.updateStatus(marketId, oldStatus, newStatus);
+    }
+
+    @Override
+    @Transactional
+    public void setBetValidated(UUID betId) {
+        updateStatus(List.of(betId), BetStatus.VALIDATED);
+    }
+
+    @Override
     @Transactional(readOnly = true)
-    public long countByStatus(BetStatus betStatus) {
+    public boolean isMarketClosed(UUID marketId) {
+        return marketSettleStatusRepository.existsById(marketId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public int countByStatus(BetStatus betStatus) {
         return betRepository.countByStatus(betStatus);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public int countSettledBets(UUID marketId) {
+        MarketSettleStatusEntity marketSettleStatusEntity = marketSettleStatusRepository.findById(marketId).get();
+        if (marketSettleStatusEntity != null) {
+            return marketSettleStatusEntity.getFinishedCount();
+        } else {
+            throw new IllegalArgumentException("Wrong usage of countSettledBets method");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void marketSettleStart(UUID marketId, int expectedCount) {
+        if (!marketSettleStatusRepository.existsById(marketId)) {
+            MarketSettleStatusEntity marketSettleStatusEntity = new MarketSettleStatusEntity(marketId, expectedCount, 0);
+            marketSettleStatusRepository.save(marketSettleStatusEntity);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void updateMarketSettleCount(UUID betId, UUID marketId) {
+        if (betSettleRequestRepository.existsById(betId)) {
+            String message = String.format("Duplicate bet settle request for bet %s, market = %s", betId, marketId);
+            logger.warn(message);
+        } else {
+            MarketSettleStatusEntity marketSettleStatusEntity = marketSettleStatusRepository.findById(marketId).get();
+            marketSettleStatusEntity.setFinishedCount(marketSettleStatusEntity.getFinishedCount() + 1);
+            marketSettleStatusRepository.save(marketSettleStatusEntity);
+            betSettleRequestRepository.save(new BetSettleRequestEntity(betId, marketId));
+        }
+    }
+
+    @Override
+    @Transactional
+    public void marketSettleDone(UUID marketId) {
+        if (marketSettleStatusRepository.existsById(marketId)) {
+            MarketSettleStatusEntity marketSettleStatusEntity = marketSettleStatusRepository.findById(marketId).get();
+            marketSettleStatusRepository.delete(marketSettleStatusEntity);
+            betSettleRequestRepository.deleteByMarketId(marketId);
+        }
     }
 
     private BetData createBetData(BetEntity betEntity) {
@@ -152,6 +230,19 @@ public class BetServiceImpl implements BetService {
                 .marketName(betData.getMarketName())
                 .stake(betData.getStake())
                 .result(betData.getResult())
+                .build();
+    }
+
+    private BetCreatedEvent createBetCreatedEvent(BetEntity betEntity, UUID requestId, UUID cancelRequestId) {
+        return BetCreatedEvent.builder()
+                .betId(betEntity.getId())
+                .customerId(betEntity.getCustomerId())
+                .requestId(requestId)
+                .cancelRequestId(cancelRequestId)
+                .marketId(betEntity.getMarketId())
+                .marketName(betEntity.getMarketName())
+                .stake(betEntity.getStake())
+                .result(betEntity.getResult())
                 .build();
     }
 

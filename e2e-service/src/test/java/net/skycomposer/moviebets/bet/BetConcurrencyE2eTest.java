@@ -47,7 +47,7 @@ public class BetConcurrencyE2eTest extends E2eTest {
     @SneakyThrows
     void createParallelBetsThenFundsAreZeroTest() {
         String walletId = UUID.randomUUID().toString();
-        String walletRequestId = UUID.randomUUID().toString();
+        UUID walletRequestId = UUID.randomUUID();
         int walletBalance = 500;
         int walletBeforeMarketCloseBalance = 0;
         int walletAfterMarketCloseBalance = 1000;
@@ -86,7 +86,7 @@ public class BetConcurrencyE2eTest extends E2eTest {
         List<CompletableFuture<WalletResponse>> addedFunds = new ArrayList<>();
         for (int i = 0; i < numberOfWalletUpdates; i++) {
             CompletableFuture<WalletResponse> addFundsResult = customerTestHelper
-                    .asyncAddFunds(walletId, UUID.randomUUID().toString(), 10);
+                    .asyncAddFunds(walletId, UUID.randomUUID(), 10);
             addedFunds.add(addFundsResult);
         }
 
@@ -107,11 +107,11 @@ public class BetConcurrencyE2eTest extends E2eTest {
                 Duration.ofSeconds(5)
                 , () -> {
                     var result = marketTestHelper.getMarketData(marketId);
-                    while (result.getStatus() != MarketStatus.CLOSING) {
+                    while (result.getStatus() != MarketStatus.CLOSED) {
                         Thread.sleep(1000);
                         result =  marketTestHelper.getMarketData(marketId);
                     }
-                    assertThat(result.getStatus(), equalTo(MarketStatus.CLOSING));
+                    assertThat(result.getStatus(), equalTo(MarketStatus.CLOSED));
                 }, () -> String.format("Market update status is incorrect for marketId = %s: status = %s", marketId, marketTestHelper.getMarketData(marketId).getStatus())
         );
 

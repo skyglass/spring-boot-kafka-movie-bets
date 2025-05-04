@@ -1,15 +1,16 @@
 package net.skycomposer.moviebets.customer;
 
 import java.time.Duration;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import feign.FeignException;
-import lombok.SneakyThrows;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.skycomposer.moviebets.common.dto.customer.WalletData;
 import net.skycomposer.moviebets.common.dto.customer.WalletResponse;
@@ -22,16 +23,16 @@ public class CustomerTestHelper {
     private final CustomerClient customerClient;
 
     @Async
-    public CompletableFuture<WalletResponse> asyncAddFunds(String walletId, String requestId, int funds) {
+    public CompletableFuture<WalletResponse> asyncAddFunds(String walletId, UUID requestId, int funds) {
         return CompletableFuture.completedFuture(addFunds(walletId, requestId, funds));
     }
 
-    public WalletResponse createWallet(String walletId, String requestId, int funds) {
+    public WalletResponse createWallet(String walletId, UUID requestId, int funds) {
         return addFunds(walletId, requestId, funds);
     }
 
     @SneakyThrows
-    public WalletResponse addFunds(String walletId, String requestId, int funds) {
+    public WalletResponse addFunds(String walletId, UUID requestId, int funds) {
         WalletResponse response = null;
         while (response == null) {
             try {
@@ -43,7 +44,7 @@ public class CustomerTestHelper {
         return response;
     }
 
-    public WalletResponse removeFunds(String walletId, String requestId, int funds) {
+    public WalletResponse removeFunds(String walletId, UUID requestId, int funds) {
         return customerClient.removeFunds(walletId, requestId, funds);
     }
 

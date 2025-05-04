@@ -37,11 +37,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public WalletResponse addFunds(String customerId, String requestId, BigDecimal funds) {
+    public WalletResponse addFunds(String customerId, UUID requestId, BigDecimal funds) {
         CustomerEntity customerEntity = saveEntityIfNotExists(customerId, funds);
         BigDecimal currentBalance = customerEntity.getBalance();
         BigDecimal newBalance = currentBalance.add(funds);
-        if (walletRequestRepository.existsById(UUID.fromString(requestId))) {
+        if (walletRequestRepository.existsById(requestId)) {
             String message = String.format("Duplicate addFunds request for customer %s, requestId = %s", customerId, requestId);
             logger.warn(message);
             return new WalletResponse(message,
@@ -50,7 +50,7 @@ public class CustomerServiceImpl implements CustomerService {
         } else {
             customerEntity.setBalance(newBalance);
             customerRepository.save(customerEntity);
-            walletRequestRepository.save(new WalletRequestEntity(UUID.fromString(requestId)));
+            walletRequestRepository.save(new WalletRequestEntity(requestId));
             return new WalletResponse(FUNDS_ADDED_SUCCESSFULLY.formatted(currentBalance, newBalance),
                     customerEntity.getUsername(),
                     newBalance);
@@ -59,13 +59,13 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public WalletResponse removeFunds(String customerId, String requestId, BigDecimal funds) {
+    public WalletResponse removeFunds(String customerId, UUID requestId, BigDecimal funds) {
         CustomerEntity customerEntity = customerRepository.findByUsername(customerId).get();
         if (customerEntity == null) {
             throw new CustomerNotFoundException(customerId);
         }
         BigDecimal currentBalance = customerEntity.getBalance();
-        if (walletRequestRepository.existsById(UUID.fromString(requestId))) {
+        if (walletRequestRepository.existsById(requestId)) {
             String message = String.format("Duplicate removeFunds request for customer %s, requestId = %s", customerId, requestId);
             logger.warn(message);
             return new WalletResponse(message,
@@ -78,7 +78,7 @@ public class CustomerServiceImpl implements CustomerService {
             }
             customerEntity.setBalance(newBalance);
             customerRepository.save(customerEntity);
-            walletRequestRepository.save(new WalletRequestEntity(UUID.fromString(requestId)));
+            walletRequestRepository.save(new WalletRequestEntity(requestId));
             return new WalletResponse(FUNDS_REMOVED_SUCCESSFULLY.formatted(currentBalance, newBalance),
                     customerEntity.getUsername(),
                     newBalance);

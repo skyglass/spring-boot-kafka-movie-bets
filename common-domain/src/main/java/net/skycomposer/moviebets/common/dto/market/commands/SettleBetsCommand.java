@@ -17,11 +17,16 @@ public class SettleBetsCommand {
     private String requestId;
     BigDecimal winnerEarned;
     BigDecimal totalLost;
-    Long totalCount;
+    Integer totalCount;
 
     public SettleBetsCommand(UUID marketId, String requestId) {
         this.marketId = marketId;
         this.requestId = requestId;
+    }
+
+    public SettleBetsCommand(UUID marketId, String requestId, Integer totalCount) {
+        this(marketId, requestId);
+        this.totalCount = totalCount;
     }
 
 }

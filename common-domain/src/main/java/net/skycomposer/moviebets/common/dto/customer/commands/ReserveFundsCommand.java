@@ -16,6 +16,7 @@ public class ReserveFundsCommand {
     private UUID betId;
     private String customerId;
     private UUID marketId;
-    private String requestId;
+    private UUID requestId;
+    private UUID cancelRequestId;
     private BigDecimal funds;
 }
