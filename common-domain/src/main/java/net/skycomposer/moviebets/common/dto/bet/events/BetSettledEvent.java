@@ -1,18 +1,17 @@
-package net.skycomposer.moviebets.common.dto.market.events;
+package net.skycomposer.moviebets.common.dto.bet.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.skycomposer.moviebets.common.dto.market.MarketResult;
 
 import java.util.UUID;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class MarketSettledEvent {
+public class BetSettledEvent {
+    private UUID betId;
     private UUID marketId;
-    private MarketResult winResult;
 }

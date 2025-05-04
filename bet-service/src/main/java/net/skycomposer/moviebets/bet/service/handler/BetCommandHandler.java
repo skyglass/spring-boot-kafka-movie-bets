@@ -16,10 +16,11 @@ import net.skycomposer.moviebets.bet.service.BetService;
 import net.skycomposer.moviebets.common.dto.bet.CancelBetRequest;
 import net.skycomposer.moviebets.common.dto.bet.commands.RejectBetCommand;
 import net.skycomposer.moviebets.common.dto.bet.commands.SettleBetCommand;
+import net.skycomposer.moviebets.common.dto.bet.events.BetSettledEvent;
 import net.skycomposer.moviebets.common.dto.customer.commands.AddFundsCommand;
 
 @Component
-@KafkaListener(topics = "${bet.commands.topic.name}", groupId = "${kafka.consumer.commands.group-id}")
+@KafkaListener(topics = "${bet.commands.topic.name}", groupId = "${kafka.consumer.group-id}")
 @RequiredArgsConstructor
 public class BetCommandHandler {
 
@@ -27,6 +28,10 @@ public class BetCommandHandler {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Value("${bet.settle.topic.name}")
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    private final String betSettleTopicName;
 
     @Value("${customer.commands.topic.name}")
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -40,13 +45,18 @@ public class BetCommandHandler {
 
     @KafkaHandler
     public void handleCommand(@Payload SettleBetCommand settleBetCommand) {
-        AddFundsCommand addFundsCommand = new AddFundsCommand(
-                settleBetCommand.getBetId(),
-                settleBetCommand.getCustomerId(),
-                settleBetCommand.getMarketId(),
-                settleBetCommand.getRequestId(),
-                settleBetCommand.getWinnerEarned().add(new BigDecimal(settleBetCommand.getStake())));
-        kafkaTemplate.send(customerCommandsTopicName, settleBetCommand.getCustomerId(), addFundsCommand);
+        if (settleBetCommand.isWinner()) {
+            AddFundsCommand addFundsCommand = new AddFundsCommand(
+                    settleBetCommand.getBetId(),
+                    settleBetCommand.getCustomerId(),
+                    settleBetCommand.getMarketId(),
+                    settleBetCommand.getRequestId(),
+                    settleBetCommand.getWinnerEarned().add(new BigDecimal(settleBetCommand.getStake())));
+            kafkaTemplate.send(customerCommandsTopicName, settleBetCommand.getCustomerId(), addFundsCommand);
+        } else {
+            BetSettledEvent betSettledEvent = new BetSettledEvent(settleBetCommand.getBetId(), settleBetCommand.getMarketId());
+            kafkaTemplate.send(betSettleTopicName, settleBetCommand.getMarketId().toString(), betSettledEvent);
+        }
     }
 
 }

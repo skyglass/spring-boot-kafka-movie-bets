@@ -33,7 +33,7 @@ public class MarketCommandHandler {
     public void handleCommand(@Payload SettleMarketCommand settleMarketCommand) {
         UUID marketId = settleMarketCommand.getMarketId();
         marketService.settle(marketId);
-        MarketSettledEvent marketSettledEvent = new MarketSettledEvent(marketId);
+        MarketSettledEvent marketSettledEvent = new MarketSettledEvent(marketId, settleMarketCommand.getWinResult());
         kafkaTemplate.send(betSettleTopicName, marketId.toString(), marketSettledEvent);
     }
 

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import net.skycomposer.moviebets.common.dto.bet.*;
+import net.skycomposer.moviebets.common.dto.market.MarketResult;
 
 public interface BetService {
 
@@ -15,7 +16,7 @@ public interface BetService {
 
     void updateStatus(List<UUID> betUuids, BetStatus betStatus);
 
-    void updateStatus(UUID marketId, BetStatus oldStatus, BetStatus newStatus);
+    void settleBets(UUID marketId, BetStatus validatedStatus, BetStatus settledStatus, MarketResult winResult);
 
     BetData getState(UUID betId);
 
@@ -42,7 +43,5 @@ public interface BetService {
     void updateMarketSettleCount(UUID betId, UUID marketId);
 
     void marketSettleDone(UUID marketId);
-
-
 
 }

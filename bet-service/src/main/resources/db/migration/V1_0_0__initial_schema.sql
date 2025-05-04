@@ -29,13 +29,6 @@ CREATE INDEX idx_bet_market_result ON bet (market_id, result);
 CREATE INDEX idx_bet_market_status ON bet (market_id, status);
 CREATE UNIQUE INDEX idx_bet_customer_market ON bet (customer_id, market_id);
 
-DROP TABLE IF EXISTS bet_request;
-
-CREATE TABLE bet_request(
-    id uuid NOT NULL,
-    CONSTRAINT bet_request_pkey PRIMARY KEY (id)
-);
-
 DROP TABLE IF EXISTS market_settle_status;
 
 CREATE TABLE market_settle_status(id uuid NOT NULL,

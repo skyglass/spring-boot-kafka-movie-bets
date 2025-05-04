@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import net.skycomposer.moviebets.bet.dao.entity.BetEntity;
 import net.skycomposer.moviebets.common.dto.bet.BetStatus;
 import net.skycomposer.moviebets.common.dto.bet.SumStakeData;
+import net.skycomposer.moviebets.common.dto.market.MarketResult;
 
 @Repository
 public interface BetRepository extends JpaRepository<BetEntity, UUID> {
@@ -32,8 +33,13 @@ public interface BetRepository extends JpaRepository<BetEntity, UUID> {
     void updateStatus(List<UUID> ids, BetStatus status);
 
     @Modifying
-    @Query("UPDATE BetEntity b SET b.status = :newStatus WHERE b.marketId = :marketId AND b.status = :oldStatus")
-    void updateStatus(UUID marketId, BetStatus oldStatus, BetStatus newStatus);
+    @Query("""
+        UPDATE BetEntity b
+        SET b.status = :settledStatus,
+            b.betWon = CASE WHEN b.result = :winResult THEN true ELSE false END
+        WHERE b.marketId = :marketId AND b.status = :validatedStatus
+    """)
+    void settleBets(UUID marketId, BetStatus validatedStatus, BetStatus settledStatus, MarketResult winResult);
 
     int countByStatus(BetStatus status);
 

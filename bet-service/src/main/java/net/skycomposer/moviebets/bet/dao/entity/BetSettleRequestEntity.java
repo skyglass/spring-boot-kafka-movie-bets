@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Table(name = "bet_request")
+@Table(name = "bet_settle_request")
 @Entity
 @Data // Generates getters, setters, toString, equals, and hashCode
 @NoArgsConstructor

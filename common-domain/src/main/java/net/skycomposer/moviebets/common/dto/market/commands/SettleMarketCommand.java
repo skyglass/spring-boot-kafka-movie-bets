@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.skycomposer.moviebets.common.dto.market.MarketResult;
 
 @Data
 @NoArgsConstructor
@@ -13,4 +14,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SettleMarketCommand {
     private UUID marketId;
+    private MarketResult winResult;
 }

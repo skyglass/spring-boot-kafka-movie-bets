@@ -22,6 +22,7 @@ import net.skycomposer.moviebets.bet.dao.repository.MarketSettleStatusRepository
 import net.skycomposer.moviebets.bet.exception.BetNotFoundException;
 import net.skycomposer.moviebets.common.dto.bet.*;
 import net.skycomposer.moviebets.common.dto.bet.events.BetCreatedEvent;
+import net.skycomposer.moviebets.common.dto.market.MarketResult;
 
 @Service
 @RequiredArgsConstructor
@@ -137,8 +138,8 @@ public class BetServiceImpl implements BetService {
 
     @Override
     @Transactional
-    public void updateStatus(UUID marketId, BetStatus oldStatus, BetStatus newStatus) {
-        betRepository.updateStatus(marketId, oldStatus, newStatus);
+    public void settleBets(UUID marketId, BetStatus validatedStatus, BetStatus settledStatus, MarketResult winResult) {
+        betRepository.settleBets(marketId, validatedStatus, settledStatus, winResult);
     }
 
     @Override

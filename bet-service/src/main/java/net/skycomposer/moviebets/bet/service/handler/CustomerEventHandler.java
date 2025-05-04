@@ -13,16 +13,9 @@ import net.skycomposer.moviebets.common.dto.customer.events.FundReservationCance
 import net.skycomposer.moviebets.common.dto.customer.events.FundReservationFailedEvent;
 
 @Component
-@KafkaListener(
-    topics = {
-            "${bet.events.topic.name}",
-            "${market.events.topic.name}",
-            "${customer.events.topic.name}"
-    },
-    groupId = "${kafka.consumer.group-id}"
-)
+@KafkaListener(topics = "${customer.events.topic.name}", groupId = "${kafka.consumer.group-id}")
 @RequiredArgsConstructor
-public class BetSaga {
+public class CustomerEventHandler {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
