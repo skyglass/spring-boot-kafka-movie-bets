@@ -76,8 +76,8 @@ app:
   postgres:
     host: moviebets-postgres
     port: 5432
-    database: betdb
-    user: betdbuser
+    database: bettingdb
+    user: bettingdbuser
     password: dbpass
 
   kafka:

@@ -12,7 +12,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.RequiredArgsConstructor;
 import net.skycomposer.moviebets.bet.dao.entity.BetEntity;
 import net.skycomposer.moviebets.bet.dao.entity.BetSettleRequestEntity;
 import net.skycomposer.moviebets.bet.dao.entity.MarketSettleStatusEntity;
@@ -25,7 +24,6 @@ import net.skycomposer.moviebets.common.dto.bet.events.BetCreatedEvent;
 import net.skycomposer.moviebets.common.dto.market.MarketResult;
 
 @Service
-@RequiredArgsConstructor
 public class BetServiceImpl implements BetService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -38,9 +36,22 @@ public class BetServiceImpl implements BetService {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    @Value("${bet.settle.topic.name}")
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     private final String betSettleTopicName;
+
+
+    public BetServiceImpl(
+            BetRepository betRepository,
+            MarketSettleStatusRepository marketSettleStatusRepository,
+            BetSettleRequestRepository betSettleRequestRepository,
+            KafkaTemplate<String, Object> kafkaTemplate,
+            @Value("${bet.settle.topic.name}") String betSettleTopicName
+    ) {
+        this.betRepository = betRepository;
+        this.marketSettleStatusRepository = marketSettleStatusRepository;
+        this.betSettleRequestRepository = betSettleRequestRepository;
+        this.kafkaTemplate = kafkaTemplate;
+        this.betSettleTopicName = betSettleTopicName;
+    }
 
 
     @Override
@@ -138,12 +149,6 @@ public class BetServiceImpl implements BetService {
 
     @Override
     @Transactional
-    public void settleBets(UUID marketId, BetStatus validatedStatus, BetStatus settledStatus, MarketResult winResult) {
-        betRepository.settleBets(marketId, validatedStatus, settledStatus, winResult);
-    }
-
-    @Override
-    @Transactional
     public void setBetValidated(UUID betId) {
         updateStatus(List.of(betId), BetStatus.VALIDATED);
     }
@@ -196,12 +201,13 @@ public class BetServiceImpl implements BetService {
 
     @Override
     @Transactional
-    public void marketSettleDone(UUID marketId) {
+    public void marketSettleDone(UUID marketId, MarketResult winResult) {
         if (marketSettleStatusRepository.existsById(marketId)) {
             MarketSettleStatusEntity marketSettleStatusEntity = marketSettleStatusRepository.findById(marketId).get();
             marketSettleStatusRepository.delete(marketSettleStatusEntity);
             betSettleRequestRepository.deleteByMarketId(marketId);
         }
+        betRepository.settleBets(marketId, BetStatus.VALIDATED, BetStatus.SETTLED, winResult);
     }
 
     private BetData createBetData(BetEntity betEntity) {

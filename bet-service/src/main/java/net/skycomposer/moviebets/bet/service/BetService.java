@@ -16,8 +16,6 @@ public interface BetService {
 
     void updateStatus(List<UUID> betUuids, BetStatus betStatus);
 
-    void settleBets(UUID marketId, BetStatus validatedStatus, BetStatus settledStatus, MarketResult winResult);
-
     BetData getState(UUID betId);
 
     SumStakesData getBetsByMarket(UUID marketId);
@@ -42,6 +40,6 @@ public interface BetService {
 
     void updateMarketSettleCount(UUID betId, UUID marketId);
 
-    void marketSettleDone(UUID marketId);
+    void marketSettleDone(UUID marketId, MarketResult winResult);
 
 }

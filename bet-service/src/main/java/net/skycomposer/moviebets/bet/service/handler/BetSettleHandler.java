@@ -15,7 +15,6 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.RequiredArgsConstructor;
 import net.skycomposer.moviebets.bet.service.BetService;
 import net.skycomposer.moviebets.common.dto.bet.BetData;
 import net.skycomposer.moviebets.common.dto.bet.BetStatus;
@@ -36,35 +35,43 @@ import net.skycomposer.moviebets.common.dto.market.events.MarketClosedEvent;
 import net.skycomposer.moviebets.common.dto.market.events.MarketSettledEvent;
 
 @Component
-@KafkaListener(topics = "${bet.settle.topic.name}", groupId = "${kafka.consumer.group-id}")
-@RequiredArgsConstructor
+@KafkaListener(topics = "${bet.settle.topic.name}", groupId = "${spring.kafka.consumer.group-id}")
 public class BetSettleHandler {
 
     private final BetService betService;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    @Value("${bet.settle.topic.name}")
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     private final String betSettleTopicName;
 
-    @Value("${bet.commands.topic.name}")
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     private final String betCommandsTopicName;
 
-    @Value("${market.commands.topic.name}")
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     private final String marketCommandsTopicName;
 
-    @Value("${customer.commands.topic.name}")
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     private final String customerCommandsTopicName;
 
-    @Value("${bet.settle.batch.size}")
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     private final Integer betSettleBatchSize;
 
+    public BetSettleHandler(
+            BetService betService,
+            KafkaTemplate<String, Object> kafkaTemplate,
+            @Value("${bet.settle.topic.name}") String betSettleTopicName,
+            @Value("${bet.commands.topic.name}") String betCommandsTopicName,
+            @Value("${market.commands.topic.name}") String marketCommandsTopicName,
+            @Value("${customer.commands.topic.name}") String customerCommandsTopicName,
+            @Value("${bet.settle.batch.size}") Integer betSettleBatchSize
+    ) {
+        this.betService = betService;
+        this.kafkaTemplate = kafkaTemplate;
+        this.betSettleTopicName = betSettleTopicName;
+        this.betCommandsTopicName = betCommandsTopicName;
+        this.marketCommandsTopicName = marketCommandsTopicName;
+        this.customerCommandsTopicName = customerCommandsTopicName;
+        this.betSettleBatchSize = betSettleBatchSize;
+    }
+
     @KafkaHandler
+    @Transactional
     public void handleEvent(@Payload BetCreatedEvent event) {
         boolean isMarketClosed = betService.isMarketClosed(event.getMarketId());
         if (isMarketClosed) {
@@ -111,10 +118,6 @@ public class BetSettleHandler {
         betSettled(event.getBetId(), event.getMarketId());
     }
 
-    private void betSettled(UUID betId, UUID marketId) {
-        betService.updateMarketSettleCount(betId, marketId);
-    }
-
     @KafkaHandler
     @Transactional
     public void handleEvent(@Payload MarketClosedEvent event) {
@@ -125,10 +128,8 @@ public class BetSettleHandler {
     }
 
     @KafkaHandler
-    @Transactional
     public void handleEvent(@Payload MarketSettledEvent event) {
-        betService.marketSettleDone(event.getMarketId());
-        betService.settleBets(event.getMarketId(), BetStatus.VALIDATED, BetStatus.SETTLED, event.getWinResult());
+        betService.marketSettleDone(event.getMarketId(), event.getWinResult());
     }
 
     @KafkaHandler
@@ -177,6 +178,10 @@ public class BetSettleHandler {
                 }
             }
         }
+    }
+
+    private void betSettled(UUID betId, UUID marketId) {
+        betService.updateMarketSettleCount(betId, marketId);
     }
 
     private boolean isWinner(BetData betData, MarketResult winnerResult) {

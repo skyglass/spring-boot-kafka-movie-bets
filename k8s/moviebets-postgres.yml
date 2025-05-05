@@ -48,11 +48,11 @@ spec:
             - name: PGTZ
               value: "Europe/Amsterdam"
             - name: BET_DB_USER
-              value: "betdbuser"
+              value: "bettingdbuser"
             - name: BET_DB_PASSWORD
               value: "dbpass"
             - name: BET_DB_NAME
-              value: "betdb"
+              value: "bettingdb"
             - name: CUSTOMER_DB_USER
               value: "customerdbuser"
             - name: CUSTOMER_DB_PASSWORD

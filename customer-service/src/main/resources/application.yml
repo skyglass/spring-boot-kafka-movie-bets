@@ -111,6 +111,9 @@ bet:
   events:
     topic:
       name: bet-events
+  settle:
+    topic:
+      name: bet-settle
 
 customer:
   commands:

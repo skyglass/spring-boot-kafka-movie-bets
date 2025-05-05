@@ -24,8 +24,8 @@ spec:
           value: "my-cluster-kafka-bootstrap:9092"
         - name: DYNAMIC_CONFIG_ENABLED
           value: "true"
-        - name: KAFKA_CLUSTERS_0_ZOOKEEPER
-          value: "my-cluster-zookeeper-client:2181"
+        - name: LOGGING_LEVEL_ROOT
+          value: "INFO"
 
 ---
 apiVersion: v1
