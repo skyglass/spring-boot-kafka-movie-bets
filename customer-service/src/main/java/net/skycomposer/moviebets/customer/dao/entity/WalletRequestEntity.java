@@ -1,16 +1,12 @@
 package net.skycomposer.moviebets.customer.dao.entity;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.UUID;
-
-import static java.time.Instant.*;
 
 @Table(name = "wallet_request")
 @Entity
@@ -23,5 +19,8 @@ public class WalletRequestEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(name = "request_id", nullable = false)
+    private UUID requestId;
 
 }

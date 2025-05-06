@@ -32,17 +32,22 @@ CREATE UNIQUE INDEX idx_bet_customer_market ON bet (customer_id, market_id);
 DROP TABLE IF EXISTS market_settle_status;
 
 CREATE TABLE market_settle_status(id uuid NOT NULL,
+                               market_id uuid NOT NULL,
                                expected_count int NOT NULL,
                                finished_count int NOT NULL,
-                               CONSTRAINT bet_settle_status_pkey PRIMARY KEY (id)
+                               CONSTRAINT market_settle_status_pkey PRIMARY KEY (id)
 );
+
+CREATE UNIQUE INDEX idx_market_settle_status_market_id ON market_settle_status (market_id);
 
 DROP TABLE IF EXISTS bet_settle_request;
 
 CREATE TABLE bet_settle_request(
                                id uuid NOT NULL,
+                               request_id uuid NOT NULL,
                                market_id uuid NOT NULL,
                                CONSTRAINT bet_settle_request_pkey PRIMARY KEY (id)
 );
 
-CREATE INDEX idx_bet_settle_request ON bet_settle_request (market_id);
+CREATE UNIQUE INDEX idx_bet_settle_request_request_id ON bet_settle_request (request_id);
+CREATE INDEX idx_bet_settle_request_market_id ON bet_settle_request (market_id);

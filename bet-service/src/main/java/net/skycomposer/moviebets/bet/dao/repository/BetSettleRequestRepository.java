@@ -1,5 +1,6 @@
 package net.skycomposer.moviebets.bet.dao.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,8 @@ public interface BetSettleRequestRepository extends JpaRepository<BetSettleReque
     @Modifying
     @Query("DELETE FROM BetSettleRequestEntity b WHERE b.marketId = :marketId")
     void deleteByMarketId(UUID marketId);
+
+    Optional<BetSettleRequestEntity> findByRequestId(UUID requestId);
+
+    boolean existsByRequestId(UUID requestId);
 }

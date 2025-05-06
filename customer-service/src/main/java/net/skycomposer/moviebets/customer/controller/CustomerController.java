@@ -39,12 +39,12 @@ public class CustomerController {
 
   @PostMapping("/add-funds/{walletId}/{requestId}/{funds}")
   public WalletResponse addFunds(@PathVariable String walletId, @PathVariable UUID requestId, @PathVariable Integer funds) {
-    return customerService.addFunds(walletId, requestId, new BigDecimal(funds));
+    return customerService.addFundsAsync(walletId, requestId, new BigDecimal(funds));
   }
 
   @PostMapping("/remove-funds/{walletId}/{requestId}/{funds}")
   public WalletResponse removeFunds(@PathVariable String walletId, @PathVariable UUID requestId, @PathVariable Integer funds) {
-    return customerService.removeFunds(walletId, requestId, new BigDecimal(funds));
+    return customerService.removeFundsAsync(walletId, requestId, new BigDecimal(funds));
   }
 
 }

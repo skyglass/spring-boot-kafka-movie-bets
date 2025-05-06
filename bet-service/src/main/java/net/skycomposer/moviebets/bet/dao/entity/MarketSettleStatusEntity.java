@@ -20,6 +20,9 @@ public class MarketSettleStatusEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "market_id", nullable = false)
+    private UUID marketId;
+
     @Column(name = "expected_count", nullable = false)
     private Integer expectedCount;
 

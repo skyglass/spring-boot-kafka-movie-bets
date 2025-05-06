@@ -59,7 +59,7 @@ public class BetE2eTest extends E2eTest {
         } catch (FeignException.InternalServerError e) {
             //expected
         }
-        assertThat(walletResponse.getMessage(), equalTo("The request has been accepted for processing, but the processing has not been completed."));
+        assertThat(walletResponse.getMessage(), equalTo("Funds successfully increased from 100.0000 to 200.0000"));
         MarketResponse marketResponse = marketTestHelper.createMarket(marketId);
         assertThat(marketResponse.getMarketId(), equalTo(marketId));
         assertThat(marketResponse.getMessage(), equalTo("initialized"));

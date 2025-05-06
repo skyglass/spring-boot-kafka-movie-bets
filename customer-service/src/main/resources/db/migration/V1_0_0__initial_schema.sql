@@ -18,5 +18,8 @@ DROP TABLE IF EXISTS wallet_request;
 
 CREATE TABLE wallet_request(
     id uuid NOT NULL,
+    request_id uuid NOT NULL,
     CONSTRAINT wallet_request_pkey PRIMARY KEY (id)
 );
+
+CREATE UNIQUE INDEX idx_wallet_request ON wallet_request (request_id);

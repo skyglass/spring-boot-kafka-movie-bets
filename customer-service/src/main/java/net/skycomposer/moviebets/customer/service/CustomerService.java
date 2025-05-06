@@ -16,6 +16,10 @@ public interface CustomerService {
 
     WalletResponse addFunds(String customerId, UUID requestId, BigDecimal funds);
 
+    WalletResponse addFundsAsync(String customerId, UUID requestId, BigDecimal funds);
+
+    WalletResponse removeFundsAsync(String customerId, UUID requestId, BigDecimal funds);
+
     WalletResponse removeFunds(String customerId, UUID requestId, BigDecimal funds);
 
     WalletData findWalletById(String customerId);

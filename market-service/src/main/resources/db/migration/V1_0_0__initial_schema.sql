@@ -16,10 +16,3 @@ CREATE TABLE market (
 );
 
 CREATE INDEX idx_market_status ON market (status);
-
-DROP TABLE IF EXISTS market_request;
-
-CREATE TABLE market_request(
-    id uuid NOT NULL,
-    CONSTRAINT market_request_pkey PRIMARY KEY (id)
-);

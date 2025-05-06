@@ -12,8 +12,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AddFundsCommand {
+public class SettleFundsCommand {
+    private UUID betId;
     private String customerId;
+    private UUID marketId;
     private UUID requestId;
     private BigDecimal funds;
 }

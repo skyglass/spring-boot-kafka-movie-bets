@@ -179,8 +179,12 @@ public class BetServiceImpl implements BetService {
     @Override
     @Transactional
     public void marketSettleStart(UUID marketId, int expectedCount) {
-        if (!marketSettleStatusRepository.existsById(marketId)) {
-            MarketSettleStatusEntity marketSettleStatusEntity = new MarketSettleStatusEntity(marketId, expectedCount, 0);
+        if (!marketSettleStatusRepository.existsByMarketId(marketId)) {
+            MarketSettleStatusEntity marketSettleStatusEntity = MarketSettleStatusEntity.builder()
+                .marketId(marketId)
+                .expectedCount(expectedCount)
+                .finishedCount(0)
+                .build();
             marketSettleStatusRepository.save(marketSettleStatusEntity);
         }
     }
@@ -188,22 +192,26 @@ public class BetServiceImpl implements BetService {
     @Override
     @Transactional
     public void updateMarketSettleCount(UUID betId, UUID marketId) {
-        if (betSettleRequestRepository.existsById(betId)) {
+        if (betSettleRequestRepository.existsByRequestId(betId)) {
             String message = String.format("Duplicate bet settle request for bet %s, market = %s", betId, marketId);
             logger.warn(message);
         } else {
             MarketSettleStatusEntity marketSettleStatusEntity = marketSettleStatusRepository.findById(marketId).get();
             marketSettleStatusEntity.setFinishedCount(marketSettleStatusEntity.getFinishedCount() + 1);
             marketSettleStatusRepository.save(marketSettleStatusEntity);
-            betSettleRequestRepository.save(new BetSettleRequestEntity(betId, marketId));
+            betSettleRequestRepository.save(
+                    BetSettleRequestEntity.builder()
+                    .requestId(betId)
+                    .marketId(marketId)
+                    .build());
         }
     }
 
     @Override
     @Transactional
     public void marketSettleDone(UUID marketId, MarketResult winResult) {
-        if (marketSettleStatusRepository.existsById(marketId)) {
-            MarketSettleStatusEntity marketSettleStatusEntity = marketSettleStatusRepository.findById(marketId).get();
+        if (marketSettleStatusRepository.existsByMarketId(marketId)) {
+            MarketSettleStatusEntity marketSettleStatusEntity = marketSettleStatusRepository.findByMarketId(marketId).get();
             marketSettleStatusRepository.delete(marketSettleStatusEntity);
             betSettleRequestRepository.deleteByMarketId(marketId);
         }

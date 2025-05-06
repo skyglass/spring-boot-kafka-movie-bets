@@ -17,7 +17,7 @@ import net.skycomposer.moviebets.common.dto.bet.CancelBetRequest;
 import net.skycomposer.moviebets.common.dto.bet.commands.RejectBetCommand;
 import net.skycomposer.moviebets.common.dto.bet.commands.SettleBetCommand;
 import net.skycomposer.moviebets.common.dto.bet.events.BetSettledEvent;
-import net.skycomposer.moviebets.common.dto.customer.commands.AddFundsCommand;
+import net.skycomposer.moviebets.common.dto.customer.commands.SettleFundsCommand;
 
 @Component
 @KafkaListener(topics = "${bet.commands.topic.name}", groupId = "${spring.kafka.consumer.group-id}")
@@ -53,13 +53,13 @@ public class BetCommandHandler {
     @Transactional
     public void handleCommand(@Payload SettleBetCommand settleBetCommand) {
         if (settleBetCommand.isWinner()) {
-            AddFundsCommand addFundsCommand = new AddFundsCommand(
+            SettleFundsCommand settleFundsCommand = new SettleFundsCommand(
                     settleBetCommand.getBetId(),
                     settleBetCommand.getCustomerId(),
                     settleBetCommand.getMarketId(),
                     settleBetCommand.getRequestId(),
                     settleBetCommand.getWinnerEarned().add(new BigDecimal(settleBetCommand.getStake())));
-            kafkaTemplate.send(customerCommandsTopicName, settleBetCommand.getCustomerId(), addFundsCommand);
+            kafkaTemplate.send(customerCommandsTopicName, settleBetCommand.getCustomerId(), settleFundsCommand);
         } else {
             BetSettledEvent betSettledEvent = new BetSettledEvent(settleBetCommand.getBetId(), settleBetCommand.getMarketId());
             kafkaTemplate.send(betSettleTopicName, settleBetCommand.getMarketId().toString(), betSettledEvent);

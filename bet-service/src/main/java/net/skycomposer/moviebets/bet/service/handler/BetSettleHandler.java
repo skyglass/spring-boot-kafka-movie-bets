@@ -26,8 +26,8 @@ import net.skycomposer.moviebets.common.dto.bet.events.BetCreatedEvent;
 import net.skycomposer.moviebets.common.dto.bet.events.BetSettledEvent;
 import net.skycomposer.moviebets.common.dto.customer.commands.CancelFundReservationCommand;
 import net.skycomposer.moviebets.common.dto.customer.commands.ReserveFundsCommand;
-import net.skycomposer.moviebets.common.dto.customer.events.FundsAddedEvent;
 import net.skycomposer.moviebets.common.dto.customer.events.FundsReservedEvent;
+import net.skycomposer.moviebets.common.dto.customer.events.FundsSettledEvent;
 import net.skycomposer.moviebets.common.dto.market.MarketResult;
 import net.skycomposer.moviebets.common.dto.market.commands.SettleBetsCommand;
 import net.skycomposer.moviebets.common.dto.market.commands.SettleMarketCommand;
@@ -109,7 +109,7 @@ public class BetSettleHandler {
     }
 
     @KafkaHandler
-    public void handleEvent(@Payload FundsAddedEvent event) {
+    public void handleEvent(@Payload FundsSettledEvent event) {
         betSettled(event.getBetId(), event.getMarketId());
     }
 
@@ -205,7 +205,7 @@ public class BetSettleHandler {
         SumStakeData max = sumStakesData.getSumStakes().get(0);
         for (int i = 1; i < sumStakesData.getSumStakes().size(); i++) {
             SumStakeData candidate = sumStakesData.getSumStakes().get(i);
-            if (candidate.getTotal().doubleValue() > max.getTotal().doubleValue()) {
+            if (candidate.getVotes() > max.getVotes()) {
                 max = candidate;
             }
 

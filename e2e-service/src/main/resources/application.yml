@@ -32,6 +32,22 @@ spring:
       hikari:
         connection-timeout: 2000 #ms
         maximum-pool-size: 5
+    customer:
+      url: jdbc:postgresql://${app.customer.postgres.host}:${app.customer.postgres.port}/${app.customer.postgres.database}
+      username: ${app.customer.postgres.user}
+      password: ${app.customer.postgres.password}
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        connection-timeout: 2000 #ms
+        maximum-pool-size: 5
+    market:
+      url: jdbc:postgresql://${app.market.postgres.host}:${app.market.postgres.port}/${app.market.postgres.database}
+      username: ${app.market.postgres.user}
+      password: ${app.market.postgres.password}
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        connection-timeout: 2000 #ms
+        maximum-pool-size: 5
 
 security:
   oauth2:
@@ -45,6 +61,20 @@ app:
     postgres:
       host: localhost
       port: 5432
-      database: bet
-      user: postgres
+      database: bettingdb
+      user: bettingdbuser
+      password: dbpass
+  customer:
+    postgres:
+      host: localhost
+      port: 5432
+      database: customerdb
+      user: customerdbuser
+      password: dbpass
+  market:
+    postgres:
+      host: localhost
+      port: 5432
+      database: marketdb
+      user: marketdbuser
       password: dbpass

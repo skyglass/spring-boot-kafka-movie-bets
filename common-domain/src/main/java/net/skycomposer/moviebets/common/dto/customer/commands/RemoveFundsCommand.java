@@ -1,4 +1,4 @@
-package net.skycomposer.moviebets.common.dto.customer.events;
+package net.skycomposer.moviebets.common.dto.customer.commands;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,10 +12,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FundsAddedEvent {
-    private UUID betId;
+public class RemoveFundsCommand {
     private String customerId;
-    private UUID marketId;
+    private UUID requestId;
     private BigDecimal funds;
-    private BigDecimal currentBalance;
 }

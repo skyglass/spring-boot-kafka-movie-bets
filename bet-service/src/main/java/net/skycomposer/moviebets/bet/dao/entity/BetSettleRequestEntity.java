@@ -20,6 +20,9 @@ public class BetSettleRequestEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "request_id", nullable = false)
+    private UUID requestId;
+
     @Column(name = "market_id", nullable = false)
     private UUID marketId;
 

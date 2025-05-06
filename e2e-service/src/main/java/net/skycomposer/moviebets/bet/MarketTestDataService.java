@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class BetTestDataService extends JdbcTestDataService {
+public class MarketTestDataService extends JdbcTestDataService {
 
     @Autowired
-    @Qualifier("betJdbcTemplate")
+    @Qualifier("marketJdbcTemplate")
     private JdbcTemplate jdbcTemplate;
 
     @Override
@@ -22,9 +22,7 @@ public class BetTestDataService extends JdbcTestDataService {
 
     @Override
     public void resetDatabase() {
-        executeString("DELETE FROM bet");
-        executeString("DELETE FROM market_settle_status");
-        executeString("DELETE FROM bet_settle_request");
+        executeString("DELETE FROM market");
     }
 
 }

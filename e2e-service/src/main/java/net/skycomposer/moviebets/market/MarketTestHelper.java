@@ -18,9 +18,8 @@ public class MarketTestHelper {
 
     private final MarketClient marketClient;
 
-    public MarketResponse createMarket(UUID marketId) {
+    public MarketResponse createMarket() {
         MarketData marketData = MarketData.builder()
-                .marketId(marketId)
                 .item1("RM")
                 .item2("MU")
                 .status(MarketStatus.OPENED)
