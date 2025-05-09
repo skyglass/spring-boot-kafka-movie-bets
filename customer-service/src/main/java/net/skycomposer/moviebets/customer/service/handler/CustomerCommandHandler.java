@@ -27,20 +27,24 @@ public class CustomerCommandHandler {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    private final String betEventsTopicName;
+    private final String customerEventsTopicName;
 
     private final String betSettleTopicName;
+
+    private final String betSettleJobTopicName;
 
     public CustomerCommandHandler(
             CustomerService customerService,
             KafkaTemplate<String, Object> kafkaTemplate,
-            @Value("${bet.events.topic.name}") String betEventsTopicName,
-            @Value("${bet.settle.topic.name}") String betSettleTopicName
+            @Value("${customer.events.topic.name}") String customerEventsTopicName,
+            @Value("${bet.settle.topic.name}") String betSettleTopicName,
+            @Value("${bet.settle-job.topic.name}") String betSettleJobTopicName
     ) {
         this.customerService = customerService;
         this.kafkaTemplate = kafkaTemplate;
-        this.betEventsTopicName = betEventsTopicName;
+        this.customerEventsTopicName = customerEventsTopicName;
         this.betSettleTopicName = betSettleTopicName;
+        this.betSettleJobTopicName = betSettleJobTopicName;
     }
 
     @KafkaHandler
@@ -58,7 +62,7 @@ public class CustomerCommandHandler {
             FundReservationFailedEvent fundReservationFailedEvent = new FundReservationFailedEvent(
                     command.getBetId(), command.getCustomerId(),
                     e.getRequiredAmount(), e.getAvailableAmount());
-            kafkaTemplate.send(betEventsTopicName, command.getBetId().toString(), fundReservationFailedEvent);
+            kafkaTemplate.send(customerEventsTopicName, command.getCustomerId().toString(), fundReservationFailedEvent);
         }
     }
 
@@ -70,7 +74,7 @@ public class CustomerCommandHandler {
                 command.getBetId(), command.getCustomerId(),
                 command.getMarketId(),
                 command.getFunds(), walletResponse.getCurrentBalance());
-        kafkaTemplate.send(betEventsTopicName, command.getBetId().toString(), fundReservationCancelledEvent);
+        kafkaTemplate.send(customerEventsTopicName, command.getCustomerId().toString(), fundReservationCancelledEvent);
     }
 
     @KafkaHandler
@@ -81,7 +85,7 @@ public class CustomerCommandHandler {
                 command.getBetId(), command.getCustomerId(),
                 command.getMarketId(),
                 command.getFunds(), walletResponse.getCurrentBalance());
-        kafkaTemplate.send(betSettleTopicName, command.getMarketId().toString(), fundsSettledEvent);
+        kafkaTemplate.send(betSettleJobTopicName, command.getMarketId().toString(), fundsSettledEvent);
     }
 
     @KafkaHandler

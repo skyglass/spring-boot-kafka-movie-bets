@@ -66,12 +66,13 @@ spring:
         enable.idempotence: true
         allow.auto.create.topics: false
     consumer:
-      group-id: customer-ms
+      group-id: customer-consumer
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: net.skycomposer.moviebets.*
         allow.auto.create.topics: false
+        isolation.level: read_committed
 
 
 app:
@@ -108,12 +109,12 @@ jwt:
       principal-attribute: preferred_username
 
 bet:
-  events:
-    topic:
-      name: bet-events
   settle:
     topic:
       name: bet-settle
+  settle-job:
+    topic:
+      name: bet-settle-job
 
 customer:
   commands:

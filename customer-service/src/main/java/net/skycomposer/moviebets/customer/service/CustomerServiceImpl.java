@@ -55,24 +55,32 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public WalletResponse addFundsAsync(String customerId, UUID requestId, BigDecimal funds) {
         CustomerEntity customerEntity = saveEntityIfNotExists(customerId, funds);
         BigDecimal currentBalance = customerEntity.getBalance();
         BigDecimal newBalance = currentBalance.add(funds);
-        AddFundsCommand addFundsCommand = new AddFundsCommand(
-                customerId,
-                requestId,
-                funds);
-        kafkaTemplate.send(customerCommandsTopicName, addFundsCommand.getCustomerId(), addFundsCommand);
-        return new WalletResponse(FUNDS_ADDED_SUCCESSFULLY.formatted(currentBalance, newBalance),
-                customerId, newBalance);
+        if (walletRequestRepository.existsByRequestId(requestId)) {
+            String message = String.format("Duplicate addFunds request for customer %s, requestId = %s", customerId, requestId);
+            logger.warn(message);
+            return new WalletResponse(message,
+                    customerEntity.getUsername(),
+                    currentBalance);
+        } else {
+            AddFundsCommand addFundsCommand = new AddFundsCommand(
+                    customerId,
+                    requestId,
+                    funds);
+            kafkaTemplate.send(customerCommandsTopicName, addFundsCommand.getCustomerId(), addFundsCommand);
+            return new WalletResponse(FUNDS_ADDED_SUCCESSFULLY.formatted(currentBalance, newBalance),
+                    customerId, newBalance);
+        }
     }
 
     @Override
     @Transactional
     public WalletResponse addFunds(String customerId, UUID requestId, BigDecimal funds) {
-        CustomerEntity customerEntity = saveEntityIfNotExists(customerId, funds);
+        CustomerEntity customerEntity = saveEntityIfNotExists(customerId, BigDecimal.ZERO);
         BigDecimal currentBalance = customerEntity.getBalance();
         BigDecimal newBalance = currentBalance.add(funds);
         if (walletRequestRepository.existsByRequestId(requestId)) {
@@ -101,22 +109,28 @@ public class CustomerServiceImpl implements CustomerService {
         CustomerEntity customerEntity = saveEntityIfNotExists(customerId, funds);
         BigDecimal currentBalance = customerEntity.getBalance();
         BigDecimal newBalance = currentBalance.subtract(funds);
-        RemoveFundsCommand removeFundsCommand = new RemoveFundsCommand(
-                customerId,
-                requestId,
-                funds);
-        kafkaTemplate.send(customerCommandsTopicName, customerId, removeFundsCommand);
-        return new WalletResponse(FUNDS_REMOVED_SUCCESSFULLY.formatted(currentBalance, newBalance),
-                customerId, newBalance);
+        if (walletRequestRepository.existsByRequestId(requestId)) {
+            String message = String.format("Duplicate addFunds request for customer %s, requestId = %s", customerId, requestId);
+            logger.warn(message);
+            return new WalletResponse(message,
+                    customerEntity.getUsername(),
+                    currentBalance);
+        } else {
+            RemoveFundsCommand removeFundsCommand = new RemoveFundsCommand(
+                    customerId,
+                    requestId,
+                    funds);
+            kafkaTemplate.send(customerCommandsTopicName, customerId, removeFundsCommand);
+            return new WalletResponse(FUNDS_REMOVED_SUCCESSFULLY.formatted(currentBalance, newBalance),
+                    customerId, newBalance);
+        }
     }
 
     @Override
     @Transactional
     public WalletResponse removeFunds(String customerId, UUID requestId, BigDecimal funds) {
-        CustomerEntity customerEntity = customerRepository.findByUsername(customerId).get();
-        if (customerEntity == null) {
-            throw new CustomerNotFoundException(customerId);
-        }
+        CustomerEntity customerEntity = customerRepository.findByUsername(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException(customerId));
         BigDecimal currentBalance = customerEntity.getBalance();
         if (walletRequestRepository.existsByRequestId(requestId)) {
             String message = String.format("Duplicate removeFunds request for customer %s, requestId = %s", customerId, requestId);
@@ -143,10 +157,8 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     @Transactional(readOnly = true)
     public Customer findCustomerById(String customerId) {
-        CustomerEntity customerEntity = customerRepository.findByUsername(customerId).get();
-        if (customerEntity == null) {
-            throw new CustomerNotFoundException(customerId);
-        }
+        CustomerEntity customerEntity = customerRepository.findByUsername(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException(customerId));
         return Customer.builder()
                 .username(customerEntity.getUsername())
                 .fullName(customerEntity.getFullName())

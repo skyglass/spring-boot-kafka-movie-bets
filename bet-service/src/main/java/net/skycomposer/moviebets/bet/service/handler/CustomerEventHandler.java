@@ -1,4 +1,4 @@
-package net.skycomposer.moviebets.bet.saga;
+package net.skycomposer.moviebets.bet.service.handler;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -13,7 +13,7 @@ import net.skycomposer.moviebets.common.dto.customer.events.FundReservationCance
 import net.skycomposer.moviebets.common.dto.customer.events.FundReservationFailedEvent;
 
 @Component
-@KafkaListener(topics = "${customer.events.topic.name}", groupId = "${spring.kafka.consumer.group-id}")
+@KafkaListener(topics = "${customer.events.topic.name}", groupId = "${spring.kafka.consumer.customer-events.group-id}")
 public class CustomerEventHandler {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -31,7 +31,7 @@ public class CustomerEventHandler {
     public void handleEvent(@Payload FundReservationCancelledEvent event) {
         RejectBetCommand rejectBetCommand = new RejectBetCommand(event.getBetId(),
                 "Bet %s was rejected and fund reservation has been successfully cancelled".formatted(event.getBetId()));
-        kafkaTemplate.send(betCommandsTopicName, event.getMarketId().toString(), rejectBetCommand);
+        kafkaTemplate.send(betCommandsTopicName, event.getBetId().toString(), rejectBetCommand);
     }
 
     @KafkaHandler

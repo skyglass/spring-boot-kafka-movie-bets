@@ -16,11 +16,13 @@ import net.skycomposer.moviebets.bet.service.BetService;
 import net.skycomposer.moviebets.common.dto.bet.CancelBetRequest;
 import net.skycomposer.moviebets.common.dto.bet.commands.RejectBetCommand;
 import net.skycomposer.moviebets.common.dto.bet.commands.SettleBetCommand;
+import net.skycomposer.moviebets.common.dto.bet.events.BetCreatedEvent;
 import net.skycomposer.moviebets.common.dto.bet.events.BetSettledEvent;
+import net.skycomposer.moviebets.common.dto.customer.commands.ReserveFundsCommand;
 import net.skycomposer.moviebets.common.dto.customer.commands.SettleFundsCommand;
 
 @Component
-@KafkaListener(topics = "${bet.commands.topic.name}", groupId = "${spring.kafka.consumer.group-id}")
+@KafkaListener(topics = "${bet.commands.topic.name}", groupId = "${spring.kafka.consumer.bet-commands.group-id}")
 public class BetCommandHandler {
 
     private final BetService betService;
@@ -28,19 +30,23 @@ public class BetCommandHandler {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    private final String betSettleTopicName;
+    private final String betSettleJobTopicName;
 
     private final String customerCommandsTopicName;
 
+    private final String betCommandsTopicName;
+
     public BetCommandHandler(BetService betService,
             KafkaTemplate<String, Object> kafkaTemplate,
-            @Value("${bet.settle.topic.name}") String betSettleTopicName,
-            @Value("${customer.commands.topic.name}") String customerCommandsTopicName
+            @Value("${bet.settle-job.topic.name}") String betSettleJobTopicName,
+            @Value("${customer.commands.topic.name}") String customerCommandsTopicName,
+            @Value("${bet.commands.topic.name}") String betCommandsTopicName
     ) {
         this.betService = betService;
         this.kafkaTemplate = kafkaTemplate;
-        this.betSettleTopicName = betSettleTopicName;
+        this.betSettleJobTopicName = betSettleJobTopicName;
         this.customerCommandsTopicName = customerCommandsTopicName;
+        this.betCommandsTopicName = betCommandsTopicName;
     }
 
     @KafkaHandler
@@ -62,8 +68,29 @@ public class BetCommandHandler {
             kafkaTemplate.send(customerCommandsTopicName, settleBetCommand.getCustomerId(), settleFundsCommand);
         } else {
             BetSettledEvent betSettledEvent = new BetSettledEvent(settleBetCommand.getBetId(), settleBetCommand.getMarketId());
-            kafkaTemplate.send(betSettleTopicName, settleBetCommand.getMarketId().toString(), betSettledEvent);
+            kafkaTemplate.send(betSettleJobTopicName, settleBetCommand.getMarketId().toString(), betSettledEvent);
         }
+    }
+
+    @KafkaHandler
+    @Transactional("kafkaTransactionManager")
+    public void handleBetCreatedEvent(@Payload BetCreatedEvent event) {
+        boolean isMarketClosed = betService.isMarketClosed(event.getMarketId());
+        if (isMarketClosed) {
+            RejectBetCommand rejectBetCommand = new RejectBetCommand(event.getBetId(),
+                    "Bet %s was rejected, because market %s is already closed".formatted(event.getBetId(), event.getMarketId()));
+            kafkaTemplate.send(betCommandsTopicName, event.getBetId().toString(), rejectBetCommand);
+            return;
+        }
+        ReserveFundsCommand reserveFundsCommand = new ReserveFundsCommand(
+                event.getBetId(),
+                event.getCustomerId(),
+                event.getMarketId(),
+                event.getRequestId(),
+                event.getCancelRequestId(),
+                new BigDecimal(event.getStake())
+        );
+        kafkaTemplate.send(customerCommandsTopicName, event.getCustomerId(), reserveFundsCommand);
     }
 
 }

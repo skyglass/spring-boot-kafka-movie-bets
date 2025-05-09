@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import net.skycomposer.moviebets.common.dto.bet.BetStatus;
 import net.skycomposer.moviebets.common.dto.market.MarketResult;
 
-@Table(name = "market")
+@Table(name = "bet")
 @Entity
 @Data // Generates getters, setters, toString, equals, and hashCode
 @NoArgsConstructor
@@ -60,9 +60,6 @@ public class BetEntity {
 
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
-
-    @Column(name = "ingested_at", nullable = false)
-    private Instant ingestedAt;
 
     @PrePersist
     public void prePersist() {

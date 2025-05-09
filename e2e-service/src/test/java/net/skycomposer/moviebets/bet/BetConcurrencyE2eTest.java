@@ -51,7 +51,7 @@ public class BetConcurrencyE2eTest extends E2eTest {
         int walletBalance = 500;
         int walletBeforeMarketCloseBalance = 0;
         int walletAfterMarketCloseBalance = 1000;
-        UUID marketId = UUID.randomUUID();
+        UUID marketId;
         int betStake = 10;
         double betOdds = 2.8;
         double betOdds2 = 2.9;
@@ -66,7 +66,8 @@ public class BetConcurrencyE2eTest extends E2eTest {
             //expected
         }
         assertThat(walletResponse.getMessage(), equalTo("The request has been accepted for processing, but the processing has not been completed."));
-        MarketResponse marketResponse = marketTestHelper.createMarket(marketId);
+        MarketResponse marketResponse = marketTestHelper.createMarket();
+        marketId = marketResponse.getMarketId();
         assertThat(marketResponse.getMessage(), equalTo("initialized"));
 
         // Start the clock
@@ -76,7 +77,6 @@ public class BetConcurrencyE2eTest extends E2eTest {
         List<CompletableFuture<BetResponse>> createdBets = new ArrayList<>();
         for (int i = 0; i < numberOfBets; i++) {
             CompletableFuture<BetResponse> betResponse = betTestHelper.asyncPlaceBet(
-                    UUID.randomUUID(),
                     marketId, walletId, betStake,
                     betResult);
             createdBets.add(betResponse);

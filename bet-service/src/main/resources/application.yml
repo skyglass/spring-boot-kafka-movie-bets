@@ -21,7 +21,7 @@ spring:
     virtual:
       enabled: true
   application:
-    name: moviebets-service
+    name: bet-service
   lifecycle:
     timeout-per-shutdown-phase: 15s
 
@@ -65,12 +65,20 @@ spring:
         enable.idempotence: true
         allow.auto.create.topics: false
     consumer:
-      group-id: bet-consumer
+      bet-commands:
+        group-id: bet-commands-consumer
+      bet-settle:
+        group-id: bet-settle-consumer
+      bet-settle-job:
+        group-id: bet-settle-job-consumer
+      customer-events:
+        group-id: customer-events-consumer
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: net.skycomposer.moviebets.*
         allow.auto.create.topics: false
+        isolation.level: read_committed
 
 app:
   postgres:
@@ -112,22 +120,19 @@ bet:
   commands:
     topic:
       name: bet-commands
-  events:
-    topic:
-      name: bet-events
   settle:
     topic:
       name: bet-settle
     batch:
       size: 20
+  settle-job:
+    topic:
+      name: bet-settle-job
 
 market:
   commands:
     topic:
       name: market-commands
-  events:
-    topic:
-      name: market-events
 
 customer:
   commands:

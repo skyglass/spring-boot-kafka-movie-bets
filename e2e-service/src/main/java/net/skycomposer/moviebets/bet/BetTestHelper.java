@@ -26,15 +26,15 @@ public class BetTestHelper {
     private final BetClient betClient;
 
     @Async
-    public CompletableFuture<BetResponse> asyncPlaceBet(UUID betId, UUID marketId, String customerId, int stake, MarketResult result) throws InterruptedException {
-        return CompletableFuture.completedFuture(createBet(betId, marketId, customerId, stake, result));
+    public CompletableFuture<BetResponse> asyncPlaceBet(UUID marketId, String customerId, int stake, MarketResult result) throws InterruptedException {
+        return CompletableFuture.completedFuture(createBet(marketId, customerId, stake, result));
     }
 
     @SneakyThrows
-    public BetResponse createBet(UUID betId, UUID marketId, String customerId, int stake, MarketResult result) {
+    public BetResponse createBet(UUID marketId, String customerId, int stake, MarketResult result) {
         BetData betData = BetData.builder()
-                .betId(betId)
                 .marketId(marketId)
+                .marketName("RM vs MU")
                 .customerId(customerId)
                 .requestId(UUID.randomUUID())
                 .cancelRequestId(UUID.randomUUID())

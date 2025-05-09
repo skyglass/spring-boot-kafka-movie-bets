@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-@Table(name = "bet_settle_status")
+@Table(name = "market_settle_status")
 @Entity
 @Data // Generates getters, setters, toString, equals, and hashCode
 @NoArgsConstructor

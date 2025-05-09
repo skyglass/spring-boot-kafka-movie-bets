@@ -20,14 +20,9 @@ import net.skycomposer.moviebets.common.dto.bet.BetData;
 import net.skycomposer.moviebets.common.dto.bet.BetStatus;
 import net.skycomposer.moviebets.common.dto.bet.SumStakeData;
 import net.skycomposer.moviebets.common.dto.bet.SumStakesData;
-import net.skycomposer.moviebets.common.dto.bet.commands.RejectBetCommand;
 import net.skycomposer.moviebets.common.dto.bet.commands.SettleBetCommand;
-import net.skycomposer.moviebets.common.dto.bet.events.BetCreatedEvent;
-import net.skycomposer.moviebets.common.dto.bet.events.BetSettledEvent;
 import net.skycomposer.moviebets.common.dto.customer.commands.CancelFundReservationCommand;
-import net.skycomposer.moviebets.common.dto.customer.commands.ReserveFundsCommand;
 import net.skycomposer.moviebets.common.dto.customer.events.FundsReservedEvent;
-import net.skycomposer.moviebets.common.dto.customer.events.FundsSettledEvent;
 import net.skycomposer.moviebets.common.dto.market.MarketResult;
 import net.skycomposer.moviebets.common.dto.market.commands.SettleBetsCommand;
 import net.skycomposer.moviebets.common.dto.market.commands.SettleMarketCommand;
@@ -35,7 +30,7 @@ import net.skycomposer.moviebets.common.dto.market.events.MarketClosedEvent;
 import net.skycomposer.moviebets.common.dto.market.events.MarketSettledEvent;
 
 @Component
-@KafkaListener(topics = "${bet.settle.topic.name}", groupId = "${spring.kafka.consumer.group-id}")
+@KafkaListener(topics = "${bet.settle.topic.name}", groupId = "${spring.kafka.consumer.bet-settle.group-id}")
 public class BetSettleHandler {
 
     private final BetService betService;
@@ -72,27 +67,6 @@ public class BetSettleHandler {
 
     @KafkaHandler
     @Transactional
-    public void handleEvent(@Payload BetCreatedEvent event) {
-        boolean isMarketClosed = betService.isMarketClosed(event.getMarketId());
-        if (isMarketClosed) {
-            RejectBetCommand rejectBetCommand = new RejectBetCommand(event.getBetId(),
-                    "Bet %s was rejected, because market %s is already closed".formatted(event.getBetId(), event.getMarketId()));
-            kafkaTemplate.send(betCommandsTopicName, event.getBetId().toString(), rejectBetCommand);
-            return;
-        }
-        ReserveFundsCommand reserveFundsCommand = new ReserveFundsCommand(
-                event.getBetId(),
-                event.getCustomerId(),
-                event.getMarketId(),
-                event.getRequestId(),
-                event.getCancelRequestId(),
-                new BigDecimal(event.getStake())
-        );
-        kafkaTemplate.send(customerCommandsTopicName, event.getCustomerId(), reserveFundsCommand);
-    }
-
-    @KafkaHandler
-    @Transactional
     public void handleEvent(@Payload FundsReservedEvent event) {
         boolean isMarketClosed = betService.isMarketClosed(event.getMarketId());
         if (isMarketClosed) {
@@ -106,16 +80,6 @@ public class BetSettleHandler {
         } else {
             betService.setBetValidated(event.getBetId());
         }
-    }
-
-    @KafkaHandler
-    public void handleEvent(@Payload FundsSettledEvent event) {
-        betSettled(event.getBetId(), event.getMarketId());
-    }
-
-    @KafkaHandler
-    public void handleEvent(@Payload BetSettledEvent event) {
-        betSettled(event.getBetId(), event.getMarketId());
     }
 
     @KafkaHandler
@@ -152,7 +116,7 @@ public class BetSettleHandler {
         if (winResult != null) {
             List<BetData> betsToSettle = betService.findByMarketAndStatus(command.getMarketId(), BetStatus.VALIDATED, betSettleBatchSize);
             if (CollectionUtils.isNotEmpty(betsToSettle)) {
-                betService.updateStatus(betsToSettle.stream().map(BetData::getBetId).toList(), BetStatus.SETTLE_READY);
+                betService.updateStatus(betsToSettle.stream().map(BetData::getBetId).toList(), BetStatus.SETTLE_STARTED);
             }
             for (BetData betData: betsToSettle) {
                 SettleBetCommand settleBetCommand = new SettleBetCommand(
@@ -178,10 +142,6 @@ public class BetSettleHandler {
                 }
             }
         }
-    }
-
-    private void betSettled(UUID betId, UUID marketId) {
-        betService.updateMarketSettleCount(betId, marketId);
     }
 
     private boolean isWinner(BetData betData, MarketResult winnerResult) {

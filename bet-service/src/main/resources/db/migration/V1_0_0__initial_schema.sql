@@ -10,7 +10,6 @@ CREATE TABLE bet(
     stake int NOT NULL,
     result int NOT NULL,
     status character varying COLLATE pg_catalog."default" NOT NULL,
-    ingested_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     market_confirmed BOOLEAN NOT NULL DEFAULT FALSE,

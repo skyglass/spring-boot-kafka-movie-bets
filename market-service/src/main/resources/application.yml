@@ -71,6 +71,7 @@ spring:
       properties:
         spring.json.trusted.packages: net.skycomposer.moviebets.*
         allow.auto.create.topics: false
+        isolation.level: read_committed
 
 logging:
   pattern:
@@ -109,9 +110,6 @@ bet:
   commands:
     topic:
       name: bet-commands
-  events:
-    topic:
-      name: bet-events
   settle:
     topic:
       name: bet-settle
@@ -120,6 +118,3 @@ market:
   commands:
     topic:
       name: market-commands
-  events:
-    topic:
-      name: market-events

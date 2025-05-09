@@ -15,7 +15,6 @@ import net.skycomposer.moviebets.common.dto.market.*;
 import net.skycomposer.moviebets.common.dto.market.events.MarketClosedEvent;
 import net.skycomposer.moviebets.market.dao.entity.MarketEntity;
 import net.skycomposer.moviebets.market.dao.repository.MarketRepository;
-import net.skycomposer.moviebets.market.dao.repository.MarketRequestRepository;
 import net.skycomposer.moviebets.market.exception.MarketNotFoundException;
 
 @Service
@@ -29,20 +28,16 @@ public class MarketServiceImpl implements MarketService {
 
     private final MarketRepository marketRepository;
 
-    private final MarketRequestRepository marketRequestRepository;
-
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     private final String betSettleTopicName;
 
     public MarketServiceImpl(
             MarketRepository marketRepository,
-            MarketRequestRepository marketRequestRepository,
             KafkaTemplate<String, Object> kafkaTemplate,
             @Value("${bet.settle.topic.name}") String betSettleTopicName
     ) {
         this.marketRepository = marketRepository;
-        this.marketRequestRepository = marketRequestRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.betSettleTopicName = betSettleTopicName;
     }

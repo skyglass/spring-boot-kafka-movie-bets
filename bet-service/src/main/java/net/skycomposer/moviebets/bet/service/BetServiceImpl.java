@@ -36,7 +36,7 @@ public class BetServiceImpl implements BetService {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    private final String betSettleTopicName;
+    private final String betCommandsTopicName;
 
 
     public BetServiceImpl(
@@ -44,13 +44,13 @@ public class BetServiceImpl implements BetService {
             MarketSettleStatusRepository marketSettleStatusRepository,
             BetSettleRequestRepository betSettleRequestRepository,
             KafkaTemplate<String, Object> kafkaTemplate,
-            @Value("${bet.settle.topic.name}") String betSettleTopicName
+            @Value("${bet.commands.topic.name}") String betCommandsTopicName
     ) {
         this.betRepository = betRepository;
         this.marketSettleStatusRepository = marketSettleStatusRepository;
         this.betSettleRequestRepository = betSettleRequestRepository;
         this.kafkaTemplate = kafkaTemplate;
-        this.betSettleTopicName = betSettleTopicName;
+        this.betCommandsTopicName = betCommandsTopicName;
     }
 
 
@@ -75,10 +75,16 @@ public class BetServiceImpl implements BetService {
     @Override
     @Transactional
     public BetResponse open(BetData betData) {
+        if (betRepository.existsByCustomerIdAndMarketId(betData.getCustomerId(), betData.getMarketId())) {
+            String message = String.format("Duplicate bet request for the same customer %s and marketId = %s", betData.getCustomerId(), betData.getMarketId());
+            logger.warn(message);
+            return new BetResponse(null, message);
+        }
         BetEntity betEntity = createBetEntity(betData);
+        betEntity.setStatus(BetStatus.PlACED);
         betEntity = betRepository.save(betEntity);
         BetCreatedEvent betCreatedEvent = createBetCreatedEvent(betEntity, betData.getRequestId(), betData.getCancelRequestId());
-        kafkaTemplate.send(betSettleTopicName, betEntity.getMarketId().toString(), betCreatedEvent);
+        kafkaTemplate.send(betCommandsTopicName, betEntity.getId().toString(), betCreatedEvent);
         return new BetResponse(betEntity.getId(),
                 "Bet %s created successfully".formatted(betEntity.getId()));
     }
