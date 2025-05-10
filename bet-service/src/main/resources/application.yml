@@ -138,6 +138,8 @@ customer:
   commands:
     topic:
       name: customer-commands
+    retry:
+      count: -1
   events:
     topic:
       name: customer-events

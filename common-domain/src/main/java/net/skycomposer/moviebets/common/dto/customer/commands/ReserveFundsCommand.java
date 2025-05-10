@@ -19,4 +19,6 @@ public class ReserveFundsCommand {
     private UUID requestId;
     private UUID cancelRequestId;
     private BigDecimal funds;
+    private Integer retryCount;
+    private Integer totalRetries;
 }

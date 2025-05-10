@@ -36,17 +36,21 @@ public class BetCommandHandler {
 
     private final String betCommandsTopicName;
 
+    private final Integer customerCommandsRetryCount;
+
     public BetCommandHandler(BetService betService,
             KafkaTemplate<String, Object> kafkaTemplate,
             @Value("${bet.settle-job.topic.name}") String betSettleJobTopicName,
             @Value("${customer.commands.topic.name}") String customerCommandsTopicName,
-            @Value("${bet.commands.topic.name}") String betCommandsTopicName
+            @Value("${bet.commands.topic.name}") String betCommandsTopicName,
+            @Value("${customer.commands.retry.count}") Integer customerCommandsRetryCount
     ) {
         this.betService = betService;
         this.kafkaTemplate = kafkaTemplate;
         this.betSettleJobTopicName = betSettleJobTopicName;
         this.customerCommandsTopicName = customerCommandsTopicName;
         this.betCommandsTopicName = betCommandsTopicName;
+        this.customerCommandsRetryCount = customerCommandsRetryCount;
     }
 
     @KafkaHandler
@@ -88,7 +92,9 @@ public class BetCommandHandler {
                 event.getMarketId(),
                 event.getRequestId(),
                 event.getCancelRequestId(),
-                new BigDecimal(event.getStake())
+                new BigDecimal(event.getStake()),
+                1,
+                customerCommandsRetryCount
         );
         kafkaTemplate.send(customerCommandsTopicName, event.getCustomerId(), reserveFundsCommand);
     }

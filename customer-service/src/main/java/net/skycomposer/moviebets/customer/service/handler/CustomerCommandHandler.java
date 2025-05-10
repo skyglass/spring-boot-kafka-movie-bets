@@ -29,22 +29,30 @@ public class CustomerCommandHandler {
 
     private final String customerEventsTopicName;
 
+    private final String customerCommandsTopicName;
+
     private final String betSettleTopicName;
 
     private final String betSettleJobTopicName;
+
+    private final String customerEventsDlqTopicName;
 
     public CustomerCommandHandler(
             CustomerService customerService,
             KafkaTemplate<String, Object> kafkaTemplate,
             @Value("${customer.events.topic.name}") String customerEventsTopicName,
             @Value("${bet.settle.topic.name}") String betSettleTopicName,
-            @Value("${bet.settle-job.topic.name}") String betSettleJobTopicName
+            @Value("${bet.settle-job.topic.name}") String betSettleJobTopicName,
+            @Value("${customer.commands.topic.name}") String customerCommandsTopicName,
+            @Value("${customer.events.dlq.topic.name}") String customerEventsDlqTopicName
     ) {
         this.customerService = customerService;
         this.kafkaTemplate = kafkaTemplate;
         this.customerEventsTopicName = customerEventsTopicName;
         this.betSettleTopicName = betSettleTopicName;
         this.betSettleJobTopicName = betSettleJobTopicName;
+        this.customerCommandsTopicName = customerCommandsTopicName;
+        this.customerEventsDlqTopicName = customerEventsDlqTopicName;
     }
 
     @KafkaHandler
@@ -58,11 +66,26 @@ public class CustomerCommandHandler {
                     command.getMarketId(), command.getFunds(), walletResponse.getCurrentBalance());
             kafkaTemplate.send(betSettleTopicName, command.getMarketId().toString(), fundsReservedEvent);
         } catch (CustomerInsufficientFundsException e) {
-            logger.error(e.getLocalizedMessage(), e);
-            FundReservationFailedEvent fundReservationFailedEvent = new FundReservationFailedEvent(
-                    command.getBetId(), command.getCustomerId(),
-                    e.getRequiredAmount(), e.getAvailableAmount());
-            kafkaTemplate.send(customerEventsTopicName, command.getCustomerId().toString(), fundReservationFailedEvent);
+            if (command.getTotalRetries().intValue() != -1
+                && (command.getRetryCount().intValue() == command.getTotalRetries().intValue())) {
+                logger.error(e.getLocalizedMessage(), e);
+                FundReservationFailedEvent fundReservationFailedEvent = new FundReservationFailedEvent(
+                        command.getBetId(), command.getCustomerId(),
+                        e.getRequiredAmount(), e.getAvailableAmount());
+                kafkaTemplate.send(customerEventsDlqTopicName, command.getCustomerId().toString(), fundReservationFailedEvent);
+            } else {
+                ReserveFundsCommand reserveFundsCommand = new ReserveFundsCommand(
+                        command.getBetId(),
+                        command.getCustomerId(),
+                        command.getMarketId(),
+                        command.getRequestId(),
+                        command.getCancelRequestId(),
+                        command.getFunds(),
+                        command.getRetryCount() + 1,
+                        command.getTotalRetries()
+                );
+                kafkaTemplate.send(customerCommandsTopicName, command.getCustomerId(), reserveFundsCommand);
+            }
         }
     }
 
@@ -94,7 +117,16 @@ public class CustomerCommandHandler {
     }
 
     @KafkaHandler
+    @Transactional
     public void handleCommand(@Payload RemoveFundsCommand command) {
-        customerService.removeFunds(command.getCustomerId(), command.getRequestId(), command.getFunds());
+        try {
+            customerService.removeFunds(command.getCustomerId(), command.getRequestId(), command.getFunds());
+        } catch (CustomerInsufficientFundsException e) {
+            logger.error(e.getLocalizedMessage(), e);
+            FundReservationFailedEvent fundReservationFailedEvent = new FundReservationFailedEvent(
+                    command.getRequestId(), command.getCustomerId(),
+                    e.getRequiredAmount(), e.getAvailableAmount());
+            kafkaTemplate.send(customerEventsDlqTopicName, command.getCustomerId().toString(), fundReservationFailedEvent);
+        }
     }
 }

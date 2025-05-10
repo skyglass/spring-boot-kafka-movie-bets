@@ -120,5 +120,8 @@ customer:
     topic:
       name: customer-commands
   events:
+    dlq:
+      topic:
+        name: customer-events-dlq
     topic:
       name: customer-events

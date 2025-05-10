@@ -202,7 +202,7 @@ public class BetServiceImpl implements BetService {
             String message = String.format("Duplicate bet settle request for bet %s, market = %s", betId, marketId);
             logger.warn(message);
         } else {
-            MarketSettleStatusEntity marketSettleStatusEntity = marketSettleStatusRepository.findById(marketId).get();
+            MarketSettleStatusEntity marketSettleStatusEntity = marketSettleStatusRepository.findByMarketId(marketId).get();
             marketSettleStatusEntity.setFinishedCount(marketSettleStatusEntity.getFinishedCount() + 1);
             marketSettleStatusRepository.save(marketSettleStatusEntity);
             betSettleRequestRepository.save(

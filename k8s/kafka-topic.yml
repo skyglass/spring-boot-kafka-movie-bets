@@ -56,6 +56,17 @@ spec:
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic
 metadata:
+  name: customer-events-dlq
+  labels:
+    strimzi.io/cluster: my-cluster
+spec:
+  partitions: 3
+  replicas: 3
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
   name: market-commands
   labels:
     strimzi.io/cluster: my-cluster

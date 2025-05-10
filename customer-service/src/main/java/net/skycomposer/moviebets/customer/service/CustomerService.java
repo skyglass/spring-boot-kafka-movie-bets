@@ -7,6 +7,7 @@ import java.util.UUID;
 import net.skycomposer.moviebets.common.dto.customer.Customer;
 import net.skycomposer.moviebets.common.dto.customer.WalletData;
 import net.skycomposer.moviebets.common.dto.customer.WalletResponse;
+import net.skycomposer.moviebets.customer.exception.CustomerInsufficientFundsException;
 
 public interface CustomerService {
 
@@ -20,7 +21,7 @@ public interface CustomerService {
 
     WalletResponse removeFundsAsync(String customerId, UUID requestId, BigDecimal funds);
 
-    WalletResponse removeFunds(String customerId, UUID requestId, BigDecimal funds);
+    WalletResponse removeFunds(String customerId, UUID requestId, BigDecimal funds) throws CustomerInsufficientFundsException;
 
     WalletData findWalletById(String customerId);
 

@@ -93,10 +93,8 @@ public class MarketServiceImpl implements MarketService {
     @Override
     @Transactional
     public MarketResponse settle(UUID marketId) {
-        MarketEntity marketEntity = marketRepository.findById(marketId).get();
-        if (marketEntity == null) {
-            throw new MarketNotFoundException(marketId);
-        }
+        MarketEntity marketEntity = marketRepository.findById(marketId).orElseThrow(
+                () -> new MarketNotFoundException(marketId));
         marketEntity.setStatus(MarketStatus.SETTLED);
         marketEntity = marketRepository.save(marketEntity);
         return new MarketResponse(marketEntity.getId(),

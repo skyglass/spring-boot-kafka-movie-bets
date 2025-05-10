@@ -1,12 +1,11 @@
 package net.skycomposer.moviebets.customer.exception;
 
+import java.math.BigDecimal;
+
 import lombok.Getter;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-
 @Getter
-public class CustomerInsufficientFundsException extends RuntimeException {
+public class CustomerInsufficientFundsException extends Exception {
 
     private BigDecimal requiredAmount;
 

@@ -109,7 +109,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public WalletResponse removeFundsAsync(String customerId, UUID requestId, BigDecimal funds) {
         CustomerEntity customerEntity = createEntityIfNotExists(customerId);
         BigDecimal currentBalance = customerEntity.getBalance();
@@ -133,8 +133,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    @Transactional
-    public WalletResponse removeFunds(String customerId, UUID requestId, BigDecimal funds) {
+    public WalletResponse removeFunds(String customerId, UUID requestId, BigDecimal funds) throws CustomerInsufficientFundsException {
         CustomerEntity customerEntity = createEntityIfNotExists(customerId);
         BigDecimal currentBalance = customerEntity.getBalance();
         BigDecimal newBalance = currentBalance.subtract(funds);
