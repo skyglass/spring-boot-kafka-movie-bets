@@ -37,11 +37,6 @@ public class MarketController {
       return marketService.open(marketData);
     }
 
-    @PostMapping("/update")
-    public MarketResponse update(@RequestBody @Valid MarketData marketData) {
-      return marketService.update(marketData);
-    }
-
     @PostMapping("/close")
     public MarketResponse close(@RequestBody @Valid CloseMarketRequest request) {
         return marketService.close(request);

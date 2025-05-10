@@ -43,15 +43,6 @@ public class BetEntity {
     @Enumerated(EnumType.STRING)
     private BetStatus status;
 
-    @Column(name = "market_confirmed", nullable = false)
-    private Boolean marketConfirmed;
-
-    @Column(name = "funds_confirmed", nullable = false)
-    private Boolean fundsConfirmed;
-
-    @Column(name = "bet_settled", nullable = false)
-    private Boolean betSettled;
-
     @Column(name = "bet_won", nullable = false)
     private Boolean betWon;
 
@@ -66,9 +57,6 @@ public class BetEntity {
         Instant now = Instant.now();
         this.createdAt = now;
         this.updatedAt = now;
-        this.marketConfirmed = false;
-        this.fundsConfirmed = false;
-        this.betSettled = false;
         this.betWon = false;
     }
 

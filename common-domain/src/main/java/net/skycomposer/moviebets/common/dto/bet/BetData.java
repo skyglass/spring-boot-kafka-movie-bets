@@ -22,9 +22,6 @@ public class BetData {
     private Integer stake;
     private MarketResult result;
     private BetStatus status;
-    private Boolean marketConfirmed;
-    private Boolean fundsConfirmed;
-    private Boolean betSettled;
     private Boolean betWon;
 
 }

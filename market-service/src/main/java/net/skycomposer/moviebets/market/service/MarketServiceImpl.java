@@ -76,23 +76,6 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     @Transactional
-    public MarketResponse update(MarketData marketData) {
-        MarketEntity marketEntity = marketRepository.findById(marketData.getMarketId()).get();
-        if (marketEntity == null) {
-            throw new MarketNotFoundException(marketData.getMarketId());
-        }
-        marketEntity.setItem1(marketData.getItem1());
-        marketEntity.setItem2(marketData.getItem2());
-        marketEntity.setStatus(marketData.getStatus());
-        marketEntity.setResult(marketData.getResult());
-        marketEntity.setClosesAt(marketData.getClosesAt());
-        marketEntity = marketRepository.save(marketEntity);
-        return new MarketResponse(marketEntity.getId(),
-                "Market %s updated successfully".formatted(marketEntity.getId()));
-    }
-
-    @Override
-    @Transactional
     public MarketResponse close(CloseMarketRequest request) {
         MarketEntity marketEntity = marketRepository.findById(request.getMarketId()).get();
         if (marketEntity == null) {

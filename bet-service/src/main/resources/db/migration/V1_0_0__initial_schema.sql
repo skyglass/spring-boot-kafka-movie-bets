@@ -12,9 +12,6 @@ CREATE TABLE bet(
     status character varying COLLATE pg_catalog."default" NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    market_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
-    funds_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
-    bet_settled BOOLEAN NOT NULL DEFAULT FALSE,
     bet_won BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT bet_pkey PRIMARY KEY (id)
 );

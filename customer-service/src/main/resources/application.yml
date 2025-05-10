@@ -74,7 +74,6 @@ spring:
         allow.auto.create.topics: false
         isolation.level: read_committed
 
-
 app:
   postgres:
     host: moviebets-postgres

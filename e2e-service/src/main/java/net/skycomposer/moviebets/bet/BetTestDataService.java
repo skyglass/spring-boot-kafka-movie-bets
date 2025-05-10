@@ -22,9 +22,9 @@ public class BetTestDataService extends JdbcTestDataService {
 
     @Override
     public void resetDatabase() {
-        executeString("DELETE FROM bet");
-        executeString("DELETE FROM market_settle_status");
-        executeString("DELETE FROM bet_settle_request");
+        executeString("TRUNCATE bet");
+        executeString("TRUNCATE market_settle_status");
+        executeString("TRUNCATE bet_settle_request");
     }
 
 }

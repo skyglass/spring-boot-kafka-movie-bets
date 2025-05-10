@@ -19,9 +19,6 @@ public interface MarketClient {
     @ResponseStatus(HttpStatus.CREATED)
     MarketResponse open(@RequestBody @Valid MarketData marketData);
 
-    @PostMapping("/update")
-    MarketResponse update(@RequestBody @Valid MarketData marketData);
-
     @PostMapping("/close")
     MarketResponse close(@RequestBody @Valid CloseMarketRequest request);
 

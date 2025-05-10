@@ -16,8 +16,6 @@ public interface MarketService {
 
     MarketResponse open(MarketData marketData);
 
-    MarketResponse update(MarketData marketData);
-
     MarketResponse close(CloseMarketRequest request);
 
     MarketResponse settle(UUID marketId);

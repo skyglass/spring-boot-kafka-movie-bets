@@ -29,14 +29,6 @@ public class MarketTestHelper {
         return marketClient.open(marketData);
     }
 
-    public MarketResponse updateMarket(UUID marketId) {
-        MarketData marketData = MarketData.builder()
-                .marketId(marketId)
-                .status(MarketStatus.CLOSED)
-                .build();
-        return marketClient.update(marketData);
-    }
-
     public MarketResponse closeMarket(UUID marketId, MarketResult result) {
         CloseMarketRequest closeMarketRequest = CloseMarketRequest
                 .builder()

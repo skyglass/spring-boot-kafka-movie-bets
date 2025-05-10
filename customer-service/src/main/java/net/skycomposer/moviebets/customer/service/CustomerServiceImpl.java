@@ -32,6 +32,10 @@ public class CustomerServiceImpl implements CustomerService {
 
     private static final String FUNDS_REMOVED_SUCCESSFULLY = "Funds successfully decreased from %.4f to %.4f";
 
+    private static final String FUNDS_QUEUED_FOR_ADDING_SUCCESSFULLY = "Funds successfully queued for increasing from %.4f to %.4f";
+
+    private static final String FUNDS_QUEUED_FOR_REMOVAL_SUCCESSFULLY = "Funds successfully queued for decreasing from %.4f to %.4f";
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final CustomerRepository customerRepository;
@@ -57,7 +61,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     @Transactional
     public WalletResponse addFundsAsync(String customerId, UUID requestId, BigDecimal funds) {
-        CustomerEntity customerEntity = saveEntityIfNotExists(customerId, funds);
+        CustomerEntity customerEntity = createEntityIfNotExists(customerId);
         BigDecimal currentBalance = customerEntity.getBalance();
         BigDecimal newBalance = currentBalance.add(funds);
         if (walletRequestRepository.existsByRequestId(requestId)) {
@@ -72,15 +76,16 @@ public class CustomerServiceImpl implements CustomerService {
                     requestId,
                     funds);
             kafkaTemplate.send(customerCommandsTopicName, addFundsCommand.getCustomerId(), addFundsCommand);
-            return new WalletResponse(FUNDS_ADDED_SUCCESSFULLY.formatted(currentBalance, newBalance),
-                    customerId, newBalance);
+            var message = FUNDS_QUEUED_FOR_ADDING_SUCCESSFULLY.formatted(currentBalance, newBalance);
+            logger.info(message);
+            return new WalletResponse(message, customerId, newBalance);
         }
     }
 
     @Override
     @Transactional
     public WalletResponse addFunds(String customerId, UUID requestId, BigDecimal funds) {
-        CustomerEntity customerEntity = saveEntityIfNotExists(customerId, BigDecimal.ZERO);
+        CustomerEntity customerEntity = createEntityIfNotExists(customerId);
         BigDecimal currentBalance = customerEntity.getBalance();
         BigDecimal newBalance = currentBalance.add(funds);
         if (walletRequestRepository.existsByRequestId(requestId)) {
@@ -97,20 +102,20 @@ public class CustomerServiceImpl implements CustomerService {
                     .builder()
                     .requestId(requestId)
                     .build());
-            return new WalletResponse(FUNDS_ADDED_SUCCESSFULLY.formatted(currentBalance, newBalance),
-                    customerEntity.getUsername(),
-                    newBalance);
+            var message = FUNDS_ADDED_SUCCESSFULLY.formatted(currentBalance, newBalance);
+            logger.info(message);
+            return new WalletResponse(message, customerId, newBalance);
         }
     }
 
     @Override
     @Transactional(readOnly = true)
     public WalletResponse removeFundsAsync(String customerId, UUID requestId, BigDecimal funds) {
-        CustomerEntity customerEntity = saveEntityIfNotExists(customerId, funds);
+        CustomerEntity customerEntity = createEntityIfNotExists(customerId);
         BigDecimal currentBalance = customerEntity.getBalance();
         BigDecimal newBalance = currentBalance.subtract(funds);
         if (walletRequestRepository.existsByRequestId(requestId)) {
-            String message = String.format("Duplicate addFunds request for customer %s, requestId = %s", customerId, requestId);
+            String message = String.format("Duplicate removeFunds request for customer %s, requestId = %s", customerId, requestId);
             logger.warn(message);
             return new WalletResponse(message,
                     customerEntity.getUsername(),
@@ -121,17 +126,21 @@ public class CustomerServiceImpl implements CustomerService {
                     requestId,
                     funds);
             kafkaTemplate.send(customerCommandsTopicName, customerId, removeFundsCommand);
-            return new WalletResponse(FUNDS_REMOVED_SUCCESSFULLY.formatted(currentBalance, newBalance),
-                    customerId, newBalance);
+            var message = FUNDS_QUEUED_FOR_REMOVAL_SUCCESSFULLY.formatted(currentBalance, newBalance);
+            logger.info(message);
+            return new WalletResponse(message, customerId, newBalance);
         }
     }
 
     @Override
     @Transactional
     public WalletResponse removeFunds(String customerId, UUID requestId, BigDecimal funds) {
-        CustomerEntity customerEntity = customerRepository.findByUsername(customerId)
-                .orElseThrow(() -> new CustomerNotFoundException(customerId));
+        CustomerEntity customerEntity = createEntityIfNotExists(customerId);
         BigDecimal currentBalance = customerEntity.getBalance();
+        BigDecimal newBalance = currentBalance.subtract(funds);
+        if (newBalance.signum() == -1) {
+            throw new CustomerInsufficientFundsException(customerId, funds, currentBalance);
+        }
         if (walletRequestRepository.existsByRequestId(requestId)) {
             String message = String.format("Duplicate removeFunds request for customer %s, requestId = %s", customerId, requestId);
             logger.warn(message);
@@ -139,18 +148,14 @@ public class CustomerServiceImpl implements CustomerService {
                     customerEntity.getUsername(),
                     currentBalance);
         } else {
-            BigDecimal newBalance = currentBalance.subtract(funds);
-            if (newBalance.signum() == -1) {
-                throw new CustomerInsufficientFundsException(customerId, funds, currentBalance);
-            }
             customerEntity.setBalance(newBalance);
             customerRepository.save(customerEntity);
             walletRequestRepository.save(WalletRequestEntity.builder()
                     .requestId(requestId)
                     .build());
-            return new WalletResponse(FUNDS_REMOVED_SUCCESSFULLY.formatted(currentBalance, newBalance),
-                    customerEntity.getUsername(),
-                    newBalance);
+            var message = FUNDS_REMOVED_SUCCESSFULLY.formatted(currentBalance, newBalance);
+            logger.info(message);
+            return new WalletResponse(message, customerId, newBalance);
         }
     }
 
@@ -166,7 +171,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .build();
     }
 
-    private CustomerEntity saveEntityIfNotExists(String customerId, BigDecimal balance) {
+    private CustomerEntity createEntityIfNotExists(String customerId) {
         Optional<CustomerEntity> customerOptional = customerRepository.findByUsername(customerId);
         if (customerOptional.isPresent()) {
             return customerOptional.get();
@@ -174,8 +179,7 @@ public class CustomerServiceImpl implements CustomerService {
         CustomerEntity customerEntity = new CustomerEntity();
         customerEntity.setUsername(customerId);
         customerEntity.setFullName(customerId);
-        customerEntity.setBalance(balance);
-        customerEntity = customerRepository.save(customerEntity);
+        customerEntity.setBalance(BigDecimal.ZERO);
         return customerEntity;
     }
 

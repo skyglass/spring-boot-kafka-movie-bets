@@ -41,6 +41,8 @@ public class BetE2eTest extends E2eTest {
     @SneakyThrows
     void test() {
         String customerId = UUID.randomUUID().toString();
+        String customerId2 = UUID.randomUUID().toString();
+        String customerId3 = UUID.randomUUID().toString();
         UUID walletRequestId = UUID.randomUUID();
         int walletBalance = 100;
         int betStake = 100;
@@ -88,42 +90,41 @@ public class BetE2eTest extends E2eTest {
                         Thread.sleep(100);
                         walletData = customerTestHelper.findWalletById(customerId);
                     }
-                    assertThat(walletData.getBalance(), equalTo(BigDecimal.ZERO));
+                    assertThat(walletData.getBalance().stripTrailingZeros(), equalTo(BigDecimal.ZERO));
                 }, () -> "Wallet amount is not equal to 0; current amount = " + customerTestHelper.findWalletById(customerId).getBalance()
         );
 
-        BetResponse betResponse2 = betTestHelper.createBet(marketId, customerId, betStake2, marketResult);
+        BetResponse betResponse2 = betTestHelper.createBet(marketId, customerId2, betStake2, marketResult);
         UUID betId2 = betResponse2.getBetId();
-        assertThat(betResponse2.getBetId(), equalTo(betId2));
-        assertThat(betResponse2.getMessage(), equalTo("initialized"));
+        assertThat(betResponse2.getMessage(), equalTo("Bet %s created successfully".formatted(betId2)));
 
         //Duplicate requests to make sure that opening the bet with the same id should be handled idempotently (only one bet open event should be handled, other duplicate events should be ignored)
-        betResponse2 = betTestHelper.createBet(marketId, customerId, betStake2, marketResult);
-        //betResponse2 = betTestHelper.createBet(betId2, marketId, walletId, betStake2, betOdds2, betResult);
-        //betResponse2 = betTestHelper.createBet(betId2, marketId, walletId, betStake2, betOdds2, betResult);
+        betResponse2 = betTestHelper.createBet(marketId, customerId2, betStake2, marketResult);
+        betResponse2 = betTestHelper.createBet(marketId, customerId2, betStake2, marketResult);
+        betResponse2 = betTestHelper.createBet(marketId, customerId2, betStake2, marketResult);
 
         BetData betData2 =  RetryHelper.retry(() ->  betTestHelper.getState(betId2));
 
-        assertThat(betData2.getCustomerId(), equalTo(customerId));
+        assertThat(betData2.getCustomerId(), equalTo(customerId2));
         assertThat(betData2.getMarketId(), equalTo(marketId));
         assertThat(betData2.getBetId(), equalTo(betId2));
         assertThat(betData2.getResult(), equalTo(marketResult));
         assertThat(betData2.getStake(), equalTo(betStake2));
 
 
-        BetResponse betResponse3 = betTestHelper.createBet(marketId, customerId, betStake3,marketResult);
+        BetResponse betResponse3 = betTestHelper.createBet(marketId, customerId3, betStake3,marketResult);
         UUID betId3 = betResponse3.getBetId();
         assertThat(betResponse3.getBetId(), equalTo(betId3));
-        assertThat(betResponse3.getMessage(), equalTo("initialized"));
+        assertThat(betResponse3.getMessage(), equalTo("Bet %s created successfully".formatted(betId3)));
 
         //Duplicate requests to make sure that opening the bet with the same request id should be handled idempotently (only one bet open event should be handled, other duplicate events should be ignored)
-        betResponse3 = betTestHelper.createBet(marketId, customerId, betStake3, marketResult);
-        //betResponse3 = betTestHelper.createBet(betId3, marketId, walletId, betStake3, betOdds3, betResult);
-        //betResponse3 = betTestHelper.createBet(betId3, marketId, walletId, betStake3, betOdds3, betResult);
+        betResponse3 = betTestHelper.createBet(marketId, customerId3, betStake3, marketResult);
+        betResponse3 = betTestHelper.createBet(marketId, customerId3, betStake3, marketResult);
+        betResponse3 = betTestHelper.createBet(marketId, customerId3, betStake3, marketResult);
 
         BetData betData3 =  RetryHelper.retry(() ->  betTestHelper.getState(betId3));
 
-        assertThat(betData3.getCustomerId(), equalTo(customerId));
+        assertThat(betData3.getCustomerId(), equalTo(customerId3));
         assertThat(betData3.getMarketId(), equalTo(marketId));
         assertThat(betData3.getBetId(), equalTo(betId3));
         assertThat(betData3.getResult(), equalTo(marketResult));
@@ -131,7 +132,7 @@ public class BetE2eTest extends E2eTest {
 
         marketResponse = marketTestHelper.closeMarket(marketId, marketResult);
         assertThat(marketResponse.getMarketId(), equalTo(marketId));
-        assertThat(marketResponse.getMessage(), equalTo("initialized"));
+        assertThat(marketResponse.getMessage(), equalTo("Market %s closed successfully".formatted(marketId)));
 
         assertTimeoutPreemptively(
                 Duration.ofSeconds(10)
@@ -141,7 +142,7 @@ public class BetE2eTest extends E2eTest {
                         Thread.sleep(100);
                         walletData = customerTestHelper.findWalletById(customerId);
                     }
-                    assertThat(walletData.getBalance(), equalTo(100));
+                    assertThat(walletData.getBalance().compareTo(new BigDecimal(100)), equalTo(0));
                 }, () -> "Wallet amount is not equal to 100; current amount = " + customerTestHelper.findWalletById(customerId).getBalance()
         );
 

@@ -4,13 +4,13 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
@@ -21,11 +21,12 @@ import feign.FeignException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.skycomposer.moviebets.common.E2eTest;
+import net.skycomposer.moviebets.common.dto.bet.BetData;
 import net.skycomposer.moviebets.common.dto.bet.BetResponse;
+import net.skycomposer.moviebets.common.dto.bet.BetStatus;
 import net.skycomposer.moviebets.common.dto.customer.WalletResponse;
 import net.skycomposer.moviebets.common.dto.market.MarketResponse;
 import net.skycomposer.moviebets.common.dto.market.MarketResult;
-import net.skycomposer.moviebets.common.dto.market.MarketStatus;
 import net.skycomposer.moviebets.customer.CustomerTestHelper;
 import net.skycomposer.moviebets.market.MarketTestHelper;
 
@@ -46,122 +47,116 @@ public class BetConcurrencyE2eTest extends E2eTest {
     @Test
     @SneakyThrows
     void createParallelBetsThenFundsAreZeroTest() {
-        String walletId = UUID.randomUUID().toString();
+        String customerId = UUID.randomUUID().toString();
         UUID walletRequestId = UUID.randomUUID();
         int walletBalance = 500;
+        int addFundsAmount = 10;
         int walletBeforeMarketCloseBalance = 0;
-        int walletAfterMarketCloseBalance = 1000;
+        int walletAfterMarketCloseBalance = 10;
         UUID marketId;
         int betStake = 10;
-        double betOdds = 2.8;
-        double betOdds2 = 2.9;
         MarketResult betResult = MarketResult.ITEM2_WINS;
         AtomicInteger counter = new  AtomicInteger(0);
 
-        WalletResponse walletResponse = customerTestHelper.createWallet(walletId, walletRequestId, walletBalance);
+        WalletResponse walletResponse = customerTestHelper.createWallet(customerId, walletRequestId, walletBalance);
+        Thread.sleep(400);
         //Duplicate request with the same request id to make sure that duplicates are handled correctly
         try {
-            walletResponse = customerTestHelper.createWallet(walletId, walletRequestId, walletBalance);
+            walletResponse = customerTestHelper.createWallet(customerId, walletRequestId, walletBalance);
         } catch (FeignException.InternalServerError e) {
             //expected
         }
-        assertThat(walletResponse.getMessage(), equalTo("The request has been accepted for processing, but the processing has not been completed."));
+        assertThat(walletResponse.getMessage(), equalTo("Duplicate addFunds request for customer %s, requestId = %s".formatted(customerId, walletRequestId)));
         MarketResponse marketResponse = marketTestHelper.createMarket();
         marketId = marketResponse.getMarketId();
-        assertThat(marketResponse.getMessage(), equalTo("initialized"));
+        assertThat(marketResponse.getMessage(), equalTo("Market %s opened successfully".formatted(marketId)));
 
         // Start the clock
         long start = Instant.now().toEpochMilli();
 
         int numberOfBets = 100;
-        List<CompletableFuture<BetResponse>> createdBets = new ArrayList<>();
+        List<UUID> customers = new ArrayList<>();
         for (int i = 0; i < numberOfBets; i++) {
-            CompletableFuture<BetResponse> betResponse = betTestHelper.asyncPlaceBet(
-                    marketId, walletId, betStake,
-                    betResult);
-            createdBets.add(betResponse);
+            customers.add(UUID.randomUUID());
         }
 
-        int numberOfWalletUpdates = 50;
         List<CompletableFuture<WalletResponse>> addedFunds = new ArrayList<>();
-        for (int i = 0; i < numberOfWalletUpdates; i++) {
+        for (int i = 0; i < numberOfBets; i++) {
+            String currentCustomerId = customers.get(i).toString();
             CompletableFuture<WalletResponse> addFundsResult = customerTestHelper
-                    .asyncAddFunds(walletId, UUID.randomUUID(), 10);
+                    .asyncAddFunds(currentCustomerId, UUID.randomUUID(), addFundsAmount);
             addedFunds.add(addFundsResult);
+        }
+
+        List<CompletableFuture<BetResponse>> createdBets = new ArrayList<>();
+        for (int i = 0; i < numberOfBets; i++) {
+            String currentCustomerId = customers.get(i).toString();
+            CompletableFuture<BetResponse> betResponse = betTestHelper.asyncPlaceBet(
+                    marketId, currentCustomerId, betStake,
+                    betResult);
+            createdBets.add(betResponse);
         }
 
         // Wait until they are all done
         CompletableFuture.allOf(createdBets.toArray(new CompletableFuture[0])).join();
         CompletableFuture.allOf(addedFunds.toArray(new CompletableFuture[0])).join();
 
-        MarketResponse response = null;
-        while (response == null) {
-            try {
-                response = marketTestHelper.updateMarket(marketId);
-            } catch (FeignException.TooManyRequests e) {
-                TimeUnit.MILLISECONDS.sleep(Duration.ofSeconds(1).toMillis());
-            }
-        }
-
-        assertTimeoutPreemptively(
-                Duration.ofSeconds(5)
-                , () -> {
-                    var result = marketTestHelper.getMarketData(marketId);
-                    while (result.getStatus() != MarketStatus.CLOSED) {
-                        Thread.sleep(1000);
-                        result =  marketTestHelper.getMarketData(marketId);
-                    }
-                    assertThat(result.getStatus(), equalTo(MarketStatus.CLOSED));
-                }, () -> String.format("Market update status is incorrect for marketId = %s: status = %s", marketId, marketTestHelper.getMarketData(marketId).getStatus())
-        );
-
         //Before market is closed, make sure that all bets are confirmed by market and wallet
         for (CompletableFuture<BetResponse> betFuture: createdBets) {
+            Thread.sleep(50);
             BetResponse betResponse = betFuture.get();
+            final BetData[] resultHolder = {betTestHelper.getState(betResponse.getBetId())};
             log.info("--> " + betResponse.getBetId());
             assertTimeoutPreemptively(
                     Duration.ofSeconds(60)
                     , () -> {
-                        var result = betTestHelper.getState(betResponse.getBetId());
-                        while (!result.getMarketConfirmed() || !result.getFundsConfirmed()) {
-                            Thread.sleep(1000);
-                            result = betTestHelper.getState(betResponse.getBetId());
+                        while (resultHolder[0].getStatus() != BetStatus.VALIDATED) {
+                            Thread.sleep(100);
+                            resultHolder[0] = betTestHelper.getState(betResponse.getBetId());
                         }
-                        Thread.sleep(100);
-                        assertThat(result.getMarketConfirmed(), equalTo(true));
-                        assertThat(result.getFundsConfirmed(), equalTo(true));
-                    }, () -> String.format("Bet with betId = %s is not market or funds confirmed", betResponse.getBetId())
+                        assertThat(resultHolder[0].getStatus(), equalTo(BetStatus.VALIDATED));
+                    }, () -> String.format("Bet with betId = %s is not validated; currentStatus = %s", betResponse.getBetId(), resultHolder[0].getStatus())
             );
         }
 
-        assertTimeoutPreemptively(
-                Duration.ofSeconds(20)
-                , () -> {
-                    var result = customerTestHelper.findWalletById(walletId);
-                    while (result.getBalance().doubleValue() != walletBeforeMarketCloseBalance) {
-                        Thread.sleep(1000);
-                        result = customerTestHelper.findWalletById(walletId);
-                    }
-                    assertThat(result.getBalance(), equalTo(walletBeforeMarketCloseBalance));
-                }, () -> String.format("Available wallet funds after market update are incorrect for walletId = %s: amount = %d", walletId, customerTestHelper.findWalletById(walletId).getBalance())
-        );
+        for (int i = 0; i < numberOfBets; i++) {
+            Thread.sleep(50);
+            String currentCustomerId = customers.get(i).toString();
+            log.info("<--> " + currentCustomerId);
+            assertTimeoutPreemptively(
+                    Duration.ofSeconds(20)
+                    , () -> {
+                        var result = customerTestHelper.findWalletById(currentCustomerId);
+                        while (result.getBalance().doubleValue() != walletBeforeMarketCloseBalance) {
+                            Thread.sleep(100);
+                            result = customerTestHelper.findWalletById(currentCustomerId);
+                        }
+                        assertThat(result.getBalance().compareTo(new BigDecimal(walletBeforeMarketCloseBalance)), equalTo(0));
+                    }, () -> String.format("Available wallet funds after market update are incorrect for customerId = %s: amount = %d", customerId, customerTestHelper.findWalletById(customerId).getBalance())
+            );
+        }
 
 
         marketTestHelper.closeMarket(marketId, betResult);
 
 
-        assertTimeoutPreemptively(
-                Duration.ofSeconds(20)
-                , () -> {
-                    var result = customerTestHelper.findWalletById(walletId);
-                    while (result.getBalance().doubleValue() != walletAfterMarketCloseBalance) {
-                        log.info("--> " + result.getBalance());
-                        Thread.sleep(1000);
-                        result = customerTestHelper.findWalletById(walletId);
-                    }
-                    assertThat(result.getBalance(), equalTo(walletAfterMarketCloseBalance));
-                }, () -> String.format("Available wallet funds after market close are incorrect for walletId = %s: amount = %d", walletId, customerTestHelper.findWalletById(walletId).getBalance())
-        );
+        for (int i = 0; i < numberOfBets; i++) {
+            Thread.sleep(50);
+            String currentCustomerId = customers.get(i).toString();
+            log.info("<<-->> " + currentCustomerId);
+            assertTimeoutPreemptively(
+                    Duration.ofSeconds(20)
+                    , () -> {
+                        var result = customerTestHelper.findWalletById(currentCustomerId);
+                        while (result.getBalance().doubleValue() != walletAfterMarketCloseBalance) {
+                            log.info("--> " + result.getBalance());
+                            Thread.sleep(100);
+                            result = customerTestHelper.findWalletById(currentCustomerId);
+                        }
+                        assertThat(result.getBalance().compareTo(new BigDecimal(walletAfterMarketCloseBalance)), equalTo(0));
+                    }, () -> String.format("Available wallet funds after market close are incorrect for customerId = %s: amount = %d", customerId, customerTestHelper.findWalletById(customerId).getBalance())
+            );
+        }
 
         log.info("Elapsed time: " + (Instant.now().toEpochMilli() - start));
     }

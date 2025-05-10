@@ -233,9 +233,6 @@ public class BetServiceImpl implements BetService {
                 .stake(betEntity.getStake())
                 .result(betEntity.getResult())
                 .status(betEntity.getStatus())
-                .marketConfirmed(betEntity.getMarketConfirmed())
-                .fundsConfirmed(betEntity.getFundsConfirmed())
-                .betSettled(betEntity.getBetSettled())
                 .betWon(betEntity.getBetWon())
                 .build();
     }

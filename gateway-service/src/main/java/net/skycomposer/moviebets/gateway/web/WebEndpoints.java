@@ -15,9 +15,9 @@ public class WebEndpoints {
 	@Bean
 	public RouterFunction<ServerResponse> routerFunction() {
 		return RouterFunctions.route()
-				.GET("/moviebets-fallback", request ->
+				.GET("/api/moviebets-fallback", request ->
 						ServerResponse.ok().body(Mono.just(""), String.class))
-				.POST("/moviebets-fallback", request ->
+				.POST("/api/moviebets-fallback", request ->
 						ServerResponse.status(HttpStatus.SERVICE_UNAVAILABLE).build())
 				.build();
 	}
