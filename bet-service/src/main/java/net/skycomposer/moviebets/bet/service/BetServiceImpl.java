@@ -162,7 +162,7 @@ public class BetServiceImpl implements BetService {
     @Override
     @Transactional(readOnly = true)
     public boolean isMarketClosed(UUID marketId) {
-        return marketSettleStatusRepository.existsById(marketId);
+        return marketSettleStatusRepository.existsByMarketId(marketId);
     }
 
     @Override
@@ -174,12 +174,9 @@ public class BetServiceImpl implements BetService {
     @Override
     @Transactional(readOnly = true)
     public int countSettledBets(UUID marketId) {
-        MarketSettleStatusEntity marketSettleStatusEntity = marketSettleStatusRepository.findById(marketId).get();
-        if (marketSettleStatusEntity != null) {
-            return marketSettleStatusEntity.getFinishedCount();
-        } else {
-            throw new IllegalArgumentException("Wrong usage of countSettledBets method");
-        }
+        MarketSettleStatusEntity marketSettleStatusEntity = marketSettleStatusRepository.findByMarketId(marketId)
+                .orElseThrow(() -> new IllegalArgumentException("Wrong usage of countSettledBets method"));
+        return marketSettleStatusEntity.getFinishedCount();
     }
 
     @Override
@@ -216,12 +213,8 @@ public class BetServiceImpl implements BetService {
     @Override
     @Transactional
     public void marketSettleDone(UUID marketId, MarketResult winResult) {
-        if (marketSettleStatusRepository.existsByMarketId(marketId)) {
-            MarketSettleStatusEntity marketSettleStatusEntity = marketSettleStatusRepository.findByMarketId(marketId).get();
-            marketSettleStatusRepository.delete(marketSettleStatusEntity);
-            betSettleRequestRepository.deleteByMarketId(marketId);
-        }
-        betRepository.settleBets(marketId, BetStatus.VALIDATED, BetStatus.SETTLED, winResult);
+        betSettleRequestRepository.deleteByMarketId(marketId);
+        betRepository.settleBets(marketId, BetStatus.SETTLE_STARTED, BetStatus.SETTLED, winResult);
     }
 
     private BetData createBetData(BetEntity betEntity) {

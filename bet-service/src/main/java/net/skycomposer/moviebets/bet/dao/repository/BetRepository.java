@@ -39,9 +39,9 @@ public interface BetRepository extends JpaRepository<BetEntity, UUID> {
         UPDATE BetEntity b
         SET b.status = :settledStatus,
             b.betWon = CASE WHEN b.result = :winResult THEN true ELSE false END
-        WHERE b.marketId = :marketId AND b.status = :validatedStatus
+        WHERE b.marketId = :marketId AND b.status = :settleStartedStatus
     """)
-    void settleBets(UUID marketId, BetStatus validatedStatus, BetStatus settledStatus, MarketResult winResult);
+    void settleBets(UUID marketId, BetStatus settleStartedStatus, BetStatus settledStatus, MarketResult winResult);
 
     int countByStatus(BetStatus status);
 

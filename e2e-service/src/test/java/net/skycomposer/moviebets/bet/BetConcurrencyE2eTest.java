@@ -150,7 +150,7 @@ public class BetConcurrencyE2eTest extends E2eTest {
 
         marketTestHelper.closeMarket(marketId, betResult);
 
-
+        //After market is closed, make sure that all winner customers received money back
         for (int i = 0; i < numberOfBets; i++) {
             Thread.sleep(50);
             String currentCustomerId = customers.get(i).toString();
@@ -165,7 +165,7 @@ public class BetConcurrencyE2eTest extends E2eTest {
                             result = customerTestHelper.findWalletById(currentCustomerId);
                         }
                         assertThat(result.getBalance().compareTo(new BigDecimal(walletAfterMarketCloseBalance)), equalTo(0));
-                    }, () -> String.format("Available wallet funds after market close are incorrect for customerId = %s: amount = %.2f", customerId, customerTestHelper.findWalletById(customerId).getBalance())
+                    }, () -> String.format("Available wallet funds after market close are incorrect for customerId = %s: amount = %.2f", currentCustomerId, customerTestHelper.findWalletById(currentCustomerId).getBalance())
             );
         }
 
@@ -197,7 +197,8 @@ public class BetConcurrencyE2eTest extends E2eTest {
                         Thread.sleep(100);
                         marketDataHolder[0] = marketTestHelper.getMarketData(marketId);
                     }
-                    assertThat(marketDataHolder[0].getStatus(), equalTo(BetStatus.SETTLED));
+                    assertThat(marketDataHolder[0].getStatus(), equalTo(MarketStatus.SETTLED));
+                    assertThat(marketDataHolder[0].isOpen(), equalTo(false));
                 }, () -> String.format("Market with id = %s is not settled; currentStatus = %s", marketId, marketDataHolder[0].getStatus())
         );
 

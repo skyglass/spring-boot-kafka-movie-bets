@@ -86,6 +86,7 @@ public class BetSettleHandler {
     @Transactional
     public void handleEvent(@Payload MarketClosedEvent event) {
         int expectedCount = betService.countByStatus(BetStatus.VALIDATED);
+        logger.info("Settle Bets Started for market {}: expectedCount: {}", event.getMarketId(), expectedCount);
         betService.marketSettleStart(event.getMarketId(), expectedCount);
         SettleBetsCommand settleBetsCommand = new SettleBetsCommand(event.getMarketId(), UUID.randomUUID().toString(), expectedCount);
         kafkaTemplate.send(betSettleTopicName, event.getMarketId().toString(), settleBetsCommand);
@@ -98,7 +99,8 @@ public class BetSettleHandler {
 
     @KafkaHandler
     @Transactional
-    public void handleCommand(@Payload SettleBetsCommand command) {
+    public void handleSettleBetsCommand(@Payload SettleBetsCommand command) {
+        logger.info("Settle Bets Command Started for market {}: totalCount: {}", command.getMarketId(), command.getTotalCount());
         BigDecimal winnerEarned = command.getWinnerEarned();
         Integer totalCount = command.getTotalCount();
         MarketResult winResult = command.getWinnerResult();
@@ -113,6 +115,7 @@ public class BetSettleHandler {
                 totalCount = betService.countByStatus(BetStatus.VALIDATED);
             }
         }
+        logger.info("Settle Bets Command winResult: {}", winResult);
         if (winResult != null) {
             List<BetData> betsToSettle = betService.findByMarketAndStatus(command.getMarketId(), BetStatus.VALIDATED, betSettleBatchSize);
             if (CollectionUtils.isNotEmpty(betsToSettle)) {
@@ -130,11 +133,14 @@ public class BetSettleHandler {
                 kafkaTemplate.send(betCommandsTopicName, betData.getBetId().toString(), settleBetCommand);
             }
 
+            Integer totalSettled = betService.countSettledBets(command.getMarketId());
+            logger.info(
+                    "Settle Bets: betsToSettle: {}, totalCount: {}, totalSettled: {}", betsToSettle.size(), totalCount, totalSettled);
+
             if (CollectionUtils.isNotEmpty(betsToSettle)) {
                 settleBets(command, winnerEarned, totalCount, winResult);
             } else {
-                Integer totalSettled = betService.countSettledBets(command.getMarketId());
-                if (totalSettled != totalCount) {
+                if (totalSettled.intValue() != totalCount.intValue()) {
                     settleBets(command, winnerEarned, totalCount, winResult);
                 } else {
                     SettleMarketCommand settleMarketCommand = new SettleMarketCommand(command.getMarketId(), winResult);
