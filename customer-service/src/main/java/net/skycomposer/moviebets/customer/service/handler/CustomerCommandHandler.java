@@ -19,6 +19,10 @@ import net.skycomposer.moviebets.common.dto.customer.events.FundsSettledEvent;
 import net.skycomposer.moviebets.customer.exception.CustomerInsufficientFundsException;
 import net.skycomposer.moviebets.customer.service.CustomerService;
 
+import java.time.Duration;
+
+import static java.time.Instant.now;
+
 @Component
 @KafkaListener(topics = "${customer.commands.topic.name}", groupId = "${spring.kafka.consumer.group-id}")
 public class CustomerCommandHandler {
@@ -66,8 +70,10 @@ public class CustomerCommandHandler {
                     command.getMarketId(), command.getFunds(), walletResponse.getCurrentBalance());
             kafkaTemplate.send(betSettleTopicName, command.getMarketId().toString(), fundsReservedEvent);
         } catch (CustomerInsufficientFundsException e) {
-            if (command.getTotalRetries().intValue() != -1
-                && (command.getRetryCount().intValue() == command.getTotalRetries().intValue())) {
+            boolean isRetryTimeout = now().minus(Duration.ofSeconds(command.getRetryTimeoutSeconds())).isAfter(command.getRetryStart());
+            if (isRetryTimeout
+                    || (command.getTotalRetries().intValue() != -1
+                        && (command.getRetryCount().intValue() == command.getTotalRetries().intValue()))) {
                 logger.error(e.getLocalizedMessage(), e);
                 FundReservationFailedEvent fundReservationFailedEvent = new FundReservationFailedEvent(
                         command.getBetId(), command.getCustomerId(),
@@ -82,7 +88,9 @@ public class CustomerCommandHandler {
                         command.getCancelRequestId(),
                         command.getFunds(),
                         command.getRetryCount() + 1,
-                        command.getTotalRetries()
+                        command.getTotalRetries(),
+                        command.getRetryTimeoutSeconds(),
+                        command.getRetryStart()
                 );
                 kafkaTemplate.send(customerCommandsTopicName, command.getCustomerId(), reserveFundsCommand);
             }

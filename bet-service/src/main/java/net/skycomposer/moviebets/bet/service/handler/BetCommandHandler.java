@@ -1,6 +1,7 @@
 package net.skycomposer.moviebets.bet.service.handler;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,12 +39,16 @@ public class BetCommandHandler {
 
     private final Integer customerCommandsRetryCount;
 
+    private final Integer customerCommandsRetryTimeoutSeconds;
+
     public BetCommandHandler(BetService betService,
             KafkaTemplate<String, Object> kafkaTemplate,
             @Value("${bet.settle-job.topic.name}") String betSettleJobTopicName,
             @Value("${customer.commands.topic.name}") String customerCommandsTopicName,
             @Value("${bet.commands.topic.name}") String betCommandsTopicName,
-            @Value("${customer.commands.retry.count}") Integer customerCommandsRetryCount
+            @Value("${customer.commands.retry.count}") Integer customerCommandsRetryCount,
+            @Value("${customer.commands.retry.timeout-seconds}") Integer customerCommandsRetryTimeoutSeconds
+
     ) {
         this.betService = betService;
         this.kafkaTemplate = kafkaTemplate;
@@ -51,6 +56,7 @@ public class BetCommandHandler {
         this.customerCommandsTopicName = customerCommandsTopicName;
         this.betCommandsTopicName = betCommandsTopicName;
         this.customerCommandsRetryCount = customerCommandsRetryCount;
+        this.customerCommandsRetryTimeoutSeconds = customerCommandsRetryTimeoutSeconds;
     }
 
     @KafkaHandler
@@ -94,7 +100,9 @@ public class BetCommandHandler {
                 event.getCancelRequestId(),
                 new BigDecimal(event.getStake()),
                 1,
-                customerCommandsRetryCount
+                customerCommandsRetryCount,
+                customerCommandsRetryTimeoutSeconds,
+                Instant.now()
         );
         kafkaTemplate.send(customerCommandsTopicName, event.getCustomerId(), reserveFundsCommand);
     }

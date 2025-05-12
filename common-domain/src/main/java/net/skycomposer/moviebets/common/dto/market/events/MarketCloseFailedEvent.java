@@ -1,4 +1,4 @@
-package net.skycomposer.moviebets.common.dto.market;
+package net.skycomposer.moviebets.common.dto.market.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,12 +8,9 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CloseMarketRequest {
+@Builder
+public class MarketCloseFailedEvent {
     private UUID marketId;
-    private UUID requestId;
-    private MarketResult result;
 }
-

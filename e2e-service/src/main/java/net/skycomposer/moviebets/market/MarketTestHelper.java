@@ -34,7 +34,7 @@ public class MarketTestHelper {
                 .builder()
                 .marketId(marketId)
                 .requestId(UUID.randomUUID())
-                .result(result.getValue())
+                .result(result)
                 .build();
         return marketClient.close(closeMarketRequest);
     }

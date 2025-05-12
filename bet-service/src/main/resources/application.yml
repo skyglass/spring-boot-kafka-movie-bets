@@ -133,6 +133,9 @@ market:
   commands:
     topic:
       name: market-commands
+  close:
+    topic:
+      name: market-close
 
 customer:
   commands:
@@ -140,6 +143,7 @@ customer:
       name: customer-commands
     retry:
       count: -1
+      timeout-seconds: 120
   events:
     topic:
       name: customer-events

@@ -15,19 +15,10 @@ import net.skycomposer.moviebets.common.dto.market.MarketResult;
 @Builder
 public class SettleBetsCommand {
     private UUID marketId;
-    private String requestId;
+    private UUID requestId;
     BigDecimal winnerEarned;
     Integer totalCount;
     MarketResult winnerResult;
 
-    public SettleBetsCommand(UUID marketId, String requestId) {
-        this.marketId = marketId;
-        this.requestId = requestId;
-    }
-
-    public SettleBetsCommand(UUID marketId, String requestId, Integer totalCount) {
-        this(marketId, requestId);
-        this.totalCount = totalCount;
-    }
 
 }

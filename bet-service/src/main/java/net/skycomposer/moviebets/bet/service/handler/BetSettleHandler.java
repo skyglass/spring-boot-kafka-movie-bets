@@ -24,9 +24,11 @@ import net.skycomposer.moviebets.common.dto.bet.commands.SettleBetCommand;
 import net.skycomposer.moviebets.common.dto.customer.commands.CancelFundReservationCommand;
 import net.skycomposer.moviebets.common.dto.customer.events.FundsReservedEvent;
 import net.skycomposer.moviebets.common.dto.market.MarketResult;
+import net.skycomposer.moviebets.common.dto.market.commands.CloseMarketCommand;
 import net.skycomposer.moviebets.common.dto.market.commands.SettleBetsCommand;
 import net.skycomposer.moviebets.common.dto.market.commands.SettleMarketCommand;
-import net.skycomposer.moviebets.common.dto.market.events.MarketClosedEvent;
+import net.skycomposer.moviebets.common.dto.market.events.MarketCloseConfirmedEvent;
+import net.skycomposer.moviebets.common.dto.market.events.MarketCloseFailedEvent;
 import net.skycomposer.moviebets.common.dto.market.events.MarketSettledEvent;
 
 @Component
@@ -84,12 +86,24 @@ public class BetSettleHandler {
 
     @KafkaHandler
     @Transactional
-    public void handleEvent(@Payload MarketClosedEvent event) {
-        int expectedCount = betService.countByStatus(BetStatus.VALIDATED);
-        logger.info("Settle Bets Started for market {}: expectedCount: {}", event.getMarketId(), expectedCount);
-        betService.marketSettleStart(event.getMarketId(), expectedCount);
-        SettleBetsCommand settleBetsCommand = new SettleBetsCommand(event.getMarketId(), UUID.randomUUID().toString(), expectedCount);
-        kafkaTemplate.send(betSettleTopicName, event.getMarketId().toString(), settleBetsCommand);
+    public void handleCloseMarketCommand(@Payload CloseMarketCommand command) {
+        SumStakesData sumStakesData = betService.getBetsByMarket(command.getMarketId());
+        if (winnerExists(sumStakesData)) {
+            SumStakeData winner = getWinner(sumStakesData);
+            MarketResult winResult = winner.getResult();
+            BigDecimal winnerEarned = getTotalLost(sumStakesData, winner).divide(new BigDecimal(winner.getVotes()));
+            Integer totalCount = betService.countByMarketIdAndStatus(command.getMarketId(), BetStatus.VALIDATED);
+            MarketCloseConfirmedEvent marketCloseConfirmedEvent = new MarketCloseConfirmedEvent(command.getMarketId(), winResult);
+            kafkaTemplate.send(marketCommandsTopicName, command.getMarketId().toString(), marketCloseConfirmedEvent);
+
+            logger.info("Settle Bets Started for market {}: totalCount: {}", command.getMarketId(), totalCount);
+            betService.marketSettleStart(command.getMarketId(), totalCount);
+            SettleBetsCommand settleBetsCommand = new SettleBetsCommand(command.getMarketId(), UUID.randomUUID(), winnerEarned, totalCount, winResult);
+            kafkaTemplate.send(betSettleTopicName, command.getMarketId().toString(), settleBetsCommand);
+        } else {
+            MarketCloseFailedEvent marketCloseFailedEvent = new MarketCloseFailedEvent(command.getMarketId());
+            kafkaTemplate.send(marketCommandsTopicName, command.getMarketId().toString(), marketCloseFailedEvent);
+        }
     }
 
     @KafkaHandler
@@ -104,48 +118,35 @@ public class BetSettleHandler {
         BigDecimal winnerEarned = command.getWinnerEarned();
         Integer totalCount = command.getTotalCount();
         MarketResult winResult = command.getWinnerResult();
-        if (winnerEarned == null) {
-            SumStakesData sumStakesData = betService.getBetsByMarket(command.getMarketId());
-            SumStakeData winner = getWinner(sumStakesData);
-            if (winner != null) {
-                winResult = winner.getResult();
-                winnerEarned = getTotalLost(sumStakesData, winner).divide(new BigDecimal(winner.getVotes()));
-            }
-            if (totalCount == null) {
-                totalCount = betService.countByStatus(BetStatus.VALIDATED);
-            }
-        }
         logger.info("Settle Bets Command winResult: {}", winResult);
-        if (winResult != null) {
-            List<BetData> betsToSettle = betService.findByMarketAndStatus(command.getMarketId(), BetStatus.VALIDATED, betSettleBatchSize);
-            if (CollectionUtils.isNotEmpty(betsToSettle)) {
-                betService.updateStatus(betsToSettle.stream().map(BetData::getBetId).toList(), BetStatus.SETTLE_STARTED);
-            }
-            for (BetData betData: betsToSettle) {
-                SettleBetCommand settleBetCommand = new SettleBetCommand(
-                        betData.getBetId(),
-                        betData.getCustomerId(),
-                        betData.getMarketId(),
-                        betData.getBetId(),
-                        betData.getStake(),
-                        winnerEarned,
-                        isWinner(betData, winResult));
-                kafkaTemplate.send(betCommandsTopicName, betData.getBetId().toString(), settleBetCommand);
-            }
+        List<BetData> betsToSettle = betService.findByMarketAndStatus(command.getMarketId(), BetStatus.VALIDATED, betSettleBatchSize);
+        if (CollectionUtils.isNotEmpty(betsToSettle)) {
+            betService.updateStatus(betsToSettle.stream().map(BetData::getBetId).toList(), BetStatus.SETTLE_STARTED);
+        }
+        for (BetData betData: betsToSettle) {
+            SettleBetCommand settleBetCommand = new SettleBetCommand(
+                    betData.getBetId(),
+                    betData.getCustomerId(),
+                    betData.getMarketId(),
+                    betData.getBetId(),
+                    betData.getStake(),
+                    winnerEarned,
+                    isWinner(betData, winResult));
+            kafkaTemplate.send(betCommandsTopicName, betData.getBetId().toString(), settleBetCommand);
+        }
 
-            Integer totalSettled = betService.countSettledBets(command.getMarketId());
-            logger.info(
-                    "Settle Bets: betsToSettle: {}, totalCount: {}, totalSettled: {}", betsToSettle.size(), totalCount, totalSettled);
+        Integer totalSettled = betService.countSettledBets(command.getMarketId());
+        logger.info(
+                "Settle Bets: betsToSettle: {}, totalCount: {}, totalSettled: {}", betsToSettle.size(), totalCount, totalSettled);
 
-            if (CollectionUtils.isNotEmpty(betsToSettle)) {
+        if (CollectionUtils.isNotEmpty(betsToSettle)) {
+            settleBets(command, winnerEarned, totalCount, winResult);
+        } else {
+            if (totalSettled.intValue() != totalCount.intValue()) {
                 settleBets(command, winnerEarned, totalCount, winResult);
             } else {
-                if (totalSettled.intValue() != totalCount.intValue()) {
-                    settleBets(command, winnerEarned, totalCount, winResult);
-                } else {
-                    SettleMarketCommand settleMarketCommand = new SettleMarketCommand(command.getMarketId(), winResult);
-                    kafkaTemplate.send(marketCommandsTopicName, command.getMarketId().toString(), settleMarketCommand);
-                }
+                SettleMarketCommand settleMarketCommand = new SettleMarketCommand(command.getMarketId(), winResult);
+                kafkaTemplate.send(marketCommandsTopicName, command.getMarketId().toString(), settleMarketCommand);
             }
         }
     }
@@ -164,23 +165,38 @@ public class BetSettleHandler {
         kafkaTemplate.send(betSettleTopicName, command.getMarketId().toString(), settleBetsCommand);
     }
 
+    private boolean winnerExists(SumStakesData sumStakesData) {
+        if (sumStakesData.getSumStakes().size() == 0) {
+            return false;
+        }
+        if (sumStakesData.getSumStakes().size() == 1) {
+            return sumStakesData.getSumStakes().get(0).getVotes() > 0;
+        }
+        SumStakeData one = sumStakesData.getSumStakes().get(0);
+        SumStakeData two = sumStakesData.getSumStakes().get(0);
+        return one.getVotes().longValue() != two.getVotes().longValue();
+    }
+
     private SumStakeData getWinner(SumStakesData sumStakesData) {
         if (sumStakesData.getSumStakes().size() == 0) {
             return null;
         }
-        SumStakeData max = sumStakesData.getSumStakes().get(0);
-        for (int i = 1; i < sumStakesData.getSumStakes().size(); i++) {
-            SumStakeData candidate = sumStakesData.getSumStakes().get(i);
-            if (candidate.getVotes() > max.getVotes()) {
-                max = candidate;
-            }
-
+        if (sumStakesData.getSumStakes().size() == 1) {
+            return sumStakesData.getSumStakes().get(0);
         }
-        return max;
+        SumStakeData candidate1 = sumStakesData.getSumStakes().get(0);
+        SumStakeData candidate2 = sumStakesData.getSumStakes().get(1);
+        if (candidate1.getVotes().longValue() == candidate2.getVotes().longValue()) {
+            return null;
+        }
+        return candidate1.getVotes().longValue() > candidate2.getVotes().longValue() ? candidate1 : candidate2;
     }
 
     private BigDecimal getTotalLost(SumStakesData sumStakesData, SumStakeData winner) {
         BigDecimal totalLost = BigDecimal.ZERO;
+        if (sumStakesData.getSumStakes().size() < 2) {
+            return totalLost;
+        }
         for (int i = 0; i < sumStakesData.getSumStakes().size(); i++) {
             SumStakeData candidate = sumStakesData.getSumStakes().get(i);
             if (candidate.getResult() != winner.getResult()) {

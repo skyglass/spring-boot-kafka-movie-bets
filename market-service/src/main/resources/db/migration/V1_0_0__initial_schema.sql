@@ -16,3 +16,14 @@ CREATE TABLE market (
 );
 
 CREATE INDEX idx_market_status ON market (status);
+
+DROP TABLE IF EXISTS market_close_check;
+
+CREATE TABLE market_close_check (
+                        id uuid NOT NULL,
+                        check_id int NOT NULL,
+                        last_check_at TIMESTAMP NOT NULL,
+                        CONSTRAINT market_close_check_pkey PRIMARY KEY (id)
+);
+
+CREATE UNIQUE INDEX idx_market_close_check_id ON market_close_check (check_id);

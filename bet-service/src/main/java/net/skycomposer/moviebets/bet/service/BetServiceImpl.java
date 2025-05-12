@@ -167,8 +167,8 @@ public class BetServiceImpl implements BetService {
 
     @Override
     @Transactional(readOnly = true)
-    public int countByStatus(BetStatus betStatus) {
-        return betRepository.countByStatus(betStatus);
+    public int countByMarketIdAndStatus(UUID marketId, BetStatus betStatus) {
+        return betRepository.countByMarketIdAndStatus(marketId, betStatus);
     }
 
     @Override

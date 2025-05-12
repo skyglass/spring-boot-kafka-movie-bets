@@ -1,5 +1,8 @@
 package net.skycomposer.moviebets.market.service;
 
+import static java.time.Instant.now;
+
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -12,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.skycomposer.moviebets.common.dto.market.*;
-import net.skycomposer.moviebets.common.dto.market.events.MarketClosedEvent;
+import net.skycomposer.moviebets.common.dto.market.commands.CloseMarketCommand;
 import net.skycomposer.moviebets.market.dao.entity.MarketEntity;
 import net.skycomposer.moviebets.market.dao.repository.MarketRepository;
 import net.skycomposer.moviebets.market.exception.MarketNotFoundException;
@@ -73,21 +76,50 @@ public class MarketServiceImpl implements MarketService {
         return new MarketResponse(marketEntity.getId(),
                 "Market %s opened successfully".formatted(marketEntity.getId()));
     }
+    @Override
+    @Transactional
+    public MarketResponse close(UUID marketId) {
+        CloseMarketCommand command = new CloseMarketCommand(marketId);
+        kafkaTemplate.send(betSettleTopicName, marketId.toString(), command);
+        return new MarketResponse(marketId,
+                "Request to close Market %s has been sent successfully".formatted(marketId));
+    }
+
+    @Override
+    @Transactional
+    public MarketResponse marketCloseConfirmed(UUID marketId, MarketResult marketResult) {
+        MarketEntity marketEntity = marketRepository.findById(marketId)
+                .orElseThrow(() -> new MarketNotFoundException(marketId));
+        marketEntity.setOpen(false);
+        marketEntity.setStatus(MarketStatus.CLOSED);
+        marketEntity.setResult(marketResult);
+        marketRepository.save(marketEntity);
+        return new MarketResponse(marketEntity.getId(),
+                "Market %s closed successfully".formatted(marketEntity.getId()));
+    }
+
+    @Override
+    @Transactional
+    public MarketResponse marketCloseFailed(UUID marketId) {
+        MarketEntity marketEntity = marketRepository.findById(marketId)
+                .orElseThrow(() -> new MarketNotFoundException(marketId));
+        //this condition prevents duplicate MarketCloseFailedEvent message to increase close time twice
+        if (now().isAfter(marketEntity.getClosesAt())) {
+            Duration duration = Duration.between(marketEntity.getCreatedAt(), marketEntity.getClosesAt());
+            marketEntity.setClosesAt(marketEntity.getClosesAt().plus(duration));
+            marketRepository.save(marketEntity);
+        }
+        return new MarketResponse(marketId,
+                "Market close for market %s failed, because there is no winner yet: market close time was increased to continue".formatted(marketId));
+    }
 
     @Override
     @Transactional
     public MarketResponse close(CloseMarketRequest request) {
-        MarketEntity marketEntity = marketRepository.findById(request.getMarketId()).get();
-        if (marketEntity == null) {
-            throw new MarketNotFoundException(request.getMarketId());
-        }
-        marketEntity.setOpen(false);
-        marketEntity.setStatus(MarketStatus.CLOSED);
-        marketEntity = marketRepository.save(marketEntity);
-        MarketClosedEvent marketClosedEvent = new MarketClosedEvent(marketEntity.getId());
-        kafkaTemplate.send(betSettleTopicName, marketEntity.getId().toString(), marketClosedEvent);
-        return new MarketResponse(marketEntity.getId(),
-                "Market %s closed successfully".formatted(marketEntity.getId()));
+        CloseMarketCommand command = new CloseMarketCommand(request.getMarketId());
+        kafkaTemplate.send(betSettleTopicName, request.getMarketId().toString(), command);
+        return new MarketResponse(request.getMarketId(),
+                "Request to close Market %s has been sent successfully".formatted(request.getMarketId()));
     }
 
     @Override

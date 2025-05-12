@@ -19,7 +19,7 @@ import net.skycomposer.moviebets.common.dto.market.MarketResult;
 public interface BetRepository extends JpaRepository<BetEntity, UUID> {
 
     @Query("SELECT new net.skycomposer.moviebets.common.dto.bet.SumStakeData(SUM(b.stake), COUNT(b.id), b.result) " +
-            "FROM BetEntity b WHERE b.marketId = :marketId GROUP BY b.result")
+            "FROM BetEntity b WHERE b.marketId = :marketId AND b.status = 'VALIDATED' GROUP BY b.result")
     List<SumStakeData> findStakeSumGroupedByResult(@Param("marketId") UUID marketId);
 
     List<BetEntity> findByMarketId(UUID marketId);
@@ -43,6 +43,6 @@ public interface BetRepository extends JpaRepository<BetEntity, UUID> {
     """)
     void settleBets(UUID marketId, BetStatus settleStartedStatus, BetStatus settledStatus, MarketResult winResult);
 
-    int countByStatus(BetStatus status);
+    int countByMarketIdAndStatus(UUID marketId, BetStatus status);
 
 }

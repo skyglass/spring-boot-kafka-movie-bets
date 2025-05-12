@@ -132,7 +132,7 @@ public class BetE2eTest extends E2eTest {
 
         marketResponse = marketTestHelper.closeMarket(marketId, marketResult);
         assertThat(marketResponse.getMarketId(), equalTo(marketId));
-        assertThat(marketResponse.getMessage(), equalTo("Market %s closed successfully".formatted(marketId)));
+        assertThat(marketResponse.getMessage(), equalTo("Request to close Market %s has been sent successfully".formatted(marketId)));
 
         assertTimeoutPreemptively(
                 Duration.ofSeconds(10)

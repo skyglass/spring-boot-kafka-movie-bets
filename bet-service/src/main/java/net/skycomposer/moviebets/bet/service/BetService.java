@@ -28,7 +28,7 @@ public interface BetService {
 
     BetResponse close(CancelBetRequest request);
 
-    int countByStatus(BetStatus status);
+    int countByMarketIdAndStatus(UUID marketId, BetStatus status);
 
     void setBetValidated(UUID betId);
 

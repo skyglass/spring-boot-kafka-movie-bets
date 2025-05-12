@@ -12,7 +12,10 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import net.skycomposer.moviebets.common.dto.market.MarketResult;
 import net.skycomposer.moviebets.common.dto.market.commands.SettleMarketCommand;
+import net.skycomposer.moviebets.common.dto.market.events.MarketCloseConfirmedEvent;
+import net.skycomposer.moviebets.common.dto.market.events.MarketCloseFailedEvent;
 import net.skycomposer.moviebets.common.dto.market.events.MarketSettledEvent;
 import net.skycomposer.moviebets.market.service.MarketService;
 
@@ -38,11 +41,24 @@ public class MarketCommandHandler {
 
     @KafkaHandler
     @Transactional
-    public void handleCommand(@Payload SettleMarketCommand settleMarketCommand) {
+    public void handleSettleMarketCommand(@Payload SettleMarketCommand settleMarketCommand) {
         UUID marketId = settleMarketCommand.getMarketId();
         marketService.settle(marketId);
         MarketSettledEvent marketSettledEvent = new MarketSettledEvent(marketId, settleMarketCommand.getWinResult());
         kafkaTemplate.send(betSettleTopicName, marketId.toString(), marketSettledEvent);
+    }
+
+    @KafkaHandler
+    public void handleMarketCloseConfirmedEvent(@Payload MarketCloseConfirmedEvent marketCloseConfirmedEvent) {
+        UUID marketId = marketCloseConfirmedEvent.getMarketId();
+        MarketResult marketResult = marketCloseConfirmedEvent.getMarketResult();
+        marketService.marketCloseConfirmed(marketId, marketResult);
+    }
+
+    @KafkaHandler
+    public void handleMarketCloseFailedEvent(@Payload MarketCloseFailedEvent marketCloseFailedEvent) {
+        UUID marketId = marketCloseFailedEvent.getMarketId();
+        marketService.marketCloseFailed(marketId);
     }
 
 
