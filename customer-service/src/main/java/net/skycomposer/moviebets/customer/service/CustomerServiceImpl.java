@@ -137,25 +137,25 @@ public class CustomerServiceImpl implements CustomerService {
         CustomerEntity customerEntity = createEntityIfNotExists(customerId);
         BigDecimal currentBalance = customerEntity.getBalance();
         BigDecimal newBalance = currentBalance.subtract(funds);
-        if (newBalance.signum() == -1) {
-            throw new CustomerInsufficientFundsException(customerId, funds, currentBalance);
-        }
         if (walletRequestRepository.existsByRequestId(requestId)) {
             String message = String.format("Duplicate removeFunds request for customer %s, requestId = %s", customerId, requestId);
             logger.warn(message);
             return new WalletResponse(message,
-                    customerEntity.getUsername(),
+                    customerId,
                     currentBalance);
-        } else {
-            customerEntity.setBalance(newBalance);
-            customerRepository.save(customerEntity);
-            walletRequestRepository.save(WalletRequestEntity.builder()
-                    .requestId(requestId)
-                    .build());
-            var message = FUNDS_REMOVED_SUCCESSFULLY.formatted(currentBalance, newBalance);
-            logger.info(message);
-            return new WalletResponse(message, customerId, newBalance);
         }
+
+        if (newBalance.signum() == -1) {
+            throw new CustomerInsufficientFundsException(customerId, funds, currentBalance);
+        }
+        customerEntity.setBalance(newBalance);
+        customerRepository.save(customerEntity);
+        walletRequestRepository.save(WalletRequestEntity.builder()
+                .requestId(requestId)
+                .build());
+        var message = FUNDS_REMOVED_SUCCESSFULLY.formatted(currentBalance, newBalance);
+        logger.info(message);
+        return new WalletResponse(message, customerId, newBalance);
     }
 
     @Override

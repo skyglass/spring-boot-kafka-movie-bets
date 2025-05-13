@@ -15,7 +15,6 @@ import net.skycomposer.moviebets.common.dto.market.MarketResult;
 @Builder
 public class SettleBetsCommand {
     private UUID marketId;
-    private UUID requestId;
     BigDecimal winnerEarned;
     Integer totalCount;
     MarketResult winnerResult;

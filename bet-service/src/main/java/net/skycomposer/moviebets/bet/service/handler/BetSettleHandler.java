@@ -2,7 +2,6 @@ package net.skycomposer.moviebets.bet.service.handler;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -87,6 +86,10 @@ public class BetSettleHandler {
     @KafkaHandler
     @Transactional
     public void handleCloseMarketCommand(@Payload CloseMarketCommand command) {
+        boolean isMarketClosed = betService.isMarketClosed(command.getMarketId());
+        if (isMarketClosed) {
+            return;
+        }
         SumStakesData sumStakesData = betService.getBetsByMarket(command.getMarketId());
         if (winnerExists(sumStakesData)) {
             SumStakeData winner = getWinner(sumStakesData);
@@ -98,7 +101,7 @@ public class BetSettleHandler {
 
             logger.info("Settle Bets Started for market {}: totalCount: {}", command.getMarketId(), totalCount);
             betService.marketSettleStart(command.getMarketId(), totalCount);
-            SettleBetsCommand settleBetsCommand = new SettleBetsCommand(command.getMarketId(), UUID.randomUUID(), winnerEarned, totalCount, winResult);
+            SettleBetsCommand settleBetsCommand = new SettleBetsCommand(command.getMarketId(), winnerEarned, totalCount, winResult);
             kafkaTemplate.send(betSettleTopicName, command.getMarketId().toString(), settleBetsCommand);
         } else {
             MarketCloseFailedEvent marketCloseFailedEvent = new MarketCloseFailedEvent(command.getMarketId());
@@ -136,8 +139,7 @@ public class BetSettleHandler {
         }
 
         Integer totalSettled = betService.countSettledBets(command.getMarketId());
-        logger.info(
-                "Settle Bets: betsToSettle: {}, totalCount: {}, totalSettled: {}", betsToSettle.size(), totalCount, totalSettled);
+        logger.info("Settle Bets: betsToSettle: {}, totalCount: {}, totalSettled: {}", betsToSettle.size(), totalCount, totalSettled);
 
         if (CollectionUtils.isNotEmpty(betsToSettle)) {
             settleBets(command, winnerEarned, totalCount, winResult);
@@ -158,7 +160,6 @@ public class BetSettleHandler {
     private void settleBets(SettleBetsCommand command, BigDecimal winnerEarned, Integer totalCount, MarketResult winResult) {
         SettleBetsCommand settleBetsCommand = new SettleBetsCommand(
                 command.getMarketId(),
-                command.getRequestId(),
                 winnerEarned,
                 totalCount,
                 winResult);

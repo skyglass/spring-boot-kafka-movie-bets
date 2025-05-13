@@ -13,7 +13,5 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CloseMarketRequest {
     private UUID marketId;
-    private UUID requestId;
-    private MarketResult result;
 }
 

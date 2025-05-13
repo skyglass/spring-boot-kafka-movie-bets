@@ -123,5 +123,7 @@ market:
   close:
     topic:
       name: market-close
+    close-time:
+      extend-seconds: 300
     check-time:
       threshold-seconds: 5

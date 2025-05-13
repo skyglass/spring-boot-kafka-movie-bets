@@ -7,7 +7,10 @@ import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.skycomposer.moviebets.common.dto.market.*;
+import net.skycomposer.moviebets.common.dto.market.CloseMarketRequest;
+import net.skycomposer.moviebets.common.dto.market.MarketData;
+import net.skycomposer.moviebets.common.dto.market.MarketResponse;
+import net.skycomposer.moviebets.common.dto.market.MarketStatus;
 
 @Component
 @RequiredArgsConstructor
@@ -29,12 +32,10 @@ public class MarketTestHelper {
         return marketClient.open(marketData);
     }
 
-    public MarketResponse closeMarket(UUID marketId, MarketResult result) {
+    public MarketResponse closeMarket(UUID marketId) {
         CloseMarketRequest closeMarketRequest = CloseMarketRequest
                 .builder()
                 .marketId(marketId)
-                .requestId(UUID.randomUUID())
-                .result(result)
                 .build();
         return marketClient.close(closeMarketRequest);
     }

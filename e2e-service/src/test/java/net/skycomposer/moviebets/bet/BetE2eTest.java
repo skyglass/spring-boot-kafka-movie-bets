@@ -130,7 +130,7 @@ public class BetE2eTest extends E2eTest {
         assertThat(betData3.getResult(), equalTo(marketResult));
         assertThat(betData3.getStake(), equalTo(betStake3));
 
-        marketResponse = marketTestHelper.closeMarket(marketId, marketResult);
+        marketResponse = marketTestHelper.closeMarket(marketId);
         assertThat(marketResponse.getMarketId(), equalTo(marketId));
         assertThat(marketResponse.getMessage(), equalTo("Request to close Market %s has been sent successfully".formatted(marketId)));
 

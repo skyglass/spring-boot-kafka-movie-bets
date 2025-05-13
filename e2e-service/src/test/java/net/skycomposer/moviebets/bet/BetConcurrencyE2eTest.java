@@ -148,7 +148,7 @@ public class BetConcurrencyE2eTest extends E2eTest {
         }
 
 
-        marketTestHelper.closeMarket(marketId, betResult);
+        marketTestHelper.closeMarket(marketId);
 
         //After market is closed, make sure that all winner customers received money back
         for (int i = 0; i < numberOfBets; i++) {

@@ -3,6 +3,7 @@ package net.skycomposer.moviebets.market.service;
 import static java.time.Instant.now;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,14 +36,18 @@ public class MarketServiceImpl implements MarketService {
 
     private final String betSettleTopicName;
 
+    private final Integer marketCloseTimeExtendSeconds;
+
     public MarketServiceImpl(
             MarketRepository marketRepository,
             KafkaTemplate<String, Object> kafkaTemplate,
-            @Value("${bet.settle.topic.name}") String betSettleTopicName
+            @Value("${bet.settle.topic.name}") String betSettleTopicName,
+            @Value("${market.close.close-time.extend-seconds}") Integer marketCloseTimeExtendSeconds
     ) {
         this.marketRepository = marketRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.betSettleTopicName = betSettleTopicName;
+        this.marketCloseTimeExtendSeconds = marketCloseTimeExtendSeconds;
     }
 
 
@@ -103,12 +108,9 @@ public class MarketServiceImpl implements MarketService {
     public MarketResponse marketCloseFailed(UUID marketId) {
         MarketEntity marketEntity = marketRepository.findById(marketId)
                 .orElseThrow(() -> new MarketNotFoundException(marketId));
-        //this condition prevents duplicate MarketCloseFailedEvent message to increase close time twice
-        if (now().isAfter(marketEntity.getClosesAt())) {
-            Duration duration = Duration.between(marketEntity.getCreatedAt(), marketEntity.getClosesAt());
-            marketEntity.setClosesAt(marketEntity.getClosesAt().plus(duration));
-            marketRepository.save(marketEntity);
-        }
+        Instant newClosesAt = now().plus(Duration.ofSeconds(marketCloseTimeExtendSeconds));
+        marketEntity.setClosesAt(newClosesAt);
+        marketRepository.save(marketEntity);
         return new MarketResponse(marketId,
                 "Market close for market %s failed, because there is no winner yet: market close time was increased to continue".formatted(marketId));
     }
@@ -136,15 +138,14 @@ public class MarketServiceImpl implements MarketService {
     @Override
     @Transactional
     public MarketResponse cancel(CancelMarketRequest request) {
-        MarketEntity marketEntity = marketRepository.findById(request.getMarketId()).get();
-        if (marketEntity == null) {
-            throw new MarketNotFoundException(request.getMarketId());
-        }
+        var marketId = request.getMarketId();
+        MarketEntity marketEntity = marketRepository.findById(marketId).orElseThrow(
+                () -> new MarketNotFoundException(marketId));
         marketEntity.setOpen(false);
         marketEntity.setStatus(MarketStatus.CANCELLED);
-        marketEntity = marketRepository.save(marketEntity);
-        return new MarketResponse(marketEntity.getId(),
-                "Market %s cancelled successfully, reason: %s".formatted(marketEntity.getId(), request.getReason()));
+        marketRepository.save(marketEntity);
+        return new MarketResponse(marketId,
+                "Market %s cancelled successfully, reason: %s".formatted(marketId, request.getReason()));
     }
 
     @Override
