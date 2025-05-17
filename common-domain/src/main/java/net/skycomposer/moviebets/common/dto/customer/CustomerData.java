@@ -8,15 +8,10 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WalletResponse {
-
-    private String message;
-
+@Builder
+public class CustomerData {
     private String customerId;
-
-    private BigDecimal currentBalance;
+    private BigDecimal balance;
 }
-

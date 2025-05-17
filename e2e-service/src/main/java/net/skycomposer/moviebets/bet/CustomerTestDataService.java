@@ -23,7 +23,7 @@ public class CustomerTestDataService extends JdbcTestDataService {
     @Override
     public void resetDatabase() {
         executeString("DELETE FROM customer");
-        executeString("DELETE FROM wallet_request");
+        executeString("DELETE FROM fund_request");
     }
 
 }

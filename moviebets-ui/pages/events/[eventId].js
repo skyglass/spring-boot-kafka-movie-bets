@@ -50,7 +50,7 @@ const EventShow = () => {
 
     return (
         <div>
-            <h1>{event.fixture.homeTeam} vs {event.fixture.awayTeam}</h1>
+            <h1>{event.item1} vs {event.item2}</h1>
 
             {errors && (
                 <div className="alert alert-danger">
@@ -62,46 +62,24 @@ const EventShow = () => {
                 </div>
             )}
 
-            <h3>Fixture Information</h3>
-            <div className="fixture-data">
-                {event.fixture ? (
-                    <div>
-                        <p><strong>Fixture ID:</strong> {event.fixture.id}</p>
-                        <p><strong>Home Team:</strong> {event.fixture.homeTeam}</p>
-                        <p><strong>Away Team:</strong> {event.fixture.awayTeam}</p>
-                    </div>
-                ) : (
-                    <p>No fixture data available.</p>
-                )}
-            </div>
-
-            <h3>Odds Information</h3>
-            <div className="odds-data">
-                {event.odds ? (
-                    <div>
-                        <p><strong>Win Home:</strong> {event.odds.winHome}</p>
-                        <p><strong>Win Away:</strong> {event.odds.winAway}</p>
-                        <p><strong>Tie:</strong> {event.odds.tie}</p>
-                    </div>
-                ) : (
-                    <p>No odds data available.</p>
-                )}
-            </div>
-
-            <h3>Additional Information</h3>
-            <div className="additional-info">
-                {event.opensAt && (
-                    <p><strong>Opened At:</strong> {new Date(event.opensAt).toLocaleString()}</p>
-                )}
-                {/* Add the Result field */}
-                <p><strong>Result:</strong> {getResultText(event.open, event.result)}</p>
+            <h3>Movie Bet Information</h3>
+            <div className="market-data">
+                <div>
+                    <p><strong>Movie 1:</strong> {event.item1}</p>
+                    <p><strong>Movie 2:</strong> {event.item2}</p>
+                </div>
+                <div className="additional-info">
+                    {event.closesAt && (
+                        <p><strong>Closes At:</strong> {new Date(event.closesAt).toLocaleString()}</p>
+                    )}
+                </div>
             </div>
 
             <button onClick={placeBet} className="btn btn-primary">
                 Place Bet
             </button>
         </div>
-    );
+    )
 };
 
 export default EventShow;

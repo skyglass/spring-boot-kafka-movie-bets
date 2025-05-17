@@ -11,20 +11,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import feign.FeignException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.skycomposer.moviebets.common.E2eTest;
 import net.skycomposer.moviebets.common.dto.bet.BetData;
 import net.skycomposer.moviebets.common.dto.bet.BetResponse;
 import net.skycomposer.moviebets.common.dto.bet.BetStatus;
-import net.skycomposer.moviebets.common.dto.customer.WalletResponse;
+import net.skycomposer.moviebets.common.dto.customer.CustomerResponse;
 import net.skycomposer.moviebets.common.dto.market.MarketData;
 import net.skycomposer.moviebets.common.dto.market.MarketResponse;
 import net.skycomposer.moviebets.common.dto.market.MarketResult;
@@ -50,25 +48,20 @@ public class BetConcurrencyE2eTest extends E2eTest {
     @SneakyThrows
     void createParallelBetsThenFundsAreZeroTest() {
         String customerId = UUID.randomUUID().toString();
-        UUID walletRequestId = UUID.randomUUID();
-        int walletBalance = 500;
+        UUID fundRequestId = UUID.randomUUID();
+        int customerBalance = 500;
         int addFundsAmount = 5;
-        int walletBeforeMarketCloseBalance = 0;
-        int walletAfterMarketCloseBalance = 10;
+        int beforeMarketCloseBalance = 0;
+        int afterMarketCloseBalance = 10;
         UUID marketId;
         int betStake = 10;
         MarketResult betResult = MarketResult.ITEM2_WINS;
-        AtomicInteger counter = new  AtomicInteger(0);
 
-        WalletResponse walletResponse = customerTestHelper.createWallet(customerId, walletRequestId, walletBalance);
-        Thread.sleep(800);
+        CustomerResponse customerResponse = customerTestHelper.createCustomer(customerId, fundRequestId, customerBalance);
+        Thread.sleep(1200);
         //Duplicate request with the same request id to make sure that duplicates are handled correctly
-        try {
-            walletResponse = customerTestHelper.createWallet(customerId, walletRequestId, walletBalance);
-        } catch (FeignException.InternalServerError e) {
-            //expected
-        }
-        assertThat(walletResponse.getMessage(), equalTo("Duplicate addFunds request for customer %s, requestId = %s".formatted(customerId, walletRequestId)));
+        customerResponse = customerTestHelper.createCustomer(customerId, fundRequestId, customerBalance);
+        assertThat(customerResponse.getMessage(), equalTo("Duplicate addFunds request for customer %s, requestId = %s".formatted(customerId, fundRequestId)));
         MarketResponse marketResponse = marketTestHelper.createMarket();
         marketId = marketResponse.getMarketId();
         assertThat(marketResponse.getMessage(), equalTo("Market %s opened successfully".formatted(marketId)));
@@ -82,10 +75,10 @@ public class BetConcurrencyE2eTest extends E2eTest {
             customers.add(UUID.randomUUID());
         }
 
-        List<CompletableFuture<WalletResponse>> addedFunds = new ArrayList<>();
+        List<CompletableFuture<CustomerResponse>> addedFunds = new ArrayList<>();
         for (int i = 0; i < numberOfBets; i++) {
             String currentCustomerId = customers.get(i).toString();
-            CompletableFuture<WalletResponse> addFundsResult = customerTestHelper
+            CompletableFuture<CustomerResponse> addFundsResult = customerTestHelper
                     .asyncAddFunds(currentCustomerId, UUID.randomUUID(), addFundsAmount);
             addedFunds.add(addFundsResult);
         }
@@ -99,10 +92,10 @@ public class BetConcurrencyE2eTest extends E2eTest {
             createdBets.add(betResponse);
         }
 
-        List<CompletableFuture<WalletResponse>> addedFunds2 = new ArrayList<>();
+        List<CompletableFuture<CustomerResponse>> addedFunds2 = new ArrayList<>();
         for (int i = 0; i < numberOfBets; i++) {
             String currentCustomerId = customers.get(i).toString();
-            CompletableFuture<WalletResponse> addFundsResult = customerTestHelper
+            CompletableFuture<CustomerResponse> addFundsResult = customerTestHelper
                     .asyncAddFunds(currentCustomerId, UUID.randomUUID(), addFundsAmount);
             addedFunds2.add(addFundsResult);
         }
@@ -137,13 +130,13 @@ public class BetConcurrencyE2eTest extends E2eTest {
             assertTimeoutPreemptively(
                     Duration.ofSeconds(20)
                     , () -> {
-                        var result = customerTestHelper.findWalletById(currentCustomerId);
-                        while (result.getBalance().doubleValue() != walletBeforeMarketCloseBalance) {
+                        var result = customerTestHelper.findCustomerById(currentCustomerId);
+                        while (result.getBalance().doubleValue() != beforeMarketCloseBalance) {
                             Thread.sleep(100);
-                            result = customerTestHelper.findWalletById(currentCustomerId);
+                            result = customerTestHelper.findCustomerById(currentCustomerId);
                         }
-                        assertThat(result.getBalance().compareTo(new BigDecimal(walletBeforeMarketCloseBalance)), equalTo(0));
-                    }, () -> String.format("Available wallet funds after market update are incorrect for customerId = %s: amount = %d", customerId, customerTestHelper.findWalletById(customerId).getBalance())
+                        assertThat(result.getBalance().compareTo(new BigDecimal(beforeMarketCloseBalance)), equalTo(0));
+                    }, () -> String.format("Available customer balance after market update is incorrect for customerId = %s: balance = %d", customerId, customerTestHelper.findCustomerById(customerId).getBalance())
             );
         }
 
@@ -158,14 +151,14 @@ public class BetConcurrencyE2eTest extends E2eTest {
             assertTimeoutPreemptively(
                     Duration.ofSeconds(20)
                     , () -> {
-                        var result = customerTestHelper.findWalletById(currentCustomerId);
-                        while (result.getBalance().doubleValue() != walletAfterMarketCloseBalance) {
+                        var result = customerTestHelper.findCustomerById(currentCustomerId);
+                        while (result.getBalance().doubleValue() != afterMarketCloseBalance) {
                             log.info("--> " + result.getBalance());
                             Thread.sleep(100);
-                            result = customerTestHelper.findWalletById(currentCustomerId);
+                            result = customerTestHelper.findCustomerById(currentCustomerId);
                         }
-                        assertThat(result.getBalance().compareTo(new BigDecimal(walletAfterMarketCloseBalance)), equalTo(0));
-                    }, () -> String.format("Available wallet funds after market close are incorrect for customerId = %s: amount = %.2f", currentCustomerId, customerTestHelper.findWalletById(currentCustomerId).getBalance())
+                        assertThat(result.getBalance().compareTo(new BigDecimal(afterMarketCloseBalance)), equalTo(0));
+                    }, () -> String.format("Available customer balance after market close is incorrect for customerId = %s: amount = %.2f", currentCustomerId, customerTestHelper.findCustomerById(currentCustomerId).getBalance())
             );
         }
 

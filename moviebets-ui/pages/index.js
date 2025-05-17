@@ -23,36 +23,26 @@ const LandingPage = () => {
         if (open) {
             return "OPEN";
         }
-        return result;
+        switch (result) {
+            case "ITEM1_WINS":
+                return "Movie 1 Wins";
+            case "ITEM2_WINS":
+                return "Movie 2 Wins";
+            default:
+                return "Unknown";
+        }
     };
 
     const eventList = events.map((event) => {
         return (
             <tr key={event.marketId}>
-                {/* Market Fixture */}
-                <td>{event.fixture.homeTeam} vs {event.fixture.awayTeam}</td>
+                <td>{event.item1}</td>
+                <td>{event.item2}</td>
 
-                {/* Odds (Grouped) */}
-                <td>
-                    <table>
-                        <tbody>
-                        <tr>
-                            <td><strong>Home Win:</strong> {event.odds.winHome}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Away Win:</strong> {event.odds.winAway}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Tie:</strong> {event.odds.tie}</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </td>
-
-                {/* Result */}
                 <td>{getResultText(event.open, event.result)}</td>
 
-                {/* Link to view details */}
+                <td>{event.closesAt}</td>
+
                 <td>
                     <Link href={`/events/${event.marketId}`}>
                         View
@@ -83,9 +73,10 @@ const LandingPage = () => {
             <table className="table">
                 <thead>
                 <tr>
-                    <th>Fixture</th>
-                    <th>Odds</th>
+                    <th>Movie 1</th>
+                    <th>Movie 2</th>
                     <th>Result</th>
+                    <th>Result Date</th>
                     <th>Link</th>
                     <th>Action</th>
                     <th>View Bets</th>

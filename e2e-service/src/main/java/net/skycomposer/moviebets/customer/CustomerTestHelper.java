@@ -12,8 +12,8 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import net.skycomposer.moviebets.common.dto.customer.WalletData;
-import net.skycomposer.moviebets.common.dto.customer.WalletResponse;
+import net.skycomposer.moviebets.common.dto.customer.CustomerData;
+import net.skycomposer.moviebets.common.dto.customer.CustomerResponse;
 
 @Component
 @RequiredArgsConstructor
@@ -23,20 +23,20 @@ public class CustomerTestHelper {
     private final CustomerClient customerClient;
 
     @Async
-    public CompletableFuture<WalletResponse> asyncAddFunds(String walletId, UUID requestId, int funds) {
-        return CompletableFuture.completedFuture(addFunds(walletId, requestId, funds));
+    public CompletableFuture<CustomerResponse> asyncAddFunds(String customerId, UUID requestId, int funds) {
+        return CompletableFuture.completedFuture(addFunds(customerId, requestId, funds));
     }
 
-    public WalletResponse createWallet(String walletId, UUID requestId, int funds) {
-        return addFunds(walletId, requestId, funds);
+    public CustomerResponse createCustomer(String customerId, UUID requestId, int funds) {
+        return addFunds(customerId, requestId, funds);
     }
 
     @SneakyThrows
-    public WalletResponse addFunds(String walletId, UUID requestId, int funds) {
-        WalletResponse response = null;
+    public CustomerResponse addFunds(String customerId, UUID requestId, int funds) {
+        CustomerResponse response = null;
         while (response == null) {
             try {
-                response = customerClient.addFunds(walletId, requestId, funds);
+                response = customerClient.addFunds(customerId, requestId, funds);
             } catch (FeignException.TooManyRequests e) {
                 TimeUnit.MILLISECONDS.sleep(Duration.ofSeconds(1).toMillis());
             }
@@ -44,12 +44,8 @@ public class CustomerTestHelper {
         return response;
     }
 
-    public WalletResponse removeFunds(String walletId, UUID requestId, int funds) {
-        return customerClient.removeFunds(walletId, requestId, funds);
-    }
-
-    public WalletData findWalletById(String walletId) {
-        return customerClient.findWalletById(walletId);
+    public CustomerData findCustomerById(String customerId) {
+        return customerClient.findCustomerById(customerId);
     }
 
 

@@ -33,12 +33,9 @@ const NewBet = () => {
 
   // Map result to corresponding odds
   const resultOptions = [
-    { value: 0, label: "Home Win", odds: event.odds.winHome },
-    { value: 1, label: "Away Win", odds: event.odds.winAway },
-    { value: 2, label: "Tie", odds: event.odds.tie },
+    { value: 0, label: event.item1 },
+    { value: 1, label: event.item2 },
   ];
-
-  const selectedOdds = resultOptions.find((opt) => opt.value === selectedResult)?.odds || 0;
 
   const handleStakeChange = (e) => {
     const value = e.target.value;
@@ -50,13 +47,17 @@ const NewBet = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const requestId = uuidv4();
+    const cancelRequestId = uuidv4();
+
     const betData = {
       betId: uuidv4(),
       marketId: eventId,
-      marketName: `${event.fixture.homeTeam} vs ${event.fixture.awayTeam}`,
-      walletId: user.name,
+      marketName: `${event.item1} vs ${event.item2}`,
+      customerId: user.name,
       result: selectedResult,
-      stake: Number(stake),
+      requestId: requestId,
+      cancelRequestId: cancelRequestId,
     };
 
     try {
@@ -80,20 +81,10 @@ const NewBet = () => {
         <h2 className="h2 font-weight-bold mb-4">Place a Bet</h2>
 
         <form onSubmit={handleSubmit}>
-          {/* Event Name (readonly) */}
-          <div className="mb-4">
-            <label className="form-label font-weight-semibold">Event Name</label>
-            <input
-                type="text"
-                value={`${event.fixture.homeTeam} vs ${event.fixture.awayTeam}`}
-                readOnly
-                className="form-control bg-light"
-            />
-          </div>
 
           {/* Result Selection */}
           <div className="mb-4">
-            <label className="form-label font-weight-semibold">Result</label>
+            <label className="form-label font-weight-semibold">Select Movie</label>
             <select
                 className="form-select"
                 value={selectedResult}
@@ -105,29 +96,6 @@ const NewBet = () => {
                   </option>
               ))}
             </select>
-          </div>
-
-          {/* Odds (readonly) */}
-          <div className="mb-4">
-            <label className="form-label font-weight-semibold">Odds</label>
-            <input
-                type="text"
-                value={selectedOdds}
-                readOnly
-                className="form-control bg-light"
-            />
-          </div>
-
-          {/* Stake */}
-          <div className="mb-4">
-            <label className="form-label font-weight-semibold">Stake</label>
-            <input
-                type="text"
-                value={stake}
-                onChange={handleStakeChange}
-                className="form-control"
-                placeholder=" Enter stake (must be > 0)"
-            />
           </div>
 
           {/* Submit Button */}

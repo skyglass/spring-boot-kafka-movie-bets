@@ -13,15 +13,14 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import net.skycomposer.moviebets.common.dto.customer.Customer;
-import net.skycomposer.moviebets.common.dto.customer.WalletData;
-import net.skycomposer.moviebets.common.dto.customer.WalletResponse;
+import net.skycomposer.moviebets.common.dto.customer.CustomerData;
+import net.skycomposer.moviebets.common.dto.customer.CustomerResponse;
 import net.skycomposer.moviebets.common.dto.customer.commands.AddFundsCommand;
 import net.skycomposer.moviebets.common.dto.customer.commands.RemoveFundsCommand;
 import net.skycomposer.moviebets.customer.dao.entity.CustomerEntity;
-import net.skycomposer.moviebets.customer.dao.entity.WalletRequestEntity;
+import net.skycomposer.moviebets.customer.dao.entity.FundRequestEntity;
 import net.skycomposer.moviebets.customer.dao.repository.CustomerRepository;
-import net.skycomposer.moviebets.customer.dao.repository.WalletRequestRepository;
+import net.skycomposer.moviebets.customer.dao.repository.FundRequestRepository;
 import net.skycomposer.moviebets.customer.exception.CustomerInsufficientFundsException;
 import net.skycomposer.moviebets.customer.exception.CustomerNotFoundException;
 
@@ -40,7 +39,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
 
-    private final WalletRequestRepository walletRequestRepository;
+    private final FundRequestRepository fundRequestRepository;
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -48,26 +47,26 @@ public class CustomerServiceImpl implements CustomerService {
 
     public CustomerServiceImpl(
             CustomerRepository customerRepository,
-            WalletRequestRepository walletRequestRepository,
+            FundRequestRepository fundRequestRepository,
             KafkaTemplate<String, Object> kafkaTemplate,
             @Value("${customer.commands.topic.name}") String customerCommandsTopicName
     ) {
         this.customerRepository = customerRepository;
-        this.walletRequestRepository = walletRequestRepository;
+        this.fundRequestRepository = fundRequestRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.customerCommandsTopicName = customerCommandsTopicName;
     }
 
     @Override
     @Transactional
-    public WalletResponse addFundsAsync(String customerId, UUID requestId, BigDecimal funds) {
+    public CustomerResponse addFundsAsync(String customerId, UUID requestId, BigDecimal funds) {
         CustomerEntity customerEntity = createEntityIfNotExists(customerId);
         BigDecimal currentBalance = customerEntity.getBalance();
         BigDecimal newBalance = currentBalance.add(funds);
-        if (walletRequestRepository.existsByRequestId(requestId)) {
+        if (fundRequestRepository.existsByRequestId(requestId)) {
             String message = String.format("Duplicate addFunds request for customer %s, requestId = %s", customerId, requestId);
             logger.warn(message);
-            return new WalletResponse(message,
+            return new CustomerResponse(message,
                     customerEntity.getUsername(),
                     currentBalance);
         } else {
@@ -78,46 +77,46 @@ public class CustomerServiceImpl implements CustomerService {
             kafkaTemplate.send(customerCommandsTopicName, addFundsCommand.getCustomerId(), addFundsCommand);
             var message = FUNDS_QUEUED_FOR_ADDING_SUCCESSFULLY.formatted(currentBalance, newBalance);
             logger.info(message);
-            return new WalletResponse(message, customerId, newBalance);
+            return new CustomerResponse(message, customerId, newBalance);
         }
     }
 
     @Override
     @Transactional
-    public WalletResponse addFunds(String customerId, UUID requestId, BigDecimal funds) {
+    public CustomerResponse addFunds(String customerId, UUID requestId, BigDecimal funds) {
         CustomerEntity customerEntity = createEntityIfNotExists(customerId);
         BigDecimal currentBalance = customerEntity.getBalance();
         BigDecimal newBalance = currentBalance.add(funds);
-        if (walletRequestRepository.existsByRequestId(requestId)) {
+        if (fundRequestRepository.existsByRequestId(requestId)) {
             String message = String.format("Duplicate addFunds request for customer %s, requestId = %s", customerId, requestId);
             logger.warn(message);
-            return new WalletResponse(message,
+            return new CustomerResponse(message,
                     customerEntity.getUsername(),
                     currentBalance);
         } else {
             customerEntity.setBalance(newBalance);
             customerRepository.save(customerEntity);
-            walletRequestRepository.save(
-                    WalletRequestEntity
+            fundRequestRepository.save(
+                    FundRequestEntity
                     .builder()
                     .requestId(requestId)
                     .build());
             var message = FUNDS_ADDED_SUCCESSFULLY.formatted(currentBalance, newBalance);
             logger.info(message);
-            return new WalletResponse(message, customerId, newBalance);
+            return new CustomerResponse(message, customerId, newBalance);
         }
     }
 
     @Override
     @Transactional
-    public WalletResponse removeFundsAsync(String customerId, UUID requestId, BigDecimal funds) {
+    public CustomerResponse removeFundsAsync(String customerId, UUID requestId, BigDecimal funds) {
         CustomerEntity customerEntity = createEntityIfNotExists(customerId);
         BigDecimal currentBalance = customerEntity.getBalance();
         BigDecimal newBalance = currentBalance.subtract(funds);
-        if (walletRequestRepository.existsByRequestId(requestId)) {
+        if (fundRequestRepository.existsByRequestId(requestId)) {
             String message = String.format("Duplicate removeFunds request for customer %s, requestId = %s", customerId, requestId);
             logger.warn(message);
-            return new WalletResponse(message,
+            return new CustomerResponse(message,
                     customerEntity.getUsername(),
                     currentBalance);
         } else {
@@ -128,19 +127,19 @@ public class CustomerServiceImpl implements CustomerService {
             kafkaTemplate.send(customerCommandsTopicName, customerId, removeFundsCommand);
             var message = FUNDS_QUEUED_FOR_REMOVAL_SUCCESSFULLY.formatted(currentBalance, newBalance);
             logger.info(message);
-            return new WalletResponse(message, customerId, newBalance);
+            return new CustomerResponse(message, customerId, newBalance);
         }
     }
 
     @Override
-    public WalletResponse removeFunds(String customerId, UUID requestId, BigDecimal funds) throws CustomerInsufficientFundsException {
+    public CustomerResponse removeFunds(String customerId, UUID requestId, BigDecimal funds) throws CustomerInsufficientFundsException {
         CustomerEntity customerEntity = createEntityIfNotExists(customerId);
         BigDecimal currentBalance = customerEntity.getBalance();
         BigDecimal newBalance = currentBalance.subtract(funds);
-        if (walletRequestRepository.existsByRequestId(requestId)) {
+        if (fundRequestRepository.existsByRequestId(requestId)) {
             String message = String.format("Duplicate removeFunds request for customer %s, requestId = %s", customerId, requestId);
             logger.warn(message);
-            return new WalletResponse(message,
+            return new CustomerResponse(message,
                     customerId,
                     currentBalance);
         }
@@ -150,24 +149,12 @@ public class CustomerServiceImpl implements CustomerService {
         }
         customerEntity.setBalance(newBalance);
         customerRepository.save(customerEntity);
-        walletRequestRepository.save(WalletRequestEntity.builder()
+        fundRequestRepository.save(FundRequestEntity.builder()
                 .requestId(requestId)
                 .build());
         var message = FUNDS_REMOVED_SUCCESSFULLY.formatted(currentBalance, newBalance);
         logger.info(message);
-        return new WalletResponse(message, customerId, newBalance);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Customer findCustomerById(String customerId) {
-        CustomerEntity customerEntity = customerRepository.findByUsername(customerId)
-                .orElseThrow(() -> new CustomerNotFoundException(customerId));
-        return Customer.builder()
-                .username(customerEntity.getUsername())
-                .fullName(customerEntity.getFullName())
-                .balance(customerEntity.getBalance())
-                .build();
+        return new CustomerResponse(message, customerId, newBalance);
     }
 
     private CustomerEntity createEntityIfNotExists(String customerId) {
@@ -182,26 +169,20 @@ public class CustomerServiceImpl implements CustomerService {
         return customerEntity;
     }
 
+
     @Override
     @Transactional(readOnly = true)
-    public List<Customer> findAll() {
-        return customerRepository.findAll().stream()
-                .map(entity -> new Customer(entity.getId(), entity.getUsername(), entity.getFullName(), entity.getBalance()))
-                .collect(Collectors.toList());
+    public CustomerData findCustomerById(String customerId) {
+        CustomerEntity customerEntity = customerRepository.findByUsername(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException(customerId));
+        return new CustomerData(customerId, customerEntity.getBalance());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public WalletData findWalletById(String customerId) {
-        Customer customer = findCustomerById(customerId);
-        return new WalletData(customerId, customer.getBalance());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<WalletData> findAllWallets() {
+    public List<CustomerData> findAll() {
         return customerRepository.findAll().stream()
-                .map(entity -> new WalletData(entity.getUsername(), entity.getBalance()))
+                .map(entity -> new CustomerData(entity.getUsername(), entity.getBalance()))
                 .collect(Collectors.toList());
     }
 }

@@ -5,13 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class WalletData {
-    private String walletId;
-    private BigDecimal balance;
+public class CustomerList {
+    private List<CustomerData> customers;
 }

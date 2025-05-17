@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import net.skycomposer.moviebets.common.dto.customer.WalletData;
-import net.skycomposer.moviebets.common.dto.customer.WalletResponse;
+import net.skycomposer.moviebets.common.dto.customer.CustomerData;
+import net.skycomposer.moviebets.common.dto.customer.CustomerResponse;
 import net.skycomposer.moviebets.customer.service.CustomerService;
 
 @RestController
@@ -22,29 +22,29 @@ public class CustomerController {
 
   private final CustomerService customerService;
 
-  @GetMapping("/get-wallet/{walletId}")
-  public WalletData findWalletById(@PathVariable String walletId) {
-    return customerService.findWalletById(walletId);
+  @GetMapping("/get-customer/{customerId}")
+  public CustomerData findCustomerById(@PathVariable String customerId) {
+    return customerService.findCustomerById(customerId);
   }
 
   @GetMapping("/all")
-  public List<WalletData> findAll() {
-    return customerService.findAllWallets();
+  public List<CustomerData> findAll() {
+    return customerService.findAll();
   }
 
-  @PostMapping("/register/{walletId}/{requestId}")
-  public WalletResponse addFunds(@PathVariable String walletId, @PathVariable UUID requestId) {
-    return customerService.addFunds(walletId, requestId, new BigDecimal(DEFAULT_REGISTERED_CUSTOMER_AMOUNT));
+  @PostMapping("/register/{customerId}/{requestId}")
+  public CustomerResponse addFunds(@PathVariable String customerId, @PathVariable UUID requestId) {
+    return customerService.addFunds(customerId, requestId, new BigDecimal(DEFAULT_REGISTERED_CUSTOMER_AMOUNT));
   }
 
-  @PostMapping("/add-funds/{walletId}/{requestId}/{funds}")
-  public WalletResponse addFunds(@PathVariable String walletId, @PathVariable UUID requestId, @PathVariable Integer funds) {
-    return customerService.addFundsAsync(walletId, requestId, new BigDecimal(funds));
+  @PostMapping("/add-funds/{customerId}/{requestId}/{funds}")
+  public CustomerResponse addFunds(@PathVariable String customerId, @PathVariable UUID requestId, @PathVariable Integer funds) {
+    return customerService.addFundsAsync(customerId, requestId, new BigDecimal(funds));
   }
 
-  @PostMapping("/remove-funds/{walletId}/{requestId}/{funds}")
-  public WalletResponse removeFunds(@PathVariable String walletId, @PathVariable UUID requestId, @PathVariable Integer funds) {
-    return customerService.removeFundsAsync(walletId, requestId, new BigDecimal(funds));
+  @PostMapping("/remove-funds/{customerId}/{requestId}/{funds}")
+  public CustomerResponse removeFunds(@PathVariable String customerId, @PathVariable UUID requestId, @PathVariable Integer funds) {
+    return customerService.removeFundsAsync(customerId, requestId, new BigDecimal(funds));
   }
 
 }

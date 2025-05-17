@@ -16,6 +16,8 @@ CREATE TABLE market (
 );
 
 CREATE INDEX idx_market_status ON market (status);
+CREATE INDEX idx_market_status_closes_at ON market (status, closes_at);
+CREATE INDEX idx_market_closes_at ON market (closes_at);
 
 DROP TABLE IF EXISTS market_close_check;
 

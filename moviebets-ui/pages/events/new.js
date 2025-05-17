@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import { useState, useEffect } from 'react';
 import Router from 'next/router';
 import { useKeycloak } from "../../auth/provider/KeycloakProvider";
 import buildClient from "../../api/build-client";
@@ -6,41 +6,90 @@ import { v4 as uuidv4 } from 'uuid';
 
 const NewEvent = () => {
   const { user } = useKeycloak();
-  const [homeTeam, setHomeTeam] = useState('');
-  const [awayTeam, setAwayTeam] = useState('');
-  const [winHome, setWinHome] = useState('');
-  const [winAway, setWinAway] = useState('');
-  const [tie, setTie] = useState('');
+  const [item1, setItem1] = useState('');
+  const [item2, setItem2] = useState('');
+  const [durationValue, setDurationValue] = useState('');
+  const [durationUnit, setDurationUnit] = useState('minutes');
   const [errors, setErrors] = useState(null);
+  const [closesAtPreview, setClosesAtPreview] = useState('');
+
+  const computeClosesAt = () => {
+    const value = parseInt(durationValue, 10);
+    if (isNaN(value) || value <= 0) {
+      return null;
+    }
+
+    const now = Date.now();
+    let millis = 0;
+
+    switch (durationUnit) {
+      case 'seconds':
+        millis = value * 1000;
+        break;
+      case 'minutes':
+        millis = value * 60 * 1000;
+        break;
+      case 'hours':
+        millis = value * 60 * 60 * 1000;
+        break;
+      case 'days':
+        millis = value * 24 * 60 * 60 * 1000;
+        break;
+      default:
+        return null;
+    }
+
+    return new Date(now + millis).toISOString();
+  };
+
+  useEffect(() => {
+    const result = computeClosesAt();
+    if (result) {
+      setClosesAtPreview(new Date(result).toLocaleString());
+    } else {
+      setClosesAtPreview('');
+    }
+  }, [durationValue, durationUnit]);
 
   const onSubmit = async (event) => {
     event.preventDefault();
     setErrors(null);
 
+    const validationErrors = [];
+
+    if (!item1.trim()) {
+      validationErrors.push({ message: "Movie 1 must not be empty" });
+    }
+
+    if (!item2.trim()) {
+      validationErrors.push({ message: "Movie 2 must not be empty" });
+    }
+
+    const closesAt = computeClosesAt();
+    if (!closesAt) {
+      validationErrors.push({ message: "Please enter a valid duration greater than 0" });
+    }
+
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     try {
       const client = buildClient({ req: {}, currentUser: user });
-      const fixtureData = {
-        id: uuidv4(), // Unique fixture ID
-        homeTeam,
-        awayTeam,
-      };
-      const oddsData = {
-        winHome: parseFloat(winHome),
-        winAway: parseFloat(winAway),
-        tie: parseFloat(tie),
-      };
 
       const data = {
-        marketId: uuidv4(), // Unique market ID
-        fixture: fixtureData,
-        odds: oddsData,
-        opensAt: Date.now(), // Example timestamp; adjust as needed
+        marketId: uuidv4(),
+        item1,
+        item2,
+        closesAt,
       };
 
       await client.post('/api/market/open', data);
       Router.push('/');
     } catch (err) {
-      setErrors(err.response?.data?.errors || [{ message: "An error occurred" }]);
+      const msg = err.message || "An error occurred";
+      setErrors([{ message: msg }]);
     }
   };
 
@@ -48,54 +97,56 @@ const NewEvent = () => {
       <div>
         <h1>Create Event</h1>
         <form onSubmit={onSubmit}>
-          {/* Fixture Data Group */}
           <div className="form-group">
-            <h3>Fixture Details</h3>
-            <label>Home Team</label>
+            <h3>Movie Bet Details</h3>
+            <label>Movie 1</label>
             <input
-                value={homeTeam}
-                onChange={(e) => setHomeTeam(e.target.value)}
+                value={item1}
+                onChange={(e) => setItem1(e.target.value)}
                 className="form-control"
             />
           </div>
           <div className="form-group">
-            <label>Away Team</label>
+            <label>Movie 2</label>
             <input
-                value={awayTeam}
-                onChange={(e) => setAwayTeam(e.target.value)}
+                value={item2}
+                onChange={(e) => setItem2(e.target.value)}
                 className="form-control"
             />
           </div>
 
-          {/* Odds Data Group */}
           <div className="form-group">
-            <h3>Odds</h3>
-            <label>Win Home Odds</label>
-            <input
-                value={winHome}
-                onChange={(e) => setWinHome(e.target.value)}
-                className="form-control"
-            />
-          </div>
-          <div className="form-group">
-            <label>Win Away Odds</label>
-            <input
-                value={winAway}
-                onChange={(e) => setWinAway(e.target.value)}
-                className="form-control"
-            />
-          </div>
-          <div className="form-group">
-            <label>Tie Odds</label>
-            <input
-                value={tie}
-                onChange={(e) => setTie(e.target.value)}
-                className="form-control"
-            />
+            <label>Closes In:</label>
+            <div className="d-flex">
+              <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={durationValue}
+                  onChange={(e) => setDurationValue(e.target.value)}
+                  className="form-control me-2"
+                  placeholder="Duration"
+              />
+              <select
+                  value={durationUnit}
+                  onChange={(e) => setDurationUnit(e.target.value)}
+                  className="form-control"
+              >
+                <option value="seconds">Seconds</option>
+                <option value="minutes">Minutes</option>
+                <option value="hours">Hours</option>
+                <option value="days">Days</option>
+              </select>
+            </div>
+            {closesAtPreview && (
+                <small className="form-text text-muted mt-1">
+                  Will close at: <strong>{closesAtPreview}</strong>
+                </small>
+            )}
           </div>
 
           {errors && (
-              <div className="alert alert-danger">
+              <div className="alert alert-danger mt-3">
                 <ul>
                   {errors.map((err, index) => (
                       <li key={index}>{err.message}</li>
@@ -104,7 +155,7 @@ const NewEvent = () => {
               </div>
           )}
 
-          <button className="btn btn-primary">Submit</button>
+          <button className="btn btn-primary mt-3">Submit</button>
         </form>
       </div>
   );

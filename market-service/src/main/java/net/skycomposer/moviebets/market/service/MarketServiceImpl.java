@@ -77,6 +77,7 @@ public class MarketServiceImpl implements MarketService {
         marketEntity.setStatus(market.getStatus());
         marketEntity.setResult(market.getResult());
         marketEntity.setClosesAt(market.getClosesAt());
+        marketEntity.setStatus(MarketStatus.OPENED);
         marketEntity = marketRepository.save(marketEntity);
         return new MarketResponse(marketEntity.getId(),
                 "Market %s opened successfully".formatted(marketEntity.getId()));
@@ -151,7 +152,7 @@ public class MarketServiceImpl implements MarketService {
     @Override
     @Transactional(readOnly = true)
     public List<MarketData> findAll() {
-        return marketRepository.findAll().stream()
+        return marketRepository.findAllByOrderByClosesAtDesc().stream()
                 .map(entity -> new MarketData(entity.getId(), entity.getItem1(), entity.getItem2(),
                         entity.getStatus(), entity.getResult(), entity.getClosesAt(), entity.getOpen()))
                 .collect(Collectors.toList());

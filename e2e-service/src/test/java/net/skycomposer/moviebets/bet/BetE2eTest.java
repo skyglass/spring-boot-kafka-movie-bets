@@ -17,8 +17,8 @@ import lombok.SneakyThrows;
 import net.skycomposer.moviebets.common.E2eTest;
 import net.skycomposer.moviebets.common.dto.bet.BetData;
 import net.skycomposer.moviebets.common.dto.bet.BetResponse;
-import net.skycomposer.moviebets.common.dto.customer.WalletData;
-import net.skycomposer.moviebets.common.dto.customer.WalletResponse;
+import net.skycomposer.moviebets.common.dto.customer.CustomerData;
+import net.skycomposer.moviebets.common.dto.customer.CustomerResponse;
 import net.skycomposer.moviebets.common.dto.market.MarketResponse;
 import net.skycomposer.moviebets.common.dto.market.MarketResult;
 import net.skycomposer.moviebets.customer.CustomerTestHelper;
@@ -43,21 +43,22 @@ public class BetE2eTest extends E2eTest {
         String customerId = UUID.randomUUID().toString();
         String customerId2 = UUID.randomUUID().toString();
         String customerId3 = UUID.randomUUID().toString();
-        UUID walletRequestId = UUID.randomUUID();
-        int walletBalance = 100;
+        UUID fundRequestId = UUID.randomUUID();
+        int customerBalance = 100;
         int betStake = 100;
         int betStake2 = 101;
         int betStake3 = 101;
         MarketResult marketResult = MarketResult.ITEM2_WINS;
 
-        WalletResponse walletResponse = customerTestHelper.createWallet(customerId, walletRequestId, walletBalance);
+        CustomerResponse customerResponse = customerTestHelper.createCustomer(customerId, fundRequestId, customerBalance);
+        Thread.sleep(1200);
         //Duplicate request with the same request id to make sure that duplicates are handled correctly
         try {
-            walletResponse = customerTestHelper.createWallet(customerId, walletRequestId, walletBalance);
+            customerResponse = customerTestHelper.createCustomer(customerId, fundRequestId, customerBalance);
         } catch (FeignException.InternalServerError e) {
             //expected
         }
-        //assertThat(walletResponse.getMessage(), equalTo("Funds successfully increased from 100.0000 to 200.0000"));
+        assertThat(customerResponse.getMessage(), equalTo("Duplicate addFunds request for customer %s, requestId = %s".formatted(customerId, fundRequestId)));
         MarketResponse marketResponse = marketTestHelper.createMarket();
 
         UUID marketId = marketResponse.getMarketId();
@@ -85,13 +86,13 @@ public class BetE2eTest extends E2eTest {
         assertTimeoutPreemptively(
                 Duration.ofSeconds(10)
                 , () -> {
-                    WalletData walletData = customerTestHelper.findWalletById(customerId);
-                    while (walletData.getBalance().doubleValue() != 0) {
+                    CustomerData customerData = customerTestHelper.findCustomerById(customerId);
+                    while (customerData.getBalance().doubleValue() != 0) {
                         Thread.sleep(100);
-                        walletData = customerTestHelper.findWalletById(customerId);
+                        customerData = customerTestHelper.findCustomerById(customerId);
                     }
-                    assertThat(walletData.getBalance().stripTrailingZeros(), equalTo(BigDecimal.ZERO));
-                }, () -> "Wallet amount is not equal to 0; current amount = " + customerTestHelper.findWalletById(customerId).getBalance()
+                    assertThat(customerData.getBalance().stripTrailingZeros(), equalTo(BigDecimal.ZERO));
+                }, () -> "Customer balance is not equal to 0; current amount = " + customerTestHelper.findCustomerById(customerId).getBalance()
         );
 
         BetResponse betResponse2 = betTestHelper.createBet(marketId, customerId2, betStake2, marketResult);
@@ -137,13 +138,13 @@ public class BetE2eTest extends E2eTest {
         assertTimeoutPreemptively(
                 Duration.ofSeconds(10)
                 , () -> {
-                    WalletData walletData = customerTestHelper.findWalletById(customerId);
-                    while (walletData.getBalance().doubleValue() != 100) {
+                    CustomerData customerData = customerTestHelper.findCustomerById(customerId);
+                    while (customerData.getBalance().doubleValue() != 100) {
                         Thread.sleep(100);
-                        walletData = customerTestHelper.findWalletById(customerId);
+                        customerData = customerTestHelper.findCustomerById(customerId);
                     }
-                    assertThat(walletData.getBalance().compareTo(new BigDecimal(100)), equalTo(0));
-                }, () -> "Wallet amount is not equal to 100; current amount = " + customerTestHelper.findWalletById(customerId).getBalance()
+                    assertThat(customerData.getBalance().compareTo(new BigDecimal(100)), equalTo(0));
+                }, () -> "Customer balance is not equal to 100; current balance = " + customerTestHelper.findCustomerById(customerId).getBalance()
         );
 
     }

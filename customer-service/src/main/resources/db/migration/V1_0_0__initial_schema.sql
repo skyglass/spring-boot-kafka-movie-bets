@@ -14,12 +14,12 @@ CREATE TABLE customer (
 
 CREATE UNIQUE INDEX idx_customer_username ON customer (username);
 
-DROP TABLE IF EXISTS wallet_request;
+DROP TABLE IF EXISTS fund_request;
 
-CREATE TABLE wallet_request(
+CREATE TABLE fund_request(
     id uuid NOT NULL,
     request_id uuid NOT NULL,
-    CONSTRAINT wallet_request_pkey PRIMARY KEY (id)
+    CONSTRAINT fund_request_pkey PRIMARY KEY (id)
 );
 
-CREATE UNIQUE INDEX idx_wallet_request ON wallet_request (request_id);
+CREATE UNIQUE INDEX idx_fund_request ON fund_request (request_id);

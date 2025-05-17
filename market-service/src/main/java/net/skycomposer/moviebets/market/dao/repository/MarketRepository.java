@@ -14,4 +14,6 @@ public interface MarketRepository extends JpaRepository<MarketEntity, UUID> {
 
     List<MarketEntity> findByStatus(MarketStatus status);
 
+    List<MarketEntity> findAllByOrderByClosesAtDesc();
+
 }

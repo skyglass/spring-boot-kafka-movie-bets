@@ -10,7 +10,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import net.skycomposer.moviebets.common.dto.customer.WalletResponse;
+import net.skycomposer.moviebets.common.dto.customer.CustomerResponse;
 import net.skycomposer.moviebets.common.dto.customer.commands.*;
 import net.skycomposer.moviebets.common.dto.customer.events.FundReservationCancelledEvent;
 import net.skycomposer.moviebets.common.dto.customer.events.FundReservationFailedEvent;
@@ -63,11 +63,11 @@ public class CustomerCommandHandler {
     @Transactional
     public void handleCommand(@Payload ReserveFundsCommand command) {
         try {
-            WalletResponse walletResponse = customerService.removeFunds(command.getCustomerId(), command.getRequestId(), command.getFunds());
+            CustomerResponse customerResponse = customerService.removeFunds(command.getCustomerId(), command.getRequestId(), command.getFunds());
             FundsReservedEvent fundsReservedEvent = new FundsReservedEvent(
                     command.getBetId(), command.getCustomerId(),
                     command.getCancelRequestId(),
-                    command.getMarketId(), command.getFunds(), walletResponse.getCurrentBalance());
+                    command.getMarketId(), command.getFunds(), customerResponse.getCurrentBalance());
             kafkaTemplate.send(betSettleTopicName, command.getMarketId().toString(), fundsReservedEvent);
         } catch (CustomerInsufficientFundsException e) {
             boolean isRetryTimeout = now().minus(Duration.ofSeconds(command.getRetryTimeoutSeconds())).isAfter(command.getRetryStart());
@@ -100,22 +100,22 @@ public class CustomerCommandHandler {
     @KafkaHandler
     @Transactional
     public void handleCommand(@Payload CancelFundReservationCommand command) {
-        WalletResponse walletResponse = customerService.addFunds(command.getCustomerId(), command.getRequestId(), command.getFunds());
+        CustomerResponse customerResponse = customerService.addFunds(command.getCustomerId(), command.getRequestId(), command.getFunds());
         FundReservationCancelledEvent fundReservationCancelledEvent = new FundReservationCancelledEvent(
                 command.getBetId(), command.getCustomerId(),
                 command.getMarketId(),
-                command.getFunds(), walletResponse.getCurrentBalance());
+                command.getFunds(), customerResponse.getCurrentBalance());
         kafkaTemplate.send(customerEventsTopicName, command.getCustomerId().toString(), fundReservationCancelledEvent);
     }
 
     @KafkaHandler
     @Transactional
     public void handleCommand(@Payload SettleFundsCommand command) {
-        WalletResponse walletResponse = customerService.addFunds(command.getCustomerId(), command.getRequestId(), command.getFunds());
+        CustomerResponse customerResponse = customerService.addFunds(command.getCustomerId(), command.getRequestId(), command.getFunds());
         FundsSettledEvent fundsSettledEvent = new FundsSettledEvent(
                 command.getBetId(), command.getCustomerId(),
                 command.getMarketId(),
-                command.getFunds(), walletResponse.getCurrentBalance());
+                command.getFunds(), customerResponse.getCurrentBalance());
         kafkaTemplate.send(betSettleJobTopicName, command.getMarketId().toString(), fundsSettledEvent);
     }
 

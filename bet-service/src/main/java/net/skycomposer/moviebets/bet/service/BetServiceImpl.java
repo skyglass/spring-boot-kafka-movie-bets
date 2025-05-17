@@ -239,7 +239,7 @@ public class BetServiceImpl implements BetService {
                 .customerId(betData.getCustomerId())
                 .marketId(betData.getMarketId())
                 .marketName(betData.getMarketName())
-                .stake(betData.getStake())
+                .stake(betData.getStake() == null ? 1 : betData.getStake())
                 .result(betData.getResult())
                 .build();
     }

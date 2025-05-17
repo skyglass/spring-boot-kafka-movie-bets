@@ -8,13 +8,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Table(name = "wallet_request")
+@Table(name = "fund_request")
 @Entity
 @Data // Generates getters, setters, toString, equals, and hashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class WalletRequestEntity {
+public class FundRequestEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

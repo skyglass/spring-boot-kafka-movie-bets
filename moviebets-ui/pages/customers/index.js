@@ -15,7 +15,7 @@ const CustomerList = () => {
         const { data } = await client.get("/api/customer/all");
         setCustomers(data);
 
-        const existingCustomer = data.find(c => c.walletId === user.name);
+        const existingCustomer = data.find(c => c.customerId === user.name);
 
         if (!existingCustomer) {
           const requestId = uuidv4();
@@ -42,8 +42,8 @@ const CustomerList = () => {
           </thead>
           <tbody>
           {customers.map(customer => (
-              <tr key={customer.walletId}>
-                <td>{customer.walletId}</td>
+              <tr key={customer.customerId}>
+                <td>{customer.customerId}</td>
                 <td>{customer.balance}</td>
               </tr>
           ))}
