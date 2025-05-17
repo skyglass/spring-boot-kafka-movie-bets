@@ -85,7 +85,7 @@ const BetListPage = () => {
     return (
         <div>
             <h1>List of Bets for Event "{event.item1} vs {event.item2}"</h1>
-            <Link href="/bets/place">
+            <Link href={`/bets/place/${eventId}`}>
                 <button className="btn btn-primary" style={{ marginBottom: '10px' }}>Place a Bet</button>
             </Link>
             <table className="table">

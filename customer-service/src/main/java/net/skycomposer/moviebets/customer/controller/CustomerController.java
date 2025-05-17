@@ -18,8 +18,6 @@ import net.skycomposer.moviebets.customer.service.CustomerService;
 @RequiredArgsConstructor
 public class CustomerController {
 
-  private static final Integer DEFAULT_REGISTERED_CUSTOMER_AMOUNT = 100;
-
   private final CustomerService customerService;
 
   @GetMapping("/get-customer/{customerId}")
@@ -33,8 +31,8 @@ public class CustomerController {
   }
 
   @PostMapping("/register/{customerId}/{requestId}")
-  public CustomerResponse addFunds(@PathVariable String customerId, @PathVariable UUID requestId) {
-    return customerService.addFunds(customerId, requestId, new BigDecimal(DEFAULT_REGISTERED_CUSTOMER_AMOUNT));
+  public CustomerResponse registerCustomer(@PathVariable String customerId, @PathVariable UUID requestId) {
+    return customerService.addFunds(customerId, requestId, new BigDecimal(CustomerService.DEFAULT_REGISTERED_CUSTOMER_BALANCE));
   }
 
   @PostMapping("/add-funds/{customerId}/{requestId}/{funds}")

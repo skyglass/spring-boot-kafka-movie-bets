@@ -76,7 +76,7 @@ const LandingPage = () => {
                     <th>Movie 1</th>
                     <th>Movie 2</th>
                     <th>Result</th>
-                    <th>Closes At</th>
+                    <th>Close Time</th>
                     <th>Link</th>
                     <th>Action</th>
                     <th>View Bets</th>

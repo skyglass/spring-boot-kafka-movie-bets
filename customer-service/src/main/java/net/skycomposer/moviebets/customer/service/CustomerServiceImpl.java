@@ -110,7 +110,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     @Transactional
     public CustomerResponse removeFundsAsync(String customerId, UUID requestId, BigDecimal funds) {
-        CustomerEntity customerEntity = createEntityIfNotExists(customerId);
+        CustomerEntity customerEntity = createEntityIfNotExists(customerId, getDefaultRegisteredCustomerBalance());
         BigDecimal currentBalance = customerEntity.getBalance();
         BigDecimal newBalance = currentBalance.subtract(funds);
         if (fundRequestRepository.existsByRequestId(requestId)) {
@@ -133,7 +133,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerResponse removeFunds(String customerId, UUID requestId, BigDecimal funds) throws CustomerInsufficientFundsException {
-        CustomerEntity customerEntity = createEntityIfNotExists(customerId);
+        CustomerEntity customerEntity = createEntityIfNotExists(customerId, getDefaultRegisteredCustomerBalance());
         BigDecimal currentBalance = customerEntity.getBalance();
         BigDecimal newBalance = currentBalance.subtract(funds);
         if (fundRequestRepository.existsByRequestId(requestId)) {
@@ -157,7 +157,15 @@ public class CustomerServiceImpl implements CustomerService {
         return new CustomerResponse(message, customerId, newBalance);
     }
 
+    private BigDecimal getDefaultRegisteredCustomerBalance() {
+        return new BigDecimal(DEFAULT_REGISTERED_CUSTOMER_BALANCE);
+    }
+
     private CustomerEntity createEntityIfNotExists(String customerId) {
+        return createEntityIfNotExists(customerId, BigDecimal.ZERO);
+    }
+
+    private CustomerEntity createEntityIfNotExists(String customerId, BigDecimal initAmount) {
         Optional<CustomerEntity> customerOptional = customerRepository.findByUsername(customerId);
         if (customerOptional.isPresent()) {
             return customerOptional.get();
@@ -165,7 +173,7 @@ public class CustomerServiceImpl implements CustomerService {
         CustomerEntity customerEntity = new CustomerEntity();
         customerEntity.setUsername(customerId);
         customerEntity.setFullName(customerId);
-        customerEntity.setBalance(BigDecimal.ZERO);
+        customerEntity.setBalance(initAmount);
         return customerEntity;
     }
 
