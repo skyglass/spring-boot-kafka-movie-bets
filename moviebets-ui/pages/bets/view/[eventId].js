@@ -11,6 +11,7 @@ const BetListPage = () => {
     const { user } = useKeycloak();
     const { eventId } = router.query;
     const [event, setEvent] = useState(null);
+    const [errors, setErrors] = useState(null);
 
     useEffect(() => {
         if (user) {
@@ -46,9 +47,9 @@ const BetListPage = () => {
 
     const getResultText = (result) => {
         switch (result) {
-            case 0:
+            case "ITEM1_WINS":
                 return "Movie 1 Wins";
-            case 1:
+            case "ITEM2_WINS":
                 return "Movie 2 Wins";
             default:
                 return "Unknown";

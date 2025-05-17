@@ -11,7 +11,6 @@ const NewBet = () => {
 
   const [event, setEvent] = useState(null);
   const [selectedResult, setSelectedResult] = useState(0);
-  const [stake, setStake] = useState("");
 
   useEffect(() => {
     if (!eventId) return;
@@ -70,7 +69,7 @@ const NewBet = () => {
         return;
       }
 
-      router.push("/bets");
+      router.push(`/bets/view/${eventId}`);
     } catch (error) {
       console.error("Bet submission failed:", error);
     }

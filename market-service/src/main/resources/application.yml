@@ -17,6 +17,8 @@ spring:
   jackson:
     deserialization:
       fail-on-unknown-properties: true
+    serialization:
+      write-dates-as-timestamps: false
   threads:
     virtual:
       enabled: true
@@ -124,6 +126,6 @@ market:
     topic:
       name: market-close
     close-time:
-      extend-seconds: 300
+      extend-seconds: 60
     check-time:
       threshold-seconds: 5

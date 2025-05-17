@@ -41,7 +41,7 @@ const LandingPage = () => {
 
                 <td>{getResultText(event.open, event.result)}</td>
 
-                <td>{event.closesAt}</td>
+                <td>{new Date(event.closesAt).toLocaleString()}</td>
 
                 <td>
                     <Link href={`/events/${event.marketId}`}>
@@ -76,7 +76,7 @@ const LandingPage = () => {
                     <th>Movie 1</th>
                     <th>Movie 2</th>
                     <th>Result</th>
-                    <th>Result Date</th>
+                    <th>Closes At</th>
                     <th>Link</th>
                     <th>Action</th>
                     <th>View Bets</th>
