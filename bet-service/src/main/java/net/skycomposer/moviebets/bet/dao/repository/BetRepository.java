@@ -14,6 +14,7 @@ import net.skycomposer.moviebets.bet.dao.entity.BetEntity;
 import net.skycomposer.moviebets.common.dto.bet.BetStatus;
 import net.skycomposer.moviebets.common.dto.bet.SumStakeData;
 import net.skycomposer.moviebets.common.dto.market.MarketResult;
+import net.skycomposer.moviebets.common.dto.market.MarketStatus;
 
 @Repository
 public interface BetRepository extends JpaRepository<BetEntity, UUID> {
@@ -23,6 +24,8 @@ public interface BetRepository extends JpaRepository<BetEntity, UUID> {
     List<SumStakeData> findStakeSumGroupedByResult(@Param("marketId") UUID marketId);
 
     List<BetEntity> findByMarketId(UUID marketId);
+
+    Long countByMarketIdAndStatus(UUID marketId, MarketStatus status);
 
     List<BetEntity> findByCustomerId(String marketId);
 

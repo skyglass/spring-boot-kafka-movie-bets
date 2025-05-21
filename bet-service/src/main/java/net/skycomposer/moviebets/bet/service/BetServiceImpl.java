@@ -1,6 +1,7 @@
 package net.skycomposer.moviebets.bet.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -18,7 +19,10 @@ import net.skycomposer.moviebets.bet.dao.entity.MarketSettleStatusEntity;
 import net.skycomposer.moviebets.bet.dao.repository.BetRepository;
 import net.skycomposer.moviebets.bet.dao.repository.BetSettleRequestRepository;
 import net.skycomposer.moviebets.bet.dao.repository.MarketSettleStatusRepository;
+import net.skycomposer.moviebets.bet.exception.BetCloseDeniedException;
 import net.skycomposer.moviebets.bet.exception.BetNotFoundException;
+import net.skycomposer.moviebets.bet.exception.BetOpenDeniedException;
+import net.skycomposer.moviebets.bet.exception.MarketClosedException;
 import net.skycomposer.moviebets.common.dto.bet.*;
 import net.skycomposer.moviebets.common.dto.bet.events.BetCreatedEvent;
 import net.skycomposer.moviebets.common.dto.market.MarketResult;
@@ -74,7 +78,10 @@ public class BetServiceImpl implements BetService {
 
     @Override
     @Transactional
-    public BetResponse open(BetData betData) {
+    public BetResponse open(BetData betData, String authenticatedCustomerId) {
+        if (!Objects.equals(betData.getCustomerId(), authenticatedCustomerId)) {
+            throw new BetOpenDeniedException(authenticatedCustomerId, betData.getCustomerId());
+        }
         if (betRepository.existsByCustomerIdAndMarketId(betData.getCustomerId(), betData.getMarketId())) {
             String message = String.format("Duplicate bet request for the same customer %s and marketId = %s", betData.getCustomerId(), betData.getMarketId());
             logger.warn(message);
@@ -91,10 +98,13 @@ public class BetServiceImpl implements BetService {
 
     @Override
     @Transactional
-    public BetResponse close(CancelBetRequest cancelBetRequest) {
+    public BetResponse close(CancelBetRequest cancelBetRequest, String authenticatedCustomerId) {
         BetEntity betEntity = betRepository.findById(cancelBetRequest.getBetId()).get();
         if (betEntity == null) {
             throw new BetNotFoundException(cancelBetRequest.getBetId());
+        }
+        if (!Objects.equals(betEntity.getCustomerId(), authenticatedCustomerId)) {
+            throw new BetCloseDeniedException(authenticatedCustomerId, betEntity.getCustomerId());
         }
         betEntity.setStatus(BetStatus.CANCELLED);
         betEntity = betRepository.save(betEntity);
@@ -119,7 +129,10 @@ public class BetServiceImpl implements BetService {
 
     @Override
     @Transactional(readOnly = true)
-    public BetDataList getBetsForMarket(UUID marketId) {
+    public BetDataList getBetsForMarket(UUID marketId, boolean skipMarketClosedCheck) {
+        if (!skipMarketClosedCheck && isMarketClosed(marketId)) {
+            throw new MarketClosedException(marketId);
+        }
         List<BetEntity> betEntityList = betRepository.findByMarketId(marketId);
         return BetDataList.builder()
                 .betDataList(createBetDataList(betEntityList))
@@ -177,6 +190,20 @@ public class BetServiceImpl implements BetService {
         MarketSettleStatusEntity marketSettleStatusEntity = marketSettleStatusRepository.findByMarketId(marketId)
                 .orElseThrow(() -> new IllegalArgumentException("Wrong usage of countSettledBets method"));
         return marketSettleStatusEntity.getFinishedCount();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public MarketStatusData getMarketStatus(UUID marketId, String customerId) {
+        boolean marketClosed = isMarketClosed(marketId);
+        boolean customerBetExists = betRepository.existsByCustomerIdAndMarketId(customerId, marketId);
+        Integer votes = marketClosed ? 0 : betRepository.countByMarketIdAndStatus(marketId, BetStatus.VALIDATED);
+        boolean canPlaceBet = !marketClosed && !customerBetExists;
+        return MarketStatusData.builder()
+                .canPlaceBet(canPlaceBet)
+                .marketClosed(marketClosed)
+                .votes(votes)
+                .build();
     }
 
     @Override

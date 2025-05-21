@@ -69,7 +69,7 @@ const NewBet = () => {
         return;
       }
 
-      router.push(`/bets/view/${eventId}`);
+      router.push(`/bets/view/event/${eventId}`);
     } catch (error) {
       console.error("Bet submission failed:", error);
     }

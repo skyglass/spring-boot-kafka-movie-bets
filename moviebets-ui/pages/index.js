@@ -3,6 +3,7 @@ import withAuth from '../auth/middleware/withAuth';
 import buildClient from "../api/build-client";
 import { useKeycloak } from '../auth/provider/KeycloakProvider';
 import { useEffect, useState } from "react";
+import { getEventResultText } from "../helpers/Global";
 
 const LandingPage = () => {
     const [events, setEvents] = useState([]);
@@ -19,27 +20,13 @@ const LandingPage = () => {
         }
     }, [user]);
 
-    const getResultText = (open, result) => {
-        if (open) {
-            return "OPEN";
-        }
-        switch (result) {
-            case "ITEM1_WINS":
-                return "Movie 1 Wins";
-            case "ITEM2_WINS":
-                return "Movie 2 Wins";
-            default:
-                return "Unknown";
-        }
-    };
-
     const eventList = events.map((event) => {
         return (
             <tr key={event.marketId}>
                 <td>{event.item1}</td>
                 <td>{event.item2}</td>
 
-                <td>{getResultText(event.open, event.result)}</td>
+                <td>{getEventResultText(event.open, event.result)}</td>
 
                 <td>{new Date(event.closesAt).toLocaleString()}</td>
 
@@ -56,7 +43,7 @@ const LandingPage = () => {
                 </td>
 
                 <td>
-                    <Link href={`/bets/view/${event.marketId}`}>
+                    <Link href={`/bets/view/event/${event.marketId}`}>
                         View Bets
                     </Link>
                 </td>
@@ -66,9 +53,9 @@ const LandingPage = () => {
 
     return (
         <div>
-            <h1>Events</h1>
+            <h4>Movie Events</h4>
             <Link href="/events/new">
-                <button className="btn btn-primary" style={{ marginBottom: '10px' }}>Add Event</button>
+                <button className="btn btn-primary" style={{ marginBottom: '10px' }}>Add Movie Event</button>
             </Link>
             <table className="table">
                 <thead>

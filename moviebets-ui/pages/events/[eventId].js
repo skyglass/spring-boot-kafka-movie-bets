@@ -27,24 +27,6 @@ const EventShow = () => {
         }
     }, [user, eventId]);
 
-    const placeBet = async () => {
-        setErrors(null);
-        try {
-            const client = buildClient({ req: {}, currentUser: user });
-            const { data: bet } = await client.post('/api/bet', { marketId: event.id });
-            Router.push('/bets/[betId]', `/bets/${bet.id}`);
-        } catch (err) {
-            setErrors(err.response?.data?.errors || [{ message: "Failed to place bet" }]);
-        }
-    };
-
-    const getResultText = (open, result) => {
-        if (open) {
-            return "OPEN";
-        }
-        return result;
-    };
-
     if (!event) {
         return <div>Loading...</div>;
     }

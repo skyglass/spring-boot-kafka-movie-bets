@@ -4,54 +4,37 @@ import Router from 'next/router';
 import { useKeycloak } from '../../auth/provider/KeycloakProvider';
 import buildClient from '../../api/build-client';
 import { useRouter } from 'next/router';
+import { getResultText, getBetWon } from "../../helpers/Global";
 
-const EventShow = () => {
+const BetShow = () => {
     const { user } = useKeycloak();
     const router = useRouter();
-    const { eventId } = router.query;
-    const [event, setEvent] = useState(null);
+    const { betId } = router.query;
+    const [bet, setBet] = useState(null);
     const [errors, setErrors] = useState(null);
 
     useEffect(() => {
-        if (user && eventId) {
-            const fetchEvent = async () => {
+        if (user && betId) {
+            const fetchBet = async () => {
                 try {
                     const client = buildClient({ req: {}, currentUser: user });
-                    const { data } = await client.get(`/api/market/get-state/${eventId}`);
-                    setEvent(data);
+                    const { data } = await client.get(`/api/bet/get-state/${betId}`);
+                    setBet(data);
                 } catch (err) {
-                    setErrors(err.response?.data?.errors || [{ message: "Failed to fetch event" }]);
+                    setErrors(err.response?.data?.errors || [{ message: "Failed to fetch bet" }]);
                 }
             };
-            fetchEvent();
+            fetchBet();
         }
-    }, [user, eventId]);
+    }, [user, betId]);
 
-    const placeBet = async () => {
-        setErrors(null);
-        try {
-            const client = buildClient({ req: {}, currentUser: user });
-            const { data: bet } = await client.post('/api/bet', { marketId: event.id });
-            Router.push('/bets/[betId]', `/bets/${bet.id}`);
-        } catch (err) {
-            setErrors(err.response?.data?.errors || [{ message: "Failed to place bet" }]);
-        }
-    };
-
-    const getResultText = (open, result) => {
-        if (open) {
-            return "OPEN";
-        }
-        return result;
-    };
-
-    if (!event) {
+    if (!bet) {
         return <div>Loading...</div>;
     }
 
     return (
         <div>
-            <h1>{event.item1} vs {event.item2}</h1>
+            <h3>Bet for Movie Event: "{bet.marketName}"</h3>
 
             {errors && (
                 <div className="alert alert-danger">
@@ -63,24 +46,21 @@ const EventShow = () => {
                 </div>
             )}
 
-            <h3>Movie Event Information</h3>
-            <div className="market-data">
+            <div className="bet-data">
                 <div>
-                    <p><strong>Movie 1:</strong> {event.item1}</p>
-                    <p><strong>Movie 2:</strong> {event.item2}</p>
-                </div>
-                <div className="additional-info">
-                    {event.closesAt && (
-                        <p><strong>Close Time:</strong> {new Date(event.closesAt).toLocaleString()}</p>
-                    )}
+                    <p><strong>Customer:</strong> {bet.customerId}</p>
+                    <p><strong>Movie Event:</strong> {bet.marketName}</p>
+                    <p><strong>Bet Prediction:</strong> {getResultText(bet.result)}</p>
+                    <p><strong>Bet Status:</strong> {bet.status}</p>
+                    <p><strong>Bet Won:</strong> {getBetWon(bet)}</p>
                 </div>
             </div>
 
-            <Link href={`/bets/place/${eventId}`}>
-                <button className="btn btn-primary" style={{ marginBottom: '10px' }}>Place a Bet</button>
+            <Link href={`/bets/view/event/${bet.marketId}`}>
+            <button className="btn btn-primary" style={{ marginBottom: '10px' }}>View all bets for this movie event</button>
             </Link>
         </div>
     )
 };
 
-export default EventShow;
+export default BetShow;

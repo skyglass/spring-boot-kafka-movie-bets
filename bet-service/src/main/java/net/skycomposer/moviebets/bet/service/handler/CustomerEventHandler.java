@@ -29,7 +29,7 @@ public class CustomerEventHandler {
     @KafkaHandler
     @Transactional
     public void handleEvent(@Payload FundReservationCancelledEvent event) {
-        RejectBetCommand rejectBetCommand = new RejectBetCommand(event.getBetId(),
+        RejectBetCommand rejectBetCommand = new RejectBetCommand(event.getBetId(), event.getCustomerId(),
                 "Bet %s was rejected and fund reservation has been successfully cancelled".formatted(event.getBetId()));
         kafkaTemplate.send(betCommandsTopicName, event.getBetId().toString(), rejectBetCommand);
     }
@@ -37,7 +37,7 @@ public class CustomerEventHandler {
     @KafkaHandler
     @Transactional
     public void handleEvent(@Payload FundReservationFailedEvent event) {
-        RejectBetCommand rejectBetCommand = new RejectBetCommand(event.getBetId(),
+        RejectBetCommand rejectBetCommand = new RejectBetCommand(event.getBetId(), event.getCustomerId(),
                 "Bet %s was rejected because of insufficient funds for customer %s: required = %.2f, but currentBalance = %.2f".formatted(
                         event.getBetId(), event.getCustomerId(), event.getFunds(), event.getCurrentBalance()));
         kafkaTemplate.send(betCommandsTopicName, event.getBetId().toString(), rejectBetCommand);

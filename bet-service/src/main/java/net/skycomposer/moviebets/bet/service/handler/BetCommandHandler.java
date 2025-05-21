@@ -62,7 +62,7 @@ public class BetCommandHandler {
     @KafkaHandler
     public void handleCommand(@Payload RejectBetCommand rejectBetCommand) {
         CancelBetRequest cancelBetRequest = new CancelBetRequest(rejectBetCommand.getBetId(), rejectBetCommand.getReason());
-        betService.close(cancelBetRequest);
+        betService.close(cancelBetRequest, rejectBetCommand.getCustomerId());
     }
 
     @KafkaHandler
@@ -87,7 +87,7 @@ public class BetCommandHandler {
     public void handleBetCreatedEvent(@Payload BetCreatedEvent event) {
         boolean isMarketClosed = betService.isMarketClosed(event.getMarketId());
         if (isMarketClosed) {
-            RejectBetCommand rejectBetCommand = new RejectBetCommand(event.getBetId(),
+            RejectBetCommand rejectBetCommand = new RejectBetCommand(event.getBetId(), event.getCustomerId(),
                     "Bet %s was rejected, because market %s is already closed".formatted(event.getBetId(), event.getMarketId()));
             kafkaTemplate.send(betCommandsTopicName, event.getBetId().toString(), rejectBetCommand);
             return;

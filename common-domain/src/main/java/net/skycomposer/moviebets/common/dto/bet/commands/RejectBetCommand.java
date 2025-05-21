@@ -13,5 +13,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class RejectBetCommand {
     private UUID betId;
+    private String customerId;
     private String reason;
 }

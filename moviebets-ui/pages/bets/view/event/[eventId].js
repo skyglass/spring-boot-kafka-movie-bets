@@ -1,9 +1,10 @@
 import Link from 'next/link';
-import withAuth from '../../../auth/middleware/withAuth';
-import buildClient from "../../../api/build-client";
-import { useKeycloak } from '../../../auth/provider/KeycloakProvider';
+import withAuth from '../../../../auth/middleware/withAuth';
+import buildClient from "../../../../api/build-client";
+import { useKeycloak } from '../../../../auth/provider/KeycloakProvider';
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import {getResultText, getBetWon} from "../../../../helpers/Global";
 
 const BetListPage = () => {
     const router = useRouter();
@@ -45,28 +46,23 @@ const BetListPage = () => {
         }
     }, [user, eventId]);
 
-    const getResultText = (result) => {
-        switch (result) {
-            case "ITEM1_WINS":
-                return "Movie 1 Wins";
-            case "ITEM2_WINS":
-                return "Movie 2 Wins";
-            default:
-                return "Unknown";
-        }
-    };
-
     const betList = bets.map((bet) => {
         return (
             <tr key={bet.betId}>
                 {/* Event Name */}
                 <td>{bet.marketName}</td>
 
-                {/* User */}
+                {/* Player */}
                 <td>{bet.customerId}</td>
 
-                {/* Result */}
+                {/* Predicted Result */}
                 <td>{getResultText(bet.result)}</td>
+
+                {/* Bet Status */}
+                <td>{bet.status}</td>
+
+                {/* Bet Won */}
+                <td>{getBetWon(bet)}</td>
 
                 {/* Link to view bet details */}
                 <td>
@@ -84,17 +80,19 @@ const BetListPage = () => {
 
     return (
         <div>
-            <h1>List of Bets for Event "{event.item1} vs {event.item2}"</h1>
+            <h4>List of Bets for Movie Event "{event.item1} vs {event.item2}"</h4>
             <Link href={`/bets/place/${eventId}`}>
                 <button className="btn btn-primary" style={{ marginBottom: '10px' }}>Place a Bet</button>
             </Link>
             <table className="table">
                 <thead>
                 <tr>
-                    <th>Event Name</th>
-                    <th>User</th>
-                    <th>Result</th>
-                    <th>Action</th>
+                    <th>Movie Event</th>
+                    <th>Player</th>
+                    <th>Predicted Result</th>
+                    <th>Bet Status</th>
+                    <th>Bet Won</th>
+                    <th>View Bet</th>
                 </tr>
                 </thead>
                 <tbody>{betList}</tbody>

@@ -6,8 +6,8 @@ import {isAdminFunc} from "../auth/components/Helpers";
 export default ({  }) => {
   const { user } = useKeycloak();
   const links = [
-    user && { label: 'My Bets', href: '/bets' },
-    user && isAdminFunc(user) && { label: 'Players', href: '/customers' },
+    user && { label: 'My Bets', href: `/bets/view/player/${user.name}` },
+    user && isAdminFunc(user) && { label: 'Players', href: '/players' },
   ]
     .filter((linkConfig) => linkConfig)
     .map(({ label, href }) => {
