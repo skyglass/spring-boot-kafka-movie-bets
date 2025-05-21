@@ -20,15 +20,15 @@ public interface BetService {
 
     SumStakesData getBetsByMarket(UUID marketId);
 
-    BetDataList getBetsForMarket(UUID marketId, boolean skipMarketClosedCheck);
+    BetDataList getBetsForMarket(UUID marketId, boolean skipMarketOpenCheck);
 
     BetDataList getBetsForPlayer(String customerId);
 
     MarketStatusData getMarketStatus(UUID marketId, String customerId);
 
-    BetResponse open(BetData betData, String authenticatedCustomerId);
+    BetResponse place(BetData betData, String authenticatedCustomerId);
 
-    BetResponse close(CancelBetRequest request, String authenticatedCustomerId);
+    BetResponse cancel(CancelBetRequest request, String authenticatedCustomerId, boolean isAdmin);
 
     int countByMarketIdAndStatus(UUID marketId, BetStatus status);
 

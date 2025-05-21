@@ -31,7 +31,7 @@ public class BetController {
       return betService.getState(betId);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('MOVIEBETS_MANAGER')")
     @GetMapping("/get-bets-by-market/{marketId}")
     public SumStakesData getBetsByMarket(@PathVariable UUID marketId) {
       return betService.getBetsByMarket(marketId);
@@ -42,28 +42,36 @@ public class BetController {
       return betService.getBetsForMarket(marketId, false);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('MOVIEBETS_MANAGER')")
     @GetMapping("/get-bets-for-market-for-admin/{marketId}")
     public BetDataList getBetsForMarketForAdmin(@PathVariable UUID marketId) {
         return betService.getBetsForMarket(marketId, true);
     }
 
+    @PreAuthorize("hasRole('MOVIEBETS_MANAGER') or #customerId == authentication.name")
     @GetMapping("/get-bets-for-player/{customerId}")
-    @PreAuthorize("hasRole('ADMIN') or #customerId == authentication.name")
     public BetDataList getBetsForPlayer(@PathVariable String customerId) {
       return betService.getBetsForPlayer(customerId);
     }
 
-    @PostMapping("/open")
+    @PostMapping("/place")
     @ResponseStatus(HttpStatus.CREATED)
-    public BetResponse open(@RequestBody @Valid BetData betData, Authentication authentication) {
+    public BetResponse place(@RequestBody @Valid BetData betData, Authentication authentication) {
         String authenticatedCustomerId = authentication.getName();
-        return betService.open(betData, authenticatedCustomerId);
+        return betService.place(betData, authenticatedCustomerId);
     }
 
-    @PostMapping("/cancel")
-    public BetResponse close(@RequestBody @Valid CancelBetRequest request, Authentication authentication) {
+    @PreAuthorize("hasRole('MOVIEBETS_MANAGER')")
+    @PostMapping("/place-for-admin")
+    @ResponseStatus(HttpStatus.CREATED)
+    public BetResponse placeForAdmin(@RequestBody @Valid BetData betData, Authentication authentication) {
+        return betService.place(betData, betData.getCustomerId());
+    }
+
+    @PreAuthorize("hasRole('MOVIEBETS_MANAGER')")
+    @PostMapping("/cancel-for-admin")
+    public BetResponse cancelForAdmin(@RequestBody @Valid CancelBetRequest request, Authentication authentication) {
         String authenticatedCustomerId = authentication.getName();
-        return betService.close(request, authenticatedCustomerId);
+        return betService.cancel(request, authenticatedCustomerId, true);
     }
 }

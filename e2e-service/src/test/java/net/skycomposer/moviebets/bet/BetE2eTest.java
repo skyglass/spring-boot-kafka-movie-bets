@@ -71,9 +71,9 @@ public class BetE2eTest extends E2eTest {
         assertThat(betResponse.getMessage(), equalTo("Bet %s created successfully".formatted(betId)));
 
         //Duplicate requests to make sure that opening the bet with the same id should be handled idempotently (only one bet open event should be handled, other duplicate events should be ignored)
-        betResponse = betTestHelper.createBet(marketId, customerId, betStake, marketResult);
-        betResponse = betTestHelper.createBet(marketId, customerId, betStake, marketResult);
-        betResponse = betTestHelper.createBet(marketId, customerId, betStake, marketResult);
+        betTestHelper.createBet(marketId, customerId, betStake, marketResult);
+        betTestHelper.createBet(marketId, customerId, betStake, marketResult);
+        betTestHelper.createBet(marketId, customerId, betStake, marketResult);
 
         BetData betData =  RetryHelper.retry(() ->  betTestHelper.getState(betId));
 
@@ -100,9 +100,9 @@ public class BetE2eTest extends E2eTest {
         assertThat(betResponse2.getMessage(), equalTo("Bet %s created successfully".formatted(betId2)));
 
         //Duplicate requests to make sure that opening the bet with the same id should be handled idempotently (only one bet open event should be handled, other duplicate events should be ignored)
-        betResponse2 = betTestHelper.createBet(marketId, customerId2, betStake2, marketResult);
-        betResponse2 = betTestHelper.createBet(marketId, customerId2, betStake2, marketResult);
-        betResponse2 = betTestHelper.createBet(marketId, customerId2, betStake2, marketResult);
+        betTestHelper.createBet(marketId, customerId2, betStake2, marketResult);
+        betTestHelper.createBet(marketId, customerId2, betStake2, marketResult);
+        betTestHelper.createBet(marketId, customerId2, betStake2, marketResult);
 
         BetData betData2 =  RetryHelper.retry(() ->  betTestHelper.getState(betId2));
 
@@ -119,9 +119,9 @@ public class BetE2eTest extends E2eTest {
         assertThat(betResponse3.getMessage(), equalTo("Bet %s created successfully".formatted(betId3)));
 
         //Duplicate requests to make sure that opening the bet with the same request id should be handled idempotently (only one bet open event should be handled, other duplicate events should be ignored)
-        betResponse3 = betTestHelper.createBet(marketId, customerId3, betStake3, marketResult);
-        betResponse3 = betTestHelper.createBet(marketId, customerId3, betStake3, marketResult);
-        betResponse3 = betTestHelper.createBet(marketId, customerId3, betStake3, marketResult);
+        betTestHelper.createBet(marketId, customerId3, betStake3, marketResult);
+        betTestHelper.createBet(marketId, customerId3, betStake3, marketResult);
+        betTestHelper.createBet(marketId, customerId3, betStake3, marketResult);
 
         BetData betData3 =  RetryHelper.retry(() ->  betTestHelper.getState(betId3));
 

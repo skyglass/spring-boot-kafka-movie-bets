@@ -18,10 +18,10 @@ public interface BetClient {
     @GetMapping("/get-bets-by-market/{marketId}")
     SumStakesData getBetsByMarket(@PathVariable("marketId") String marketId);
 
-    @PostMapping("/open")
+    @PostMapping("/place-for-admin")
     @ResponseStatus(HttpStatus.CREATED)
-    BetResponse open(@RequestBody @Valid BetData betData);
+    BetResponse place(@RequestBody @Valid BetData betData);
 
-    @PostMapping("/cancel")
-    BetResponse close(@RequestBody @Valid CancelBetRequest request);
+    @PostMapping("/cancel-for-admin")
+    BetResponse cancel(@RequestBody @Valid CancelBetRequest request);
 }

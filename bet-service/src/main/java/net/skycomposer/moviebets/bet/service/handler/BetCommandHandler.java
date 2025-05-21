@@ -62,7 +62,7 @@ public class BetCommandHandler {
     @KafkaHandler
     public void handleCommand(@Payload RejectBetCommand rejectBetCommand) {
         CancelBetRequest cancelBetRequest = new CancelBetRequest(rejectBetCommand.getBetId(), rejectBetCommand.getReason());
-        betService.close(cancelBetRequest, rejectBetCommand.getCustomerId());
+        betService.cancel(cancelBetRequest, rejectBetCommand.getCustomerId(), false);
     }
 
     @KafkaHandler

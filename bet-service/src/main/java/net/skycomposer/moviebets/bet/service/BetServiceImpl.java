@@ -19,10 +19,7 @@ import net.skycomposer.moviebets.bet.dao.entity.MarketSettleStatusEntity;
 import net.skycomposer.moviebets.bet.dao.repository.BetRepository;
 import net.skycomposer.moviebets.bet.dao.repository.BetSettleRequestRepository;
 import net.skycomposer.moviebets.bet.dao.repository.MarketSettleStatusRepository;
-import net.skycomposer.moviebets.bet.exception.BetCloseDeniedException;
-import net.skycomposer.moviebets.bet.exception.BetNotFoundException;
-import net.skycomposer.moviebets.bet.exception.BetOpenDeniedException;
-import net.skycomposer.moviebets.bet.exception.MarketClosedException;
+import net.skycomposer.moviebets.bet.exception.*;
 import net.skycomposer.moviebets.common.dto.bet.*;
 import net.skycomposer.moviebets.common.dto.bet.events.BetCreatedEvent;
 import net.skycomposer.moviebets.common.dto.market.MarketResult;
@@ -78,14 +75,15 @@ public class BetServiceImpl implements BetService {
 
     @Override
     @Transactional
-    public BetResponse open(BetData betData, String authenticatedCustomerId) {
+    public BetResponse place(BetData betData, String authenticatedCustomerId) {
         if (!Objects.equals(betData.getCustomerId(), authenticatedCustomerId)) {
             throw new BetOpenDeniedException(authenticatedCustomerId, betData.getCustomerId());
         }
+        if (isMarketClosed(betData.getMarketId())) {
+            throw new MarketIsClosedException(betData.getMarketId());
+        }
         if (betRepository.existsByCustomerIdAndMarketId(betData.getCustomerId(), betData.getMarketId())) {
-            String message = String.format("Duplicate bet request for the same customer %s and marketId = %s", betData.getCustomerId(), betData.getMarketId());
-            logger.warn(message);
-            return new BetResponse(null, message);
+            throw new BetAlreadyExistsException(betData.getCustomerId(), betData.getMarketId());
         }
         BetEntity betEntity = createBetEntity(betData);
         betEntity.setStatus(BetStatus.PlACED);
@@ -98,13 +96,16 @@ public class BetServiceImpl implements BetService {
 
     @Override
     @Transactional
-    public BetResponse close(CancelBetRequest cancelBetRequest, String authenticatedCustomerId) {
+    public BetResponse cancel(CancelBetRequest cancelBetRequest, String authenticatedCustomerId, boolean isAdmin) {
         BetEntity betEntity = betRepository.findById(cancelBetRequest.getBetId()).get();
         if (betEntity == null) {
             throw new BetNotFoundException(cancelBetRequest.getBetId());
         }
-        if (!Objects.equals(betEntity.getCustomerId(), authenticatedCustomerId)) {
+        if (!isAdmin && !Objects.equals(betEntity.getCustomerId(), authenticatedCustomerId)) {
             throw new BetCloseDeniedException(authenticatedCustomerId, betEntity.getCustomerId());
+        }
+        if (isMarketClosed(betEntity.getMarketId())) {
+            throw new MarketIsClosedException(betEntity.getMarketId());
         }
         betEntity.setStatus(BetStatus.CANCELLED);
         betEntity = betRepository.save(betEntity);
@@ -129,9 +130,9 @@ public class BetServiceImpl implements BetService {
 
     @Override
     @Transactional(readOnly = true)
-    public BetDataList getBetsForMarket(UUID marketId, boolean skipMarketClosedCheck) {
-        if (!skipMarketClosedCheck && isMarketClosed(marketId)) {
-            throw new MarketClosedException(marketId);
+    public BetDataList getBetsForMarket(UUID marketId, boolean skipMarketOpenCheck) {
+        if (!skipMarketOpenCheck && !isMarketClosed(marketId)) {
+            throw new MarketIsOpenException(marketId);
         }
         List<BetEntity> betEntityList = betRepository.findByMarketId(marketId);
         return BetDataList.builder()
@@ -197,7 +198,9 @@ public class BetServiceImpl implements BetService {
     public MarketStatusData getMarketStatus(UUID marketId, String customerId) {
         boolean marketClosed = isMarketClosed(marketId);
         boolean customerBetExists = betRepository.existsByCustomerIdAndMarketId(customerId, marketId);
-        Integer votes = marketClosed ? 0 : betRepository.countByMarketIdAndStatus(marketId, BetStatus.VALIDATED);
+        Integer votes = marketClosed
+                ? betRepository.countByMarketIdAndStatusNotIn(marketId, BetStatus.getClosedMarketInvalidStatuses())
+                : betRepository.countByMarketIdAndStatus(marketId, BetStatus.VALIDATED);
         boolean canPlaceBet = !marketClosed && !customerBetExists;
         return MarketStatusData.builder()
                 .canPlaceBet(canPlaceBet)

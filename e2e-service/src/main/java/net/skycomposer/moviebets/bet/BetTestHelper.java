@@ -45,9 +45,11 @@ public class BetTestHelper {
         BetResponse response = null;
         while (response == null) {
             try {
-                response = betClient.open(betData);
+                response = betClient.place(betData);
             } catch (FeignException.TooManyRequests e) {
                 TimeUnit.MILLISECONDS.sleep(Duration.ofSeconds(1).toMillis());
+            } catch (FeignException.Conflict e) {
+                return new BetResponse(null, e.getMessage());
             }
         }
         return response;

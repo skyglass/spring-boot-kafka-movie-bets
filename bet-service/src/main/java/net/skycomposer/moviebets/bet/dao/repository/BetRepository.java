@@ -48,4 +48,6 @@ public interface BetRepository extends JpaRepository<BetEntity, UUID> {
 
     int countByMarketIdAndStatus(UUID marketId, BetStatus status);
 
+    int countByMarketIdAndStatusNotIn(UUID marketId, List<BetStatus> statuses);
+
 }
