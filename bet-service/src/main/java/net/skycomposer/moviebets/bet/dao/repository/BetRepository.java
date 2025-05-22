@@ -1,6 +1,7 @@
 package net.skycomposer.moviebets.bet.dao.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,8 @@ public interface BetRepository extends JpaRepository<BetEntity, UUID> {
     List<BetEntity> findByMarketIdAndStatus(UUID marketId, BetStatus status, Pageable pageable);
 
     boolean existsByCustomerIdAndMarketId(String customerId, UUID marketId);
+
+    Optional<BetEntity> findByCustomerIdAndMarketId(String customerId, UUID marketId);
 
     @Modifying
     @Query("UPDATE BetEntity b SET b.status = :status WHERE b.id IN :ids")

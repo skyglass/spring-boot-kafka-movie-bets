@@ -80,7 +80,7 @@ public class BetServiceImpl implements BetService {
             throw new BetOpenDeniedException(authenticatedCustomerId, betData.getCustomerId());
         }
         if (isMarketClosed(betData.getMarketId())) {
-            throw new MarketIsClosedException(betData.getMarketId());
+            throw new MarketIsClosedException(betData.getMarketName(), betData.getMarketId());
         }
         if (betRepository.existsByCustomerIdAndMarketId(betData.getCustomerId(), betData.getMarketId())) {
             throw new BetAlreadyExistsException(betData.getCustomerId(), betData.getMarketId());
@@ -105,7 +105,7 @@ public class BetServiceImpl implements BetService {
             throw new BetCloseDeniedException(authenticatedCustomerId, betEntity.getCustomerId());
         }
         if (isMarketClosed(betEntity.getMarketId())) {
-            throw new MarketIsClosedException(betEntity.getMarketId());
+            throw new MarketIsClosedException(betEntity.getMarketName(), betEntity.getMarketId());
         }
         betEntity.setStatus(BetStatus.CANCELLED);
         betEntity = betRepository.save(betEntity);
@@ -207,6 +207,14 @@ public class BetServiceImpl implements BetService {
                 .marketClosed(marketClosed)
                 .votes(votes)
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BetStatusResponse getBetStatus(String customerId, UUID marketId) {
+        boolean betExists = betRepository.existsByCustomerIdAndMarketId(customerId, marketId);
+        UUID betId = betExists ? betRepository.findByCustomerIdAndMarketId(customerId, marketId).get().getId() : null;
+        return new BetStatusResponse(betId, betExists);
     }
 
     @Override

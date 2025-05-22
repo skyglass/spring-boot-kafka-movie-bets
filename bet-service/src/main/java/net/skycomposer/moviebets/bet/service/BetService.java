@@ -44,4 +44,6 @@ public interface BetService {
 
     void marketSettleDone(UUID marketId, MarketResult winResult);
 
+    BetStatusResponse getBetStatus(String customerId, UUID marketId);
+
 }

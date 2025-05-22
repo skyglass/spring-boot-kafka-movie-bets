@@ -25,6 +25,8 @@ public class WebSecurityConfig {
 
                         .requestMatchers(HttpMethod.GET,"/", "/**").hasAnyRole(MOVIEBETS_USER, MOVIEBETS_MANAGER)
 
+                        .requestMatchers(HttpMethod.POST,"/open").hasAnyRole(MOVIEBETS_USER, MOVIEBETS_MANAGER)
+
                         .requestMatchers("/", "/**").hasRole(MOVIEBETS_MANAGER)
 
                         .anyRequest().authenticated())

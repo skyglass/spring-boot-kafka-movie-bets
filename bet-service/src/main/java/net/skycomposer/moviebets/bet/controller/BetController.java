@@ -42,6 +42,11 @@ public class BetController {
       return betService.getBetsForMarket(marketId, false);
     }
 
+    @GetMapping("/get-bet-status/{customerId}/{marketId}")
+    public BetStatusResponse getBetStatus(@PathVariable String customerId, @PathVariable UUID marketId) {
+        return betService.getBetStatus(customerId, marketId);
+    }
+
     @PreAuthorize("hasRole('MOVIEBETS_MANAGER')")
     @GetMapping("/get-bets-for-market-for-admin/{marketId}")
     public BetDataList getBetsForMarketForAdmin(@PathVariable UUID marketId) {
@@ -64,7 +69,7 @@ public class BetController {
     @PreAuthorize("hasRole('MOVIEBETS_MANAGER')")
     @PostMapping("/place-for-admin")
     @ResponseStatus(HttpStatus.CREATED)
-    public BetResponse placeForAdmin(@RequestBody @Valid BetData betData, Authentication authentication) {
+    public BetResponse placeForAdmin(@RequestBody @Valid BetData betData) {
         return betService.place(betData, betData.getCustomerId());
     }
 

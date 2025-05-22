@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import {useKeycloak} from "../../../auth/provider/KeycloakProvider";
 import buildClient from "../../../api/build-client";
 import { v4 as uuidv4 } from 'uuid';
+import { useMessage } from "../../../provider/MessageContextProvider";
 
 const NewBet = () => {
   const router = useRouter();
@@ -11,6 +12,8 @@ const NewBet = () => {
 
   const [event, setEvent] = useState(null);
   const [selectedResult, setSelectedResult] = useState(0);
+
+  const { showMessage } = useMessage();
 
   useEffect(() => {
     if (!eventId) return;
@@ -50,28 +53,44 @@ const NewBet = () => {
     const cancelRequestId = uuidv4();
 
     const betData = {
-      betId: uuidv4(),
       marketId: eventId,
       marketName: `${event.item1} vs ${event.item2}`,
       customerId: user.name,
       result: selectedResult,
-      requestId: requestId,
-      cancelRequestId: cancelRequestId,
+      requestId,
+      cancelRequestId,
     };
 
     try {
       const client = buildClient({ req: {}, currentUser: user });
-      const response = await client.post('/api/bet/place', betData);
+      await client.post('/api/bet/place', betData);
 
-      if (response.status !== 201) {
-        const errorMessage = await response.data.message; // Get error message from server
-        console.log("Failed to place bet:", errorMessage);
-        return;
+      showMessage("Bet placed successfully!", 'success');
+
+      // Polling for confirmation (with timeout)
+      const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
+      const timeout = 5000; // total time to wait (ms)
+      const interval = 300; // polling interval (ms)
+      const startTime = Date.now();
+
+      while (Date.now() - startTime < timeout) {
+        const { data: betStatus } = await client.get(`/api/bet/get-bet-status/${user.name}/${eventId}`);
+        const betExists = betStatus.betExists;
+        if (betExists) {
+          break;
+        }
+        await delay(interval);
       }
 
       router.push(`/bets/view/event/${eventId}`);
     } catch (error) {
-      console.error("Bet submission failed:", error);
+      const errorMsg =
+          error.response?.data?.message ||
+          error.message ||
+          "Unexpected error placing bet.";
+      showMessage(errorMsg, 'error');
+      router.push(`/bets/view/event/${eventId}`);
     }
   };
 

@@ -4,15 +4,18 @@ import buildClient from "../../../../api/build-client";
 import { useKeycloak } from '../../../../auth/provider/KeycloakProvider';
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import {getResultText, getBetWon} from "../../../../helpers/Global";
+import { getResultText, getBetWon } from "../../../../helpers/Global";
+import { useMessage } from "../../../../provider/MessageContextProvider";
+import { isAdminFunc } from "../../../../auth/components/Helpers";
 
 const BetListPage = () => {
     const router = useRouter();
     const [bets, setBets] = useState([]);
+    const [votesCount, setVotesCount] = useState(null);
     const { user } = useKeycloak();
     const { eventId } = router.query;
     const [event, setEvent] = useState(null);
-    const [errors, setErrors] = useState(null);
+    const { showMessage } = useMessage();
 
     useEffect(() => {
         if (user) {
@@ -20,10 +23,25 @@ const BetListPage = () => {
 
                 try {
                     const client = buildClient({ req: {}, currentUser: user });
-                    const { data } = await client.get(`/api/bet/get-bets-for-market/${eventId}`);
+                    const endpoint = isAdminFunc(user)
+                        ? `/api/bet/get-bets-for-market-for-admin/${eventId}`
+                        : `/api/bet/get-bets-for-market/${eventId}`;
+                    const { data } = await client.get(endpoint);
                     setBets(data.betDataList);
-                } catch (err) {
-                    setErrors(err.response?.data?.errors || [{ message: "Failed to fetch event" }]);
+                } catch (error) {
+                    if (error.response?.status === 409) {
+                        // Market is open, show vote count instead of error
+                        try {
+                            const client = buildClient({ req: {}, currentUser: user });
+                            const marketStatus = await client.get(`/api/bet/get-market-status/${eventId}`);
+                            setVotesCount(marketStatus.data.votes);
+                        } catch (statusError) {
+                            console.error("Failed to fetch market status", statusError);
+                        }
+                    } else {
+                        const errorMsg = error.response?.data?.message || error.message || "Unexpected error when getting bets for market.";
+                        showMessage(errorMsg, 'error');
+                    }
                 }
             };
             fetchData();
@@ -38,8 +56,9 @@ const BetListPage = () => {
                     const client = buildClient({ req: {}, currentUser: user });
                     const { data } = await client.get(`/api/market/get-state/${eventId}`);
                     setEvent(data);
-                } catch (err) {
-                    setErrors(err.response?.data?.errors || [{ message: "Failed to fetch event" }]);
+                } catch (error) {
+                    const errorMsg = error.response?.data?.message || error.message || "Unexpected error when fetching event.";
+                    showMessage(errorMsg, 'error');
                 }
             };
             fetchData();
@@ -76,6 +95,17 @@ const BetListPage = () => {
 
     if (!event) {
         return <div>Loading...</div>;
+    }
+
+    if (votesCount !== null) {
+        return (
+            <div style={{ padding: '1rem', border: '1px solid #ccc', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
+                <p style={{ marginBottom: '0.5rem', color: '#555' }}>
+                    <strong>Bet List is not available:</strong> Market is not closed yet.
+                </p>
+                <p>Total votes so far: <strong>{votesCount}</strong></p>
+            </div>
+        );
     }
 
     return (

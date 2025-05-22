@@ -174,7 +174,7 @@ public class BetSettleHandler {
             return sumStakesData.getSumStakes().get(0).getVotes() > 0;
         }
         SumStakeData one = sumStakesData.getSumStakes().get(0);
-        SumStakeData two = sumStakesData.getSumStakes().get(0);
+        SumStakeData two = sumStakesData.getSumStakes().get(1);
         return one.getVotes().longValue() != two.getVotes().longValue();
     }
 
