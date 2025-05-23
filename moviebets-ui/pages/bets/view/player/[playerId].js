@@ -5,13 +5,14 @@ import { useKeycloak } from '../../../../auth/provider/KeycloakProvider';
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import {getBetWon, getResultText} from "../../../../helpers/Global";
+import { useMessage } from "../../../../provider/MessageContextProvider";
 
 const BetListPage = () => {
     const router = useRouter();
     const [bets, setBets] = useState([]);
     const { user } = useKeycloak();
     const { playerId } = router.query;
-    const [errors, setErrors] = useState(null);
+    const { showMessage } = useMessage();
 
     useEffect(() => {
         if (user) {
@@ -21,13 +22,23 @@ const BetListPage = () => {
                     const client = buildClient({ req: {}, currentUser: user });
                     const { data } = await client.get(`/api/bet/get-bets-for-player/${playerId}`);
                     setBets(data.betDataList);
-                } catch (err) {
-                    setErrors(err.response?.data?.errors || [{ message: "Failed to fetch bets" }]);
+                } catch (error) {
+                    const errorMsg =
+                        error.response?.data?.message ||
+                        error.message ||
+                        "Unexpected error fetching bets.";
+                    showMessage(errorMsg, 'error');
                 }
             };
             fetchData();
         }
     }, [user, playerId]);
+
+    if (!bets) {
+        return <div>Loading...</div>;
+    }
+
+
 
     const betList = bets.map((bet) => {
         return (
@@ -57,13 +68,9 @@ const BetListPage = () => {
         );
     });
 
-    if (!event) {
-        return <div>Loading...</div>;
-    }
-
     return (
         <div>
-            <h4>List of Bets for Player: {playerId}</h4>
+            <h5>List of bets for player: {playerId}</h5>
             <table className="table">
                 <thead>
                 <tr>

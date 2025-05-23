@@ -3,6 +3,7 @@ import Router from 'next/router';
 import { useKeycloak } from "../../auth/provider/KeycloakProvider";
 import buildClient from "../../api/build-client";
 import { v4 as uuidv4 } from 'uuid';
+import { useMessage } from "../../provider/MessageContextProvider";
 
 const NewEvent = () => {
   const { user } = useKeycloak();
@@ -12,6 +13,7 @@ const NewEvent = () => {
   const [durationUnit, setDurationUnit] = useState('minutes');
   const [errors, setErrors] = useState(null);
   const [closesAtPreview, setClosesAtPreview] = useState('');
+  const { showMessage } = useMessage();
 
   const computeClosesAt = () => {
     const value = parseInt(durationValue, 10);
@@ -87,9 +89,12 @@ const NewEvent = () => {
 
       await client.post('/api/market/open', data);
       Router.push('/');
-    } catch (err) {
-      const msg = err.message || "An error occurred";
-      setErrors([{ message: msg }]);
+    } catch (error) {
+      const errorMsg =
+          error.response?.data?.message ||
+          error.message ||
+          "Unexpected error opening the event.";
+      showMessage(errorMsg, 'error');
     }
   };
 

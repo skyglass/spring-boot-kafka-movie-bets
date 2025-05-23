@@ -36,7 +36,8 @@ const BetListPage = () => {
                             const marketStatus = await client.get(`/api/bet/get-market-status/${eventId}`);
                             setVotesCount(marketStatus.data.votes);
                         } catch (statusError) {
-                            console.error("Failed to fetch market status", statusError);
+                            const errorMsg = statusError.response?.data?.message ||statusError.message || "Failed to fetch market status.";
+                            showMessage(errorMsg, 'error');
                         }
                     } else {
                         const errorMsg = error.response?.data?.message || error.message || "Unexpected error when getting bets for market.";
@@ -64,6 +65,10 @@ const BetListPage = () => {
             fetchData();
         }
     }, [user, eventId]);
+
+    if (!bets) {
+        return <div>Loading...</div>;
+    }
 
     const betList = bets.map((bet) => {
         return (
@@ -101,7 +106,7 @@ const BetListPage = () => {
         return (
             <div style={{ padding: '1rem', border: '1px solid #ccc', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
                 <p style={{ marginBottom: '0.5rem', color: '#555' }}>
-                    <strong>Bet List is not available:</strong> Market is not closed yet.
+                    <strong>Bet List is not available:</strong> Event is still open.
                 </p>
                 <p>Total votes so far: <strong>{votesCount}</strong></p>
             </div>
@@ -110,7 +115,7 @@ const BetListPage = () => {
 
     return (
         <div>
-            <h4>List of Bets for Movie Event "{event.item1} vs {event.item2}"</h4>
+            <h5>List of bets for movie event "{event.item1} vs {event.item2}"</h5>
             <Link href={`/bets/place/${eventId}`}>
                 <button className="btn btn-primary" style={{ marginBottom: '10px' }}>Place a Bet</button>
             </Link>

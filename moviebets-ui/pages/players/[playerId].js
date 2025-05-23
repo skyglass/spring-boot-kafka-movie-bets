@@ -4,13 +4,14 @@ import Router from 'next/router';
 import { useKeycloak } from '../../auth/provider/KeycloakProvider';
 import buildClient from '../../api/build-client';
 import { useRouter } from 'next/router';
+import { useMessage } from "../../provider/MessageContextProvider";
 
 const PlayerShow = () => {
     const { user } = useKeycloak();
     const router = useRouter();
     const { playerId } = router.query;
     const [player, setPlayer] = useState(null);
-    const [errors, setErrors] = useState(null);
+    const { showMessage } = useMessage();
 
     useEffect(() => {
         if (user && playerId) {
@@ -19,8 +20,12 @@ const PlayerShow = () => {
                     const client = buildClient({ req: {}, currentUser: user });
                     const { data } = await client.get(`/api/customer/get-customer/${playerId}`);
                     setPlayer(data);
-                } catch (err) {
-                    setErrors(err.response?.data?.errors || [{ message: "Failed to fetch player" }]);
+                } catch (error) {
+                    const errorMsg =
+                        error.response?.data?.message ||
+                        error.message ||
+                        "Unexpected error fetching player.";
+                    showMessage(errorMsg, 'error');
                 }
             };
             fetchPlayer();
@@ -34,16 +39,6 @@ const PlayerShow = () => {
     return (
         <div>
             <h1>Player {player.customerId}</h1>
-
-            {errors && (
-                <div className="alert alert-danger">
-                    <ul>
-                        {errors.map((err, index) => (
-                            <li key={index}>{err.message}</li>
-                        ))}
-                    </ul>
-                </div>
-            )}
 
             <h3>Player Information</h3>
             <div className="market-data">

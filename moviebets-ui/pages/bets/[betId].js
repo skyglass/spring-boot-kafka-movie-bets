@@ -5,13 +5,14 @@ import { useKeycloak } from '../../auth/provider/KeycloakProvider';
 import buildClient from '../../api/build-client';
 import { useRouter } from 'next/router';
 import { getResultText, getBetWon } from "../../helpers/Global";
+import { useMessage } from "../../provider/MessageContextProvider";
 
 const BetShow = () => {
     const { user } = useKeycloak();
     const router = useRouter();
     const { betId } = router.query;
     const [bet, setBet] = useState(null);
-    const [errors, setErrors] = useState(null);
+    const { showMessage } = useMessage();
 
     useEffect(() => {
         if (user && betId) {
@@ -20,8 +21,12 @@ const BetShow = () => {
                     const client = buildClient({ req: {}, currentUser: user });
                     const { data } = await client.get(`/api/bet/get-state/${betId}`);
                     setBet(data);
-                } catch (err) {
-                    setErrors(err.response?.data?.errors || [{ message: "Failed to fetch bet" }]);
+                } catch (error) {
+                    const errorMsg =
+                        error.response?.data?.message ||
+                        error.message ||
+                        "Unexpected error fetching bets.";
+                    showMessage(errorMsg, 'error');
                 }
             };
             fetchBet();
@@ -34,17 +39,7 @@ const BetShow = () => {
 
     return (
         <div>
-            <h3>Bet for Movie Event: "{bet.marketName}"</h3>
-
-            {errors && (
-                <div className="alert alert-danger">
-                    <ul>
-                        {errors.map((err, index) => (
-                            <li key={index}>{err.message}</li>
-                        ))}
-                    </ul>
-                </div>
-            )}
+            <h5>Bet for Movie Event: "{bet.marketName}"</h5>
 
             <div className="bet-data">
                 <div>

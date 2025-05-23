@@ -4,21 +4,35 @@ import buildClient from "../api/build-client";
 import { useKeycloak } from '../auth/provider/KeycloakProvider';
 import { useEffect, useState } from "react";
 import { getEventResultText } from "../helpers/Global";
+import {useMessage} from "../provider/MessageContextProvider";
 
 const LandingPage = () => {
     const [events, setEvents] = useState([]);
     const { user } = useKeycloak();
+    const { showMessage } = useMessage();
 
     useEffect(() => {
         if (user) {
             const fetchData = async () => {
-                const client = buildClient({ req: {}, currentUser: user });
-                const { data } = await client.get('/api/market/all');
-                setEvents(data);
+                try {
+                    const client = buildClient({ req: {}, currentUser: user });
+                    const { data } = await client.get('/api/market/all');
+                    setEvents(data);
+                } catch (error) {
+                    const errorMsg =
+                        error.response?.data?.message ||
+                        error.message ||
+                        "Unexpected error fetching events.";
+                    showMessage(errorMsg, 'error');
+                }
             };
             fetchData();
         }
     }, [user]);
+
+    if (!events) {
+        return <div>Loading...</div>;
+    }
 
     const eventList = events.map((event) => {
         return (

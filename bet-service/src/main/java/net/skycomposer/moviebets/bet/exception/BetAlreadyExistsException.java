@@ -1,10 +1,8 @@
 package net.skycomposer.moviebets.bet.exception;
 
-import java.util.UUID;
-
 public class BetAlreadyExistsException extends RuntimeException {
 
-    public BetAlreadyExistsException(String customerId, UUID marketId) {
-        super(String.format("Duplicate bet request for the same customer = %s and marketId = %s", customerId, marketId));
+    public BetAlreadyExistsException(String customerId, String marketName) {
+        super(String.format("Duplicate Bet Request: Only one bet is allowed for customer '%s' and event '%s'", customerId, marketName));
     }
 }

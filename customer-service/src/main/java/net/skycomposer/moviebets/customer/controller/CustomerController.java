@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import net.skycomposer.moviebets.common.dto.customer.CustomerData;
 import net.skycomposer.moviebets.common.dto.customer.CustomerResponse;
+import net.skycomposer.moviebets.customer.service.CustomerApplicationService;
 import net.skycomposer.moviebets.customer.service.CustomerService;
 
 @RestController
@@ -20,9 +21,16 @@ public class CustomerController {
 
   private final CustomerService customerService;
 
+  private final CustomerApplicationService customerApplicationService;
+
   @GetMapping("/get-customer/{customerId}")
   public CustomerData findCustomerById(@PathVariable String customerId) {
     return customerService.findCustomerById(customerId);
+  }
+
+  @GetMapping("/get-or-create-customer/{customerId}/{requestId}")
+  public CustomerData findCustomerById(@PathVariable String customerId, @PathVariable UUID requestId) {
+    return customerApplicationService.findOrCreateCustomerById(customerId, requestId);
   }
 
   @GetMapping("/all")
@@ -32,7 +40,7 @@ public class CustomerController {
 
   @PostMapping("/register/{customerId}/{requestId}")
   public CustomerResponse registerCustomer(@PathVariable String customerId, @PathVariable UUID requestId) {
-    return customerService.addFunds(customerId, requestId, new BigDecimal(CustomerService.DEFAULT_REGISTERED_CUSTOMER_BALANCE));
+    return customerApplicationService.registerCustomer(customerId, requestId);
   }
 
   @PostMapping("/add-funds/{customerId}/{requestId}/{funds}")

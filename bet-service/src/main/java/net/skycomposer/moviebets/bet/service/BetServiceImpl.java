@@ -80,10 +80,10 @@ public class BetServiceImpl implements BetService {
             throw new BetOpenDeniedException(authenticatedCustomerId, betData.getCustomerId());
         }
         if (isMarketClosed(betData.getMarketId())) {
-            throw new MarketIsClosedException(betData.getMarketName(), betData.getMarketId());
+            throw new MarketIsClosedException(betData.getMarketName());
         }
         if (betRepository.existsByCustomerIdAndMarketId(betData.getCustomerId(), betData.getMarketId())) {
-            throw new BetAlreadyExistsException(betData.getCustomerId(), betData.getMarketId());
+            throw new BetAlreadyExistsException(betData.getCustomerId(), betData.getMarketName());
         }
         BetEntity betEntity = createBetEntity(betData);
         betEntity.setStatus(BetStatus.PlACED);
@@ -105,7 +105,7 @@ public class BetServiceImpl implements BetService {
             throw new BetCloseDeniedException(authenticatedCustomerId, betEntity.getCustomerId());
         }
         if (isMarketClosed(betEntity.getMarketId())) {
-            throw new MarketIsClosedException(betEntity.getMarketName(), betEntity.getMarketId());
+            throw new MarketIsClosedException(betEntity.getMarketName());
         }
         betEntity.setStatus(BetStatus.CANCELLED);
         betEntity = betRepository.save(betEntity);

@@ -3,10 +3,36 @@ import LogoutButton from '../auth/components/LogoutButton';
 import { useKeycloak } from "../auth/provider/KeycloakProvider";
 import { isAdminFunc } from "../auth/components/Helpers";
 import { useMessage } from "../provider/MessageContextProvider";
+import buildClient from "../api/build-client";
+import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from 'uuid';
 
 export default () => {
     const { user } = useKeycloak();
     const { message, clearMessage } = useMessage();
+    const [balance, setBalance] = useState(null);
+    const { showMessage } = useMessage();
+
+    useEffect(() => {
+        if (!user?.name) return;
+
+        const fetchCustomerBalance = async () => {
+            try {
+                const client = buildClient({ req: {}, currentUser: user });
+                const requestId = uuidv4();
+                const response = await client.get(`/api/customer/get-or-create-customer/${user.name}/${requestId}`);
+                setBalance(response.data.balance); // assuming response contains `balance`
+            } catch (error) {
+                const errorMsg =
+                    error.response?.data?.message ||
+                    error.message ||
+                    "Unexpected error fetching customer balance.";
+                showMessage(errorMsg, 'error');
+            }
+        };
+
+        fetchCustomerBalance();
+    }, [user]);
 
     const alertClass =
         message?.type === 'error'
@@ -36,6 +62,12 @@ export default () => {
                 </Link>
 
                 <ul className="nav d-flex align-items-center">{links}</ul>
+
+                {balance !== null && (
+                    <span className="me-4 text-muted">
+                        Your Current Balance: <strong>{balance.toFixed(2)}</strong>
+                    </span>
+                )}
 
                 <LogoutButton />
             </nav>

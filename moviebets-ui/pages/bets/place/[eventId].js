@@ -24,7 +24,11 @@ const NewBet = () => {
         const response = await client.get(`/api/market/get-state/${eventId}`);
         setEvent(response.data);
       } catch (error) {
-        console.error("Error fetching event:", error);
+        const errorMsg =
+            error.response?.data?.message ||
+            error.message ||
+            "Unexpected error fetching event.";
+        showMessage(errorMsg, 'error');
       }
     };
 
