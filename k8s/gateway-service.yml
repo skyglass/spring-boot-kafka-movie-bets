@@ -43,7 +43,9 @@ spec:
         - name: SPRING_KEYCLOAK_SERVER_URL
           value: "http://moviebets-keycloak:8080/keycloak"
         - name: SPRING_KEYCLOAK_SERVER_EXTERNAL_URL
-          value: "http://localhost/keycloak"
+          value: $KEYCLOAK_BASE_URL
+        - name: MOVIEBETS_APP_BASE_URL
+          value: $BASE_URL
 
         lifecycle:
           preStop:

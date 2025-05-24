@@ -32,6 +32,9 @@ public class KeycloakInitializerRunner implements CommandLineRunner {
     @Value("${moviebets-app.redirect-url}")
     private String movieBetsAppRedirectUrl;
 
+    @Value("${moviebets-app.base-url}")
+    private String movieBetsAppBaseUrl;
+
     @Override
     public void run(String... args) {
         log.info("Initializing '{}' realm in Keycloak ...", MOVIEBETS_REALM_NAME);
@@ -64,7 +67,7 @@ public class KeycloakInitializerRunner implements CommandLineRunner {
         clientRepresentation.setDirectAccessGrantsEnabled(true);
         clientRepresentation.setPublicClient(true);
         clientRepresentation.setRedirectUris(List.of(movieBetsAppRedirectUrl));
-        clientRepresentation.setWebOrigins(List.of("*"));
+        clientRepresentation.setWebOrigins(List.of(movieBetsAppBaseUrl));
         clientRepresentation.setDefaultRoles(new String[]{WebSecurityConfig.MOVIEBETS_USER});
         realmRepresentation.setClients(List.of(clientRepresentation));
 
