@@ -4,8 +4,9 @@
   <ul>
     <li>✅ <b>Cloud-Native Spring Boot Development Environment and Startup Template</b>
     <li>✅ <b>Concurrency and Resiliency Patterns in Saga Transactions for Spring Boot Microservices</b>
-    <li>✅ <b>Part 5: Reliable Long-Running Saga Business Processes</b>
-    <li>✅ <b>Kafka Dynamic Transaction Processing Queues for Long-Running Saga Business Processes</b>
+    <li>✅ <b>Part 5: Reliable Long-Running Saga Processes</b>
+    <li>✅ <b>Long-running Saga processes, with dynamic recursive conditions for the next step, using Kafka Transactional Consumers and Outbox Pattern</b>
+    <li>✅ <b>Kafka At-least one delivery guarantee and Idempotency Check to prevent duplicate side effects.</b>
   </ul>
 </ul>
 
@@ -17,8 +18,9 @@
 #### ✅ Event-Driven Choreography Saga with Spring Kafka Listeners and Kafka Transactions
 #### ✅ Outbox Pattern with JPA ACID Transactions
 #### ✅ Synchronizing Kafka and Database Transactions with Kafka and JPA Transaction Manager
-#### ✅ Handling Concurrency with Kafka Consumer Groups and Partitions
-#### ✅ Sequential processing guarantee for messages with the same key and in the same topic
+#### ✅ Handling Concurrency and Parallelization with Kafka Consumer Groups and Partitions
+#### ✅ Sequential processing guarantee for messages with the same key
+#### ✅ Parallel processing for messages in different partitions
 #### ✅ Handling Resiliency with Kafka Consumers and Retryable Exceptions
 #### ✅ Retryable Exceptions and Dead-Letter Queue Error Channel with Spring Kafka
 #### ✅ E2E Concurrency Testing Framework with Completable Futures using Spring Cloud OpenFeign
