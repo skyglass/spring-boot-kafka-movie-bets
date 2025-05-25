@@ -233,7 +233,7 @@ KEYCLOAK_BASE_URL="https://skycomposer.net/keycloak"
 14. Open https url with your registered domain in your Browser and make sure that Keycloak `Login` and `Register` works, you are able to `Create a Movie Event` and place a bet on it
 
 - Optionally, register 2 new users, create movie event with one account and place bet with another account
-- The only difference between `skaffold dev` and `skaffold prod` is that `skaffold dev` allows hot reloading of your code changes on production! Try to make any code change with your IDE and you will immediately see this change on production!
+- The only difference between `skaffold dev` and `skaffold run` is that `skaffold dev` allows hot reloading of your code changes on production! Try to make any code change with your IDE and you will immediately see this change on production!
 - If you run `sh skaffold-local.sh` or `sh skaffold-prod.sh` you will see logs in real-time. After closing the cli window, all kubernetes resources will be destroyed! Therefore, in order to deploy final changes to production, replace `skaffold dev` with `skaffold run` in the `skaffold-prod.sh` script. You will not have hot reloading with `skaffold run` anymore, but kubernetes resources will not be destroyed after you close cli window.
 
 #### 🎉 Congratulations!
