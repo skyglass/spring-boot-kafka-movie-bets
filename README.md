@@ -1,13 +1,11 @@
 ### 📖 Movie Bets
 
-<ul style="list-style-type:disc">
-  <ul>
-    <li>✅ <b>Cloud-Native Spring Boot Development Environment and Startup Template</b>
-    <li>✅ <b>Concurrency and Resiliency Patterns in Saga Transactions for Spring Boot Microservices</b>
-    <li>✅ <b>Part 5: Reliable Long-Running Saga Processes</b>
-    <li>✅ <b>Long-running Saga processes, with dynamic recursive conditions for the next step, using Kafka Transactional Consumers and Outbox Pattern</b>
-    <li>✅ <b>Kafka At-least one delivery guarantee and Idempotency Check to prevent duplicate side effects.</b>
-  </ul>
+<ul>
+  <li>✅ <b>Cloud-Native Spring Boot Development Environment and Startup Template</b>
+  <li>✅ <b>Concurrency and Resiliency Patterns in Saga Transactions for Spring Boot Microservices</b>
+  <li>✅ <b>Part 5: Reliable Long-Running Saga Processes</b>
+  <li>✅ <b>Long-running Saga processes, with dynamic recursive conditions for the next step, using Kafka Transactional Consumers and Outbox Pattern</b>
+  <li>✅ <b>Kafka At-least one delivery guarantee and Idempotency Check to prevent duplicate side effects.</b>
 </ul>
 
 ### 📖 Concurrency and Resiliency Patterns in Saga Transactions for Spring Boot Microservices
