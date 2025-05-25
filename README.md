@@ -88,19 +88,19 @@
 
 ### 📖 Prepare your environment (skip if you only need local deployment)
 
-#### 1️⃣ Create Your GitHub Repository
+#### 1️⃣ Prepare GitHub Account
+
+- Make sure you have your own Github Account
+---
+
+#### 2️⃣ Create Your GitHub Repository
 
 - Clone this repository and copy the source code to your new repository
 ---
 
-#### 2️⃣ Prepare Azure Account
+#### 3️⃣ Prepare Azure Account
 
 - Make sure you have your own Azure Account with enough permissions (Sign Up for a Free Trial, if you don't have one)
----
-
-#### 3️⃣ Prepare GitHub Account
-
-- Make sure you have your own Github Account
 ---
 
 #### 4️⃣ Customize Source Code & GitHub Workflows
