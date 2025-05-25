@@ -106,7 +106,7 @@
 #### 4️⃣ Customize Source Code & GitHub Workflows
 
 - Edit "**.github/workflows/deploy-*.yaml**" files: replace "**master**" with the name of your main branch (you can change default main branch name in github repository settings)
-- Edit "**k8s/prod/ingress-srv.yaml**" file: replace "**skycomposer.net**" with the name of your registered domain (see **Step-05** and **Azure Production Environment Setup** for more details)
+- Edit "**k8s/prod/ingress-srv.yaml**" file: replace "**skycomposer.net**" with the name of your registered domain (see **Step 5** and [☁️ Azure Production Environment](#azure-production-environment-with-terraform--skaffold) for more details)
 ---
 
 #### 5️⃣ Register Your Domain
