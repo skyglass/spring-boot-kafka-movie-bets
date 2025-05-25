@@ -155,7 +155,7 @@ This script will build docker images and start local kubernetes environment with
 - Make sure that Keycloak `Login` and `Register` works, and you are able to `Create Movie Event` and place bet on it.
 - You can use credentials: `admin` / `admin` for user with admin privileges and credentials: `user` / `user` for regular user
 - Any new user, registered with Keycloak, is automatically assigned regular user privileges
-- Optionally, create 2 test accounts by registering on the `Keycloak Login` Page, create movie event and place bet with one account and do the same with another account.
+- Optionally, create 2 test accounts by clicking `Register` on the `Keycloak Login` Page, create movie event and place bet with one account and do the same with another account.
 - If the winner exists at the move event close time, then the movie event is closed, and the bets start to settle by recursively triggering kafka events during settlement, until all settlement jobs are finished.
 - Note: If the winner doesn't exist, then the movie event is configured to be closed later, after configurable amount of time (6ß seconds by default)
 - The winner exists only if the movie has more votes than another movie. If the votes are equal, the movie event is extended for configurable duration, until there is a winner.
@@ -231,8 +231,7 @@ KEYCLOAK_BASE_URL="https://skycomposer.net/keycloak"
 13. Verify that certificate `tls-secret` is working (Ready = True, see the article for more details)
 
 14. Open https url with your registered domain in your Browser and make sure that Keycloak `Login` and `Register` works, you are able to `Create a Movie Event` and place a bet on it
-- You can use `admin`, password `admin` for user with admin privileges and `user`, password `user` for regular user
-- Any new user, registered with Keycloak is automatically assigned regular user privileges
+
 - Optionally, register 2 new users, create movie event with one account and place bet with another account
 - The only difference between `skaffold dev` and `skaffold prod` is that `skaffold dev` allows hot reloading of your code changes on production! Try to make any code change with your IDE and you will immediately see this change on production!
 - If you run `sh skaffold-local.sh` or `sh skaffold-prod.sh` you will see logs in real-time. After closing the cli window, all kubernetes resources will be destroyed! Therefore, in order to deploy final changes to production, replace `skaffold dev` with `skaffold run` in the `skaffold-prod.sh` script. You will not have hot reloading with `skaffold run` anymore, but kubernetes resources will not be destroyed after you close cli window.
