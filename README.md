@@ -86,30 +86,30 @@
 ## 📚 Step-by-Step Setup Guide
 
 
-## 📖 Prepare your environment (skip if you only need local deployment)
+### 📖 Prepare your environment (skip if you only need local deployment)
 
-##### 1️⃣ Create Your GitHub Repository
+#### 1️⃣ Create Your GitHub Repository
 
-Clone this repository and copy the source code to your new repository
+- Clone this repository and copy the source code to your new repository
 ---
 
-##### 2️⃣ Prepare Azure Account
+#### 2️⃣ Prepare Azure Account
 
-Make sure you have your own Azure Account with enough permissions (Sign Up for a Free Trial, if you don't have one)
+- Make sure you have your own Azure Account with enough permissions (Sign Up for a Free Trial, if you don't have one)
 ---
 
-##### 3️⃣ Prepare GitHub Account
+#### 3️⃣ Prepare GitHub Account
 
-Make sure you have your own Github Account
+- Make sure you have your own Github Account
 ---
 
-##### 4️⃣ Customize Source Code & GitHub Workflows
+#### 4️⃣ Customize Source Code & GitHub Workflows
 
 - Edit "**.github/workflows/deploy-*.yaml**" files: replace "**master**" with the name of your main branch (you can change default main branch name in github repository settings)
 - Edit "**k8s/prod/ingress-srv.yaml**" file: replace "**skycomposer.net**" with the name of your registered domain (see **Step-05** and **Azure Production Environment Setup** for more details)
 ---
 
-##### 5️⃣ Register Your Domain
+#### 5️⃣ Register Your Domain
 - You need a registered domain to provide TLS connection with trusted Certificate Authority.
 - For more details on setting up TLS on AKS Ingress with LetsEncrypt see this article: https://medium.com/@jainchirag8001/tls-on-aks-ingress-with-letsencrypt-f42d65725a3
 - This article will show you how to configure TLS on AKS with LetsEncrypt for any registered domain, including AWS Route 53.
