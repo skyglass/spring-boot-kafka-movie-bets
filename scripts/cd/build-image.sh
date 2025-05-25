@@ -13,10 +13,18 @@
 #       ./scripts/cd/build-image.sh
 #
 
-set -u # or set -o nounset
+set -u
 : "$CONTAINER_REGISTRY"
 : "$VERSION"
 : "$NAME"
 : "$DIRECTORY"
+: "$REGISTRY_UN"
+: "$REGISTRY_PW"
 
-docker build -t $CONTAINER_REGISTRY/$NAME:$VERSION --file ./$DIRECTORY/Dockerfile-prod ./$DIRECTORY
+IMAGE="$CONTAINER_REGISTRY/$NAME:$VERSION"
+
+cd "$DIRECTORY"
+mvn compile jib:build \
+  -Dimage="$IMAGE" \
+  -Djib.to.auth.username="$REGISTRY_UN" \
+  -Djib.to.auth.password="$REGISTRY_PW"
