@@ -124,7 +124,7 @@ Make sure you have your own Github Account
 
 - Make sure that you know how to create Hosted Zone and Record A for your domain provider.
 
-- For more details, see [Azure Production Environment](#-azure-production-environment-with-terraform--skaffold)
+- For more details, see the section ☁️ Azure Production Environment (with Terraform & Skaffold)
 
 ---
 
