@@ -106,7 +106,7 @@
 #### 4️⃣ Customize Source Code & GitHub Workflows
 
 - Edit "**.github/workflows/deploy-*.yaml**" files: replace "**master**" with the name of your main branch (you can change default main branch name in github repository settings)
-- Edit "**k8s/prod/ingress-srv.yaml**" file: replace "**skycomposer.net**" with the name of your registered domain (see **Step 5** and [☁️ Azure Production Environment](#azure-production-environment-with-terraform--skaffold) for more details)
+- Edit "**k8s/prod/ingress-srv.yaml**" file: replace "**skycomposer.net**" with the name of your registered domain (see **Step 5** and section [Azure Production Environment](#azure-production-environment-with-terraform--skaffold) for more details)
 ---
 
 #### 5️⃣ Register Your Domain
@@ -114,7 +114,7 @@
 - For more details on setting up TLS on AKS Ingress with LetsEncrypt see this article: https://medium.com/@jainchirag8001/tls-on-aks-ingress-with-letsencrypt-f42d65725a3
 - This article will show you how to configure TLS on AKS with LetsEncrypt for any registered domain, including AWS Route 53.
 - Make sure that you know how to create Hosted Zone and Record A for your domain provider.
-- For more details, see the section [☁️ Azure Production Environment](#azure-production-environment-with-terraform--skaffold)
+- For more details, see the section [Azure Production Environment](#azure-production-environment-with-terraform--skaffold)
 ---
 
 
