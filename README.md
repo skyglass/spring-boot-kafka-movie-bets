@@ -124,7 +124,7 @@ Make sure you have your own Github Account
 
 - Make sure that you know how to create Hosted Zone and Record A for your domain provider.
 
-- For more details, see `Azure Production Environment Setup`
+- For more details, see [Azure Production Environment](#-azure-production-environment-with-terraform--skaffold)
 
 ---
 
@@ -177,7 +177,7 @@ This script will build docker images and start local kubernetes environment with
 - Note: If the winner doesn't exist, then the movie event is configured to be closed later, after configurable amount of time (6ß seconds by default)
 - The winner exists only if the movie has more votes than another movie. If the votes are equal, the movie event is extended for configurable duration, until there is a winner.
 
-## 🎉 Congratulations!
+#### 🎉 Congratulations!
 
 - You successfuly tested `Movie Bets App` locally!
 
@@ -254,7 +254,7 @@ KEYCLOAK_BASE_URL="https://skycomposer.net/keycloak"
 - The only difference between `skaffold dev` and `skaffold prod` is that `skaffold dev` allows hot reloading of your code changes on production! Try to make any code change with your IDE and you will immediately see this change on production!
 - If you run `sh skaffold-local.sh` or `sh skaffold-prod.sh` you will see logs in real-time. After closing the cli window, all kubernetes resources will be destroyed! Therefore, in order to deploy final changes to production, replace `skaffold dev` with `skaffold run` in the `skaffold-prod.sh` script. You will not have hot reloading with `skaffold run` anymore, but kubernetes resources will not be destroyed after you close cli window.
 
-## 🎉 Congratulations!
+#### 🎉 Congratulations!
 
 - You successfully tested `Moive Bets App` in production!
 
@@ -282,6 +282,6 @@ REGISTRY_PW=... (Azure Container Registry Password)
 
 5. Open https link for your registered domain in your Browser and make sure that you can see `SkyComposer 2` title on the top left
 
-## 🎉 Congratulations!
+#### 🎉 Congratulations!
 
 - You successfully tested `Movie Bets App` code changes with Github Actions Deployment Pipeline!
