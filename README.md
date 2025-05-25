@@ -3,9 +3,9 @@
 <ul>
   <li>✅ <b>Concurrency and Resiliency Patterns in Saga Transactions for Spring Boot Microservices</b>
   <li>✅ <b>Part 5: Reliable Long-Running Saga Processes</b>
-  <li>✅ <b>Long-running Saga processes, with dynamic recursive process steps, using Kafka and JPA Transactions with Outbox Pattern</b>
+  <li>✅ <b>Long-running Saga Processes, with dynamic recursive process steps, using Kafka and JPA Transactions with Outbox Pattern</b>
   <li>✅ <b>Event Collaboration and Concurrency Control in Saga Transactions, using Kafka Consumer Groups, Partitions adn Transactions</b>
-  <li>✅ <b>Splitter/Aggregator Pattern for Long-running Saga processes, using Kafka and JPA Transactions with Outbox Pattern</b>
+  <li>✅ <b>Splitter/Aggregator Pattern for starting and aggregating Long-running Saga Process Jobs, using Kafka and JPA Transactions with Outbox Pattern</b>
 </ul>
 
 ### 📖 Concurrency and Resiliency Patterns in Saga Transactions for Spring Boot Microservices
