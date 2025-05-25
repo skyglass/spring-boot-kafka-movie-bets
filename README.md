@@ -10,61 +10,64 @@
 
 ### 📖 Concurrency and Resiliency Patterns in Saga Transactions for Spring Boot Microservices
 
-#### ✅ Cloud-Native Spring Boot Development and Production Environment with Spring Boot, Kafka, Kubernetes, Skaffold and Terraform
-#### ✅ Reliable Asynchronous Long-Running Saga Processes with Event-Driven Kafka Transactions and Outbox Pattern
-#### ✅ At-least once delivery guarantee and Idempotency Key for Asynchronous Long-Running Saga Processes
-#### ✅ Event-Driven Choreography Saga with Spring Kafka Listeners and Kafka Transactions
-#### ✅ Outbox Pattern with JPA ACID Transactions
-#### ✅ Synchronizing Kafka and Database Transactions with Kafka and JPA Transaction Manager
-#### ✅ Handling Concurrency and Parallelization with Kafka Consumer Groups and Partitions
-#### ✅ Sequential processing guarantee for messages with the same key
-#### ✅ Parallel processing for messages in different partitions
-#### ✅ Handling Resiliency with Kafka Consumers and Retryable Exceptions
-#### ✅ Retryable Exceptions and Dead-Letter Queue Error Channel with Spring Kafka
-#### ✅ E2E Concurrency Testing Framework with Completable Futures using Spring Cloud OpenFeign
+<ul>
+  <li>✅ <b>Cloud-Native Spring Boot Development and Production Environment with Spring Boot, Kafka, Kubernetes, Skaffold and Terraform</b>
+  <li>✅ <b>Reliable Asynchronous Long-Running Saga Processes with Event-Driven Kafka Transactions and Outbox Pattern</b>
+  <li>✅ <b>At-least once delivery guarantee and Idempotency Key for Asynchronous Long-Running Saga Processes</b>
+  <li>✅ <b>Event-Driven Choreography Saga with Spring Kafka Listeners and Kafka Transactions</b>
+  <li>✅ <b>Outbox Pattern with JPA ACID Transactions</b>
+  <li>✅ <b>Synchronizing Kafka and Database Transactions with Kafka and JPA Transaction Manager</b>
+  <li>✅ <b>Handling Concurrency and Parallelization with Kafka Consumer Groups and Partitions</b>
+  <li>✅ <b>Sequential processing guarantee for messages with the same key</b>
+  <li>✅ <b>Parallel processing for messages in different partitions</b>
+  <li>✅ <b>Handling Resiliency with Kafka Consumers and Retryable Exceptions</b>
+  <li>✅ <b>Retryable Exceptions and Dead-Letter Queue Error Channel with Spring Kafka</b>
+  <li>✅ <b>E2E Concurrency Testing Framework with Completable Futures using Spring Cloud OpenFeign</b>
+</ul>
 
 ### 📘 Cloud-Native Startup Template
 
-<ul style="list-style-type:disc">
+<ul>
   <li>📖 This <b>Cloud-Native Full-Stack Developer Template</b> provides fully functional Development and Production Environment</li>
-    <li>📖 <b>Next.js</b> and <b>React</b> UI</li>
-    <li>📖 <b>Event-Driven Microservices</b> with Spring Boot, Kafka, PostgreSQL and Outbox Pattern</li>
-    <li>📖 <b>Swagger UI Gateway</b> with Keycloak Authorization</li>
-    <li>📖 <b>Kafka UI</b></li>
-    <li>📖 <b>Kafka Cluster</b> with Kubernetes Strimzi Operator</li>
-    <li>📖 <b>E2E Testing Service</b> with Spring Cloud OpenFeign REST Client</li>
-    <li>📖 Local <b>Kubernetes</b> Development Environment with <b>Skaffold</b></li>
-    <li>📖 Production <b>Kubernetes</b> Development Environment with <b>Skaffold</b></li>
-    <li>📖 <b>Github Actions</b> CI/CD <b>GitOps</b> pipeline</li>
-    <li>📖 <b>Azure Terraform</b> Infrastructure with <b>AKS Kubernetes Cluster</b> and <b>Private Container Registry</b></li>
+  <li>📖 <b>Next.js</b> and <b>React</b> UI</li>
+  <li>📖 <b>Event-Driven Microservices</b> with Spring Boot, Kafka, PostgreSQL and Outbox Pattern</li>
+  <li>📖 <b>Swagger UI Gateway</b> with Keycloak Authorization</li>
+  <li>📖 <b>Kafka UI</b></li>
+  <li>📖 <b>Kafka Cluster</b> with Kubernetes Strimzi Operator</li>
+  <li>📖 <b>E2E Testing Service</b> with Spring Cloud OpenFeign REST Client</li>
+  <li>📖 Local <b>Kubernetes</b> Development Environment with <b>Skaffold</b></li>
+  <li>📖 Production <b>Kubernetes</b> Development Environment with <b>Skaffold</b></li>
+  <li>📖 <b>Github Actions</b> CI/CD <b>GitOps</b> pipeline</li>
+  <li>📖 <b>Azure Terraform</b> Infrastructure with <b>AKS Kubernetes Cluster</b> and <b>Private Container Registry</b></li>
   <li>📖 Full <b>Technology Stack</b>:</li>
-  <ul>
-    <li>✅ <b>React UI</b></li>  
-    <li>✅ <b>Next.js React Framework</b> with Keycloak Authorization</li>
-    <li>✅ <b>Event-Driven Microservices with Spring Boot and Kafka</b></li>
-    <li>✅ <b>Spring Kafka Event Listeners</b></li>
-    <li>✅ <b>Synchronized Kafka and JPA Transactions for Outbox Pattern</b></li>
-    <li>✅ <b>Safe Idempotent Retry Transactions with Idempotency Key and At-Least Once Delivery Guarantee</b></li>
-    <li>✅ <b>Lookup Tables for Safe Idempotent Retries using Idempotency Key and PostgreSQL Database</b></li>
-    <li>✅ <b>PostgreSQL Database</b></li>
-    <li>✅ <b>Keycloak OAuth2 Authorization Server</b></li>
-    <li>✅ <b>Spring Cloud Gateway</b> with Keycloak Authorization</li>
-    <li>✅ <b>Spring Cloud OpenFeign</b></li>
-    <li>✅ <b>Swagger UI</b> with Keycloak Authorization</li>
-    <li>✅ <b>Kafka UI</b></li>
-    <li>✅ <b>Terraform</b></li>
-    <li>✅ <b>Kubernetes</b></li>
-    <li>✅ <b>Github Actions</b></li>
-    <li>✅ <b>Github Secrets and envsubst Environment Variables parser</b></li>
-    <li>✅ <b>Kubernetes Secrets and Configmap Variables</b></li>
-    <li>✅ <b>Local Kubernetes Development Environment with Skaffold</b></li>
-    <li>✅ <b>Production Kubernetes Development Environment with Skaffold</b></li>
-    <li>✅ <b>Custom Kubernetes Manfiests Generation for Local and Production Environments with sh scripts</b></li>
-    <li>✅ <b>Custom Skaffold Manifests Generation for Local and Production Environments with sh scripts</b></li>
-    <li>✅ <b>Hot reload of Next.js React Javascript code for Local and Production Environments with Skaffold</b></li>
-    <li>✅ <b>Hot reload of Spring Boot Java code for Local and Production Environments with Skaffold</b></li>
-    <li>✅ <b>Hot reload of Docker Containers for Local and Production Environments with Skaffold</b></li>
-  </ul>
+</ul>
+
+<ul>
+  <li>✅ <b>React UI</b></li>  
+  <li>✅ <b>Next.js React Framework</b> with Keycloak Authorization</li>
+  <li>✅ <b>Event-Driven Microservices with Spring Boot and Kafka</b></li>
+  <li>✅ <b>Spring Kafka Event Listeners</b></li>
+  <li>✅ <b>Synchronized Kafka and JPA Transactions for Outbox Pattern</b></li>
+  <li>✅ <b>Safe Idempotent Retry Transactions with Idempotency Key and At-Least Once Delivery Guarantee</b></li>
+  <li>✅ <b>Lookup Tables for Safe Idempotent Retries using Idempotency Key and PostgreSQL Database</b></li>
+  <li>✅ <b>PostgreSQL Database</b></li>
+  <li>✅ <b>Keycloak OAuth2 Authorization Server</b></li>
+  <li>✅ <b>Spring Cloud Gateway</b> with Keycloak Authorization</li>
+  <li>✅ <b>Spring Cloud OpenFeign</b></li>
+  <li>✅ <b>Swagger UI</b> with Keycloak Authorization</li>
+  <li>✅ <b>Kafka UI</b></li>
+  <li>✅ <b>Terraform</b></li>
+  <li>✅ <b>Kubernetes</b></li>
+  <li>✅ <b>Github Actions</b></li>
+  <li>✅ <b>Github Secrets and envsubst Environment Variables parser</b></li>
+  <li>✅ <b>Kubernetes Secrets and Configmap Variables</b></li>
+  <li>✅ <b>Local Kubernetes Development Environment with Skaffold</b></li>
+  <li>✅ <b>Production Kubernetes Development Environment with Skaffold</b></li>
+  <li>✅ <b>Custom Kubernetes Manfiests Generation for Local and Production Environments with sh scripts</b></li>
+  <li>✅ <b>Custom Skaffold Manifests Generation for Local and Production Environments with sh scripts</b></li>
+  <li>✅ <b>Hot reload of Next.js React Javascript code for Local and Production Environments with Skaffold</b></li>
+  <li>✅ <b>Hot reload of Spring Boot Java code for Local and Production Environments with Skaffold</b></li>
+  <li>✅ <b>Hot reload of Docker Containers for Local and Production Environments with Skaffold</b></li>
 </ul>
 
 
