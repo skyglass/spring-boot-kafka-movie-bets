@@ -153,7 +153,7 @@ This script will build docker images and start local kubernetes environment with
 6. Open `http://localhost` and test the app.
 
 - Make sure that Keycloak `Login` and `Register` works, and you are able to `Create Movie Event` and place bet on it.
-- You can use credentials: `admin` / password `admin` for user with admin privileges and credentials: `user` / password `user` for regular user
+- You can use credentials: `admin` / `admin` for user with admin privileges and credentials: `user` / `user` for regular user
 - Any new user, registered with Keycloak, is automatically assigned regular user privileges
 - Optionally, create 2 test accounts by registering on the `Keycloak Login` Page, create movie event and place bet with one account and do the same with another account.
 - If the winner exists at the move event close time, then the movie event is closed, and the bets start to settle by recursively triggering kafka events during settlement, until all settlement jobs are finished.
