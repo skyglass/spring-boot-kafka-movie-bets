@@ -226,7 +226,7 @@ KEYCLOAK_BASE_URL="https://skycomposer.net/keycloak"
 - Don't Panic! `env` folder is included to .gitignore. You will not reveal your secrets with git commit! :)
 - Make sure you set your own values for CONTAINER_REGISTRY, BASE_URL, API_BASE_URL and KEYCLOAK_BASE_URL (replace `skycomposer.net` with the name of your domain)
 
-- register your domain and enable TLS on AKS Ingress with Lestencrypt: https://medium.com/@jainchirag8001/tls-on-aks-ingress-with-letsencrypt-f42d65725a3
+- Register your domain and enable TLS on AKS Ingress with Lestencrypt: https://medium.com/@jainchirag8001/tls-on-aks-ingress-with-letsencrypt-f42d65725a3
 - Make sure you provide your email for CA cluster issuer in `k8s/cert/cluser-issuer.yml` Kubernetes resource (see more details in the article)
 - Make sure you installed ingress controller with helm (see more details in the article)
 - Make sure you installed all other kubernetes resources and followed other instructions in the article
@@ -235,18 +235,18 @@ KEYCLOAK_BASE_URL="https://skycomposer.net/keycloak"
 
 - run `sh skaffold-prod.sh`
 
-- this script will build docker images, push them to azure container registry and deploy images to production kubernetes cluster with hot reloading of your code changes
+- This script will build docker images, push them to azure container registry and deploy images to production kubernetes cluster with hot reloading of your code changes
 
-- run `kubectl get pods` and make sure that all containers are RUNNING
+- Run `kubectl get pods` and make sure that all containers are RUNNING
 
-- edit ingress `cm-acme-http-solver`, as described in the article: https://medium.com/@jainchirag8001/tls-on-aks-ingress-with-letsencrypt-f42d65725a3
-- verify that certificate `tls-secret` is working (Ready = True, see the article for more details)
+- Edit ingress `cm-acme-http-solver`, as described in the article: https://medium.com/@jainchirag8001/tls-on-aks-ingress-with-letsencrypt-f42d65725a3
+- Verify that certificate `tls-secret` is working (Ready = True, see the article for more details)
 
 - Open https url with your registered domain in your Browser and make sure that Keycloak `Login` and `Register` works, you are able to `Create a Movie Event` and place a bet on it
 - You can use `admin`, password `admin` for user with admin privileges and `user`, password `user` for regular user
 - Any new user, registered with Keycloak is automatically assigned regular user privileges
 
-- optionally, register 2 new users, create movie event with one account and place bet with another account
+- Optionally, register 2 new users, create movie event with one account and place bet with another account
 - Congratulations! You successfully tested `Moive Bets App` in production!
 
 - The only difference between `skaffold dev` and `skaffold prod` is that `skaffold dev` allows hot reloading of your code changes on production! Try to make any code change with your IDE and you will immediately see this change on production!
