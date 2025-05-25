@@ -85,56 +85,39 @@
 
 ## 📚 Step-by-Step Setup Guide
 
-### 📖 Prepare your environment (skip if you only need local deployment)
+
+## 📖 Prepare your environment (skip if you only need local deployment)
 
 ### 1️⃣ Create Your GitHub Repository
 
-
 Clone this repository and copy the source code to your new repository
-
 ---
 
 ### 2️⃣ Prepare Azure Account
 
 Make sure you have your own Azure Account with enough permissions (Sign Up for a Free Trial, if you don't have one)
-
 ---
 
 ### 3️⃣ Prepare GitHub Account
 
 Make sure you have your own Github Account
-
 ---
 
 ### 4️⃣ Customize Source Code & GitHub Workflows
 
-
 - Edit "**.github/workflows/deploy-*.yaml**" files: replace "**master**" with the name of your main branch (you can change default main branch name in github repository settings)
-
 - Edit "**k8s/prod/ingress-srv.yaml**" file: replace "**skycomposer.net**" with the name of your registered domain (see **Step-05** and **Azure Production Environment Setup** for more details)
-
 ---
 
 ### 5️⃣ Register Your Domain
-
 - You need a registered domain to provide TLS connection with trusted Certificate Authority.
-
 - For more details on setting up TLS on AKS Ingress with LetsEncrypt see this article: https://medium.com/@jainchirag8001/tls-on-aks-ingress-with-letsencrypt-f42d65725a3
-  This article will show you how to configure TLS on AKS with LetsEncrypt for any registered domain, including AWS Route 53.
-
+- This article will show you how to configure TLS on AKS with LetsEncrypt for any registered domain, including AWS Route 53.
 - Make sure that you know how to create Hosted Zone and Record A for your domain provider.
-
 - For more details, see the section [☁️ Azure Production Environment](#azure-production-environment-with-terraform--skaffold)
-
 ---
 
-### 6️⃣ Complete Udemy Course "Apache Kafka for Event-Driven Spring Boot Microservices":
 
-- If you need help on Microservices with Spring Boot and Kafka, see more details in this course: https://www.udemy.com/course/apache-kafka-for-spring-boot-microservices
-- I highly recommend you finish this course first, before following this guide!
-- All information about Kafka Concurrency, Parallelization, Transactions, Durability, Error Handling, Integration Testing, Scalability, Spring + Kafka, Event-Driven Microservices with Kafka, Event Collaboration and Concurrency Control for Microservices, Saga Transactions, and so on, is perfectly explained in this course!
-
----
 
 ## ⚙️ Local Kubernetes Environment Setup with Skaffold:
 
