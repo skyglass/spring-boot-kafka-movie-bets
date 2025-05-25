@@ -124,7 +124,7 @@ Make sure you have your own Github Account
 
 - Make sure that you know how to create Hosted Zone and Record A for your domain provider.
 
-- For more details, see the section ☁️ Azure Production Environment (with Terraform & Skaffold)
+- For more details, see the section [☁️ Azure Production Environment](#azure-production-environment-with-terraform--skaffold)
 
 ---
 
@@ -182,7 +182,7 @@ This script will build docker images and start local kubernetes environment with
 - You successfuly tested `Movie Bets App` locally!
 
 
-## ☁️ Azure Production Environment (with Terraform & Skaffold)
+## Azure Production Environment (with Terraform & Skaffold)
 
 1. Create `terraform.auto.tfvars` file in `infra` folder and provide following parameters:
 
