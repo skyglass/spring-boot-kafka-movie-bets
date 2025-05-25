@@ -13,7 +13,7 @@
 <ul>
   <li>✅ <b>Cloud-Native Spring Boot Development and Production Environment with Spring Boot, Kafka, Kubernetes, Skaffold and Terraform</b>
   <li>✅ <b>Reliable Asynchronous Long-Running Saga Processes with Event-Driven Kafka Transactions and Outbox Pattern</b>
-  <li>✅ <b>At-least once delivery guarantee and Idempotency Key for Asynchronous Long-Running Saga Processes</b>
+  <li>✅ <b>At-least once processing guarantee and Idempotency Key for Event Collaboration in Saga Transactions</b>
   <li>✅ <b>Event-Driven Choreography Saga with Spring Kafka Listeners and Kafka Transactions</b>
   <li>✅ <b>Outbox Pattern with JPA ACID Transactions</b>
   <li>✅ <b>Synchronizing Kafka and Database Transactions with Kafka and JPA Transaction Manager</b>
@@ -39,8 +39,9 @@
   <li>📖 Production <b>Kubernetes</b> Development Environment with <b>Skaffold</b></li>
   <li>📖 <b>Github Actions</b> CI/CD <b>GitOps</b> pipeline</li>
   <li>📖 <b>Azure Terraform</b> Infrastructure with <b>AKS Kubernetes Cluster</b> and <b>Private Container Registry</b></li>
-  <li>📖 Full <b>Technology Stack</b>:</li>
 </ul>
+
+### 📘 Full <b>Technology Stack</b>:
 
 <ul>
   <li>✅ <b>React UI</b></li>  
