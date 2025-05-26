@@ -34,11 +34,8 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      #
-      # Install local dependencies (e.g., common-domain) first
-      #
-      - name: Build and install local dependencies
-        run: mvn clean install -pl 'moviebets-parent,common-domain' -am -B
+      - name: Build all modules
+        run: mvn clean install -B -DskipTests
 
       #
       # Builds the Docker image.
