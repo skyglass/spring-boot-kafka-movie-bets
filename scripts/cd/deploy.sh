@@ -24,4 +24,4 @@ export CONTAINER_REGISTRY
 export NAME
 export VERSION
 
-envsubst < ./k8s/generated/${NAME}.yml | kubectl apply -f -
+envsubst < ./k8s/generated/test.yml | kubectl apply -f -
