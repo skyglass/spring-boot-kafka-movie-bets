@@ -19,7 +19,7 @@ jobs:
       CONTAINER_REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
       REGISTRY_UN: ${{ secrets.REGISTRY_UN }}
       REGISTRY_PW: ${{ secrets.REGISTRY_PW  }}
-      NAME: moviebets-ui
+      NAME: special
       DIRECTORY: moviebets-ui
     steps:
       
