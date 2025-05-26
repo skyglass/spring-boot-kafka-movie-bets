@@ -58,7 +58,7 @@ export default () => {
         <>
             <nav className="navbar navbar-light bg-light d-flex align-items-center justify-content-between px-4">
                 <Link className="navbar-brand" href="/">
-                    SkyComposer 14
+                    SkyComposer
                 </Link>
 
                 <ul className="nav d-flex align-items-center">{links}</ul>
