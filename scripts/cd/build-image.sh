@@ -29,10 +29,5 @@ cd "$DIRECTORY"
 mvn compile jib:build \
   -Dimage="$IMAGE" \
   -Djib.to.auth.username="$REGISTRY_UN" \
-  -Djib.to.auth.password="$REGISTRY_PW"
-
-echo $REGISTRY_PW | docker login $CONTAINER_REGISTRY --username $REGISTRY_UN --password-stdin
-
-docker tag "$IMAGE" "$LATEST_IMAGE"
-docker tag "$IMAGE" "$BASE_IMAGE"
-docker tag "$IMAGE" "$IMAGE"
+  -Djib.to.auth.password="$REGISTRY_PW" \
+  -Djib.to.tags="$VERSION,latest"
