@@ -38,7 +38,10 @@ spec:
         - name: SPRING_KEYCLOAK_SERVER_URL
           value: "http://moviebets-keycloak:8080/keycloak"
         - name: SPRING_KEYCLOAK_SERVER_EXTERNAL_URL
-          value: "$KEYCLOAK_BASE_URL"
+          valueFrom:
+            configMapKeyRef:
+              name: base-url-config
+              key: KEYCLOAK_BASE_URL
         - name: INSTANCE_NAME
           valueFrom:
             fieldRef:
