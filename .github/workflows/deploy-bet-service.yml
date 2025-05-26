@@ -38,7 +38,7 @@ jobs:
       # Install local dependencies (e.g., common-domain) first
       #
       - name: Build and install local dependencies
-        run: mvn clean install -pl '***-parent,common-domain' -am -B
+        run: mvn clean install -pl 'moviebets-parent,common-domain' -am -B
 
       #
       # Builds the Docker image.
