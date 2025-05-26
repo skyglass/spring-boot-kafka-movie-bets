@@ -15,8 +15,6 @@
 #
 
 set -u # or set -o nounset
-: "$CONTAINER_REGISTRY"
 : "$NAME"
-: "$VERSION"
 
-envsubst < ./k8s/generated/${NAME}.yml | kubectl apply -f -
+envsubst < ./k8s/${NAME}.yml | kubectl apply -f -
