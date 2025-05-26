@@ -2,10 +2,10 @@
 
 <ul>
   <li>✅ <b>Concurrency and Resiliency Patterns in Saga Transactions for Spring Boot Microservices</b>
-  <li>✅ <b>Part 5: Reliable Long-Running Saga Processes</b>
+  <li>✅ <b>Part 5: Reliable Long-Running Saga Processes, using Kafka and JPA Transactions with Outbox Pattern</b>
   <li>✅ <b>Long-running Saga Processes, with dynamic recursive process steps, using Kafka and JPA Transactions with Outbox Pattern</b>
   <li>✅ <b>Event Collaboration and Concurrency Control in Saga Transactions, using Kafka Consumer Groups, Partitions adn Transactions</b>
-  <li>✅ <b>Splitter/Aggregator Pattern for starting and aggregating Long-running Saga Process Jobs, using Kafka and JPA Transactions with Outbox Pattern</b>
+  <li>✅ <b>Splitter/Aggregator Pattern for starting and aggregating Long-running Saga Process Jobs, using Kafka and JPA Transactions with Outbox Table</b>
 </ul>
 
 ### 📖 Concurrency and Resiliency Patterns in Saga Transactions for Spring Boot Microservices
@@ -13,13 +13,13 @@
 <ul>
   <li>✅ <b>Cloud-Native Spring Boot Development and Production Environment with Spring Boot, Kafka, Kubernetes, Skaffold and Terraform</b>
   <li>✅ <b>Reliable Asynchronous Long-Running Saga Processes with Event-Driven Kafka Transactions and Outbox Pattern</b>
-  <li>✅ <b>At-least once processing guarantee and Idempotency Key for Event Collaboration in Saga Transactions</b>
+  <li>✅ <b>At-least once processing guarantee and Idempotency Key for Event Deduplication in Saga Transactions</b>
   <li>✅ <b>Event-Driven Choreography Saga with Spring Kafka Listeners and Kafka Transactions</b>
   <li>✅ <b>Outbox Pattern with JPA ACID Transactions</b>
   <li>✅ <b>Synchronizing Kafka and Database Transactions with Kafka and JPA Transaction Manager</b>
   <li>✅ <b>Handling Concurrency and Parallelization with Kafka Consumer Groups and Partitions</b>
-  <li>✅ <b>Sequential processing guarantee for messages with the same key</b>
-  <li>✅ <b>Parallel processing for messages in different partitions</b>
+  <li>✅ <b>Sequential processing guarantee for messages with the same key in Kafka</b>
+  <li>✅ <b>Parallel processing for messages in different Kafka Partitions</b>
   <li>✅ <b>Handling Resiliency with Kafka Consumers and Retryable Exceptions</b>
   <li>✅ <b>Retryable Exceptions and Dead-Letter Queue Error Channel with Spring Kafka</b>
   <li>✅ <b>E2E Concurrency Testing Framework with Completable Futures using Spring Cloud OpenFeign</b>
