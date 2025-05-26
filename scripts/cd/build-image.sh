@@ -33,3 +33,4 @@ mvn compile jib:build \
 
 docker tag "$IMAGE" "$LATEST_IMAGE"
 docker tag "$IMAGE" "$BASE_IMAGE"
+docker tag "$IMAGE" "$IMAGE"
