@@ -23,7 +23,6 @@ set -u
 
 BASE_IMAGE="$CONTAINER_REGISTRY/$NAME"
 IMAGE="$BASE_IMAGE:$VERSION"
-LATEST_IMAGE="$BASE_IMAGE:latest"
 
 cd "$DIRECTORY"
 mvn compile jib:build \
