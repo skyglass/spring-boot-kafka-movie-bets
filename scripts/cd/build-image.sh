@@ -23,6 +23,8 @@ set -u
 
 IMAGE="$CONTAINER_REGISTRY/$NAME:$VERSION"
 
+echo "$VERSION"
+
 cd "$DIRECTORY"
 mvn compile jib:build \
   -Dimage="$IMAGE" \
