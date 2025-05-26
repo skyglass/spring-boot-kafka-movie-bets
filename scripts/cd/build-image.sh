@@ -25,12 +25,12 @@ BASE_IMAGE="$CONTAINER_REGISTRY/$NAME"
 IMAGE="$BASE_IMAGE:$VERSION"
 LATEST_IMAGE="$BASE_IMAGE:latest"
 
-docker tag $IMAGE $LATEST_IMAGE $BASE_IMAGE
-
 cd "$DIRECTORY"
 mvn compile jib:build \
   -Dimage="$IMAGE" \
   -Djib.to.auth.username="$REGISTRY_UN" \
   -Djib.to.auth.password="$REGISTRY_PW"
+
+docker tag $IMAGE $LATEST_IMAGE $BASE_IMAGE
 
 docker push $LATEST_IMAGE
