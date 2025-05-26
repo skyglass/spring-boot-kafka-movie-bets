@@ -22,11 +22,14 @@ set -u
 : "$REGISTRY_PW"
 
 IMAGE="$CONTAINER_REGISTRY/$NAME:$VERSION"
+LATEST_IMAGE="$CONTAINER_REGISTRY/$NAME:latest"
 
-echo "$VERSION"
+docker tag $IMAGE $LATEST_IMAGE
 
 cd "$DIRECTORY"
 mvn compile jib:build \
   -Dimage="$IMAGE" \
   -Djib.to.auth.username="$REGISTRY_UN" \
   -Djib.to.auth.password="$REGISTRY_PW"
+
+docker push $LATEST_IMAGE
