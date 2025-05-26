@@ -20,7 +20,7 @@ jobs:
       REGISTRY_UN: ${{ secrets.REGISTRY_UN }}
       REGISTRY_PW: ${{ secrets.REGISTRY_PW  }}
       NAME: moviebets-ui
-      DEPLOY_FILE_NAME: moviebets-ui
+      DEPLOY_FILE_NAME: moviebets
       DIRECTORY: moviebets-ui
     steps:
       
@@ -68,5 +68,4 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
           CONTAINER_REGISTRY: ${{ env.CONTAINER_REGISTRY }}
-          NAME: ${{ env.NAME }}
-          DEPLOY_FILE_NAME: ${{ env.DEPLOY_FILE_NAME }}
+          NAME: ${{ env.DEPLOY_FILE_NAME }}
