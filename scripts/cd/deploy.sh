@@ -19,4 +19,9 @@ set -u # or set -o nounset
 : "$NAME"
 : "$VERSION"
 
+# Export variables so envsubst can see them
+export CONTAINER_REGISTRY
+export NAME
+export VERSION
+
 envsubst < ./k8s/generated/${NAME}.yml | kubectl apply -f -
