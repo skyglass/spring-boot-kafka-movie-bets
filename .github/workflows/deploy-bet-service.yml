@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - bet-service/**
+      - common-domain/**
 
   workflow_dispatch: 
 
@@ -24,7 +25,14 @@ jobs:
     steps:
       
       # Checks-out your repository under $GITHUB_WORKSPACE.
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      #
+      # Install local dependencies (e.g., common-domain) first
+      #
+      - name: Build and install common-domain locally
+        run: mvn -B -pl common-domain clean install
 
       #
       # Builds the Docker image.
