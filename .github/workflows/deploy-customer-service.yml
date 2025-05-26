@@ -27,29 +27,29 @@ jobs:
       - uses: actions/checkout@v3
 
       #
-      # Cache Jib and Maven dependencies
-      #
-      - name: Cache Jib
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.m2
-            ~/.cache/google-cloud-tools-java/jib
-          key: ${{ runner.os }}-jib-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-jib-
-
-      #
       # Builds the Docker image.
       #
       - name: Build
         run: ./scripts/cd/build-image.sh
+        env:
+          VERSION: ${{ env.VERSION }}
+          CONTAINER_REGISTRY: ${{ env.CONTAINER_REGISTRY }}
+          NAME: ${{ env.NAME }}
+          DIRECTORY: ${{ env.DIRECTORY }}
+          REGISTRY_UN: ${{ env.REGISTRY_UN }}
+          REGISTRY_PW: ${{ env.REGISTRY_PW }}
 
       #
       # Publishes the Docker image to the container registry.
       #
       - name: Publish
         run: ./scripts/cd/push-image.sh
+        env:
+          VERSION: ${{ env.VERSION }}
+          CONTAINER_REGISTRY: ${{ env.CONTAINER_REGISTRY }}
+          NAME: ${{ env.NAME }}
+          REGISTRY_UN: ${{ env.REGISTRY_UN }}
+          REGISTRY_PW: ${{ env.REGISTRY_PW }}
 
       #
       # Installs Kubectl and connects it to the cluster.
@@ -66,3 +66,7 @@ jobs:
       #
       - name: Deploy
         run: ./scripts/cd/deploy.sh
+        env:
+          VERSION: ${{ env.VERSION }}
+          CONTAINER_REGISTRY: ${{ env.CONTAINER_REGISTRY }}
+          NAME: ${{ env.NAME }}
