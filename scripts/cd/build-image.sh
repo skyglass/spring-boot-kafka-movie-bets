@@ -27,7 +27,7 @@ LATEST_IMAGE="$BASE_IMAGE:latest"
 
 cd "$DIRECTORY"
 mvn compile jib:build \
-  -Dimage="$IMAGE" \
+  -Djib.to.image="$IMAGE" \
   -Djib.to.auth.username="$REGISTRY_UN" \
   -Djib.to.auth.password="$REGISTRY_PW" \
   -Djib.to.tags="$VERSION,latest"
