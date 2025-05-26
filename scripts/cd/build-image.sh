@@ -31,6 +31,5 @@ mvn compile jib:build \
   -Djib.to.auth.username="$REGISTRY_UN" \
   -Djib.to.auth.password="$REGISTRY_PW"
 
-docker tag $IMAGE $LATEST_IMAGE $BASE_IMAGE
-
-docker push $LATEST_IMAGE
+docker tag "$IMAGE" "$LATEST_IMAGE"
+docker tag "$IMAGE" "$BASE_IMAGE"
