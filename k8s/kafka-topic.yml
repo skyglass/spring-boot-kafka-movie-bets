@@ -5,8 +5,8 @@ metadata:
   labels:
     strimzi.io/cluster: my-cluster
 spec:
-  partitions: 3
-  replicas: 3
+  partitions: 2
+  replicas: 2
 
 ---
 apiVersion: kafka.strimzi.io/v1beta2
@@ -16,8 +16,8 @@ metadata:
   labels:
     strimzi.io/cluster: my-cluster
 spec:
-  partitions: 3
-  replicas: 3
+  partitions: 2
+  replicas: 2
 
 ---
 apiVersion: kafka.strimzi.io/v1beta2
@@ -27,8 +27,8 @@ metadata:
   labels:
     strimzi.io/cluster: my-cluster
 spec:
-  partitions: 3
-  replicas: 3
+  partitions: 2
+  replicas: 2
 
 ---
 apiVersion: kafka.strimzi.io/v1beta2
@@ -38,8 +38,8 @@ metadata:
   labels:
     strimzi.io/cluster: my-cluster
 spec:
-  partitions: 3
-  replicas: 3
+  partitions: 2
+  replicas: 2
 
 ---
 apiVersion: kafka.strimzi.io/v1beta2
@@ -49,8 +49,8 @@ metadata:
   labels:
     strimzi.io/cluster: my-cluster
 spec:
-  partitions: 3
-  replicas: 3
+  partitions: 2
+  replicas: 2
 
 ---
 apiVersion: kafka.strimzi.io/v1beta2
@@ -60,8 +60,8 @@ metadata:
   labels:
     strimzi.io/cluster: my-cluster
 spec:
-  partitions: 3
-  replicas: 3
+  partitions: 2
+  replicas: 2
 
 ---
 apiVersion: kafka.strimzi.io/v1beta2
@@ -71,8 +71,8 @@ metadata:
   labels:
     strimzi.io/cluster: my-cluster
 spec:
-  partitions: 3
-  replicas: 3
+  partitions: 2
+  replicas: 2
 
 ---
 apiVersion: kafka.strimzi.io/v1beta2
@@ -82,5 +82,5 @@ metadata:
   labels:
     strimzi.io/cluster: my-cluster
 spec:
-  partitions: 3
-  replicas: 3
+  partitions: 2
+  replicas: 2
